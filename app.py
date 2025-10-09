@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
 from data.dimensions import DIMENSIONS, get_all_questions
+from utils.pdf_generator import generate_pdf_report
 
 # Page configuration
 st.set_page_config(
@@ -328,7 +329,7 @@ def render_results_dashboard():
     
     # Action buttons
     st.markdown("---")
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         if st.button("Retake Assessment", type="primary"):
@@ -350,11 +351,31 @@ Dimension Breakdown:
             results_text += f"• {score_data['title']}: {score_data['score']}/5\n"
         
         st.download_button(
-            label="Download Results",
+            label="📄 Download TXT",
             data=results_text,
-            file_name="ai_readiness_assessment_results.txt",
+            file_name="ai_readiness_assessment.txt",
             mime="text/plain"
         )
+    
+    with col3:
+        # Generate PDF report
+        try:
+            pdf_buffer = generate_pdf_report(
+                scores_data,
+                company_name=st.session_state.company_name,
+                primary_color=st.session_state.primary_color,
+                logo_image=st.session_state.company_logo
+            )
+            
+            st.download_button(
+                label="📊 Download PDF Report",
+                data=pdf_buffer,
+                file_name=f"{st.session_state.company_name}_AI_Readiness_Report.pdf",
+                mime="application/pdf",
+                type="primary"
+            )
+        except Exception as e:
+            st.error(f"Error generating PDF: {str(e)}")
 
 def main():
     """Main application function"""
