@@ -1,0 +1,443 @@
+# Paste this into a shell in Replit or your terminal
+
+set -e
+
+PROJECT=ai-process-readiness
+rm -rf $PROJECT
+mkdir $PROJECT
+cd $PROJECT
+
+# 1) initialize package.json via npm init (yes defaults)
+npm init -y
+
+# 2) install dependencies
+npm install react react-dom recharts
+npm install -D typescript vite @vitejs/plugin-react tailwindcss postcss autoprefixer \
+            jest @types/jest ts-jest @testing-library/react @testing-library/jest-dom \
+            @testing-library/user-event eslint prettier eslint-config-prettier \
+            eslint-plugin-react eslint-plugin-react-hooks
+
+# 3) init typescript and tailwind
+npx tsc --init --skipLibCheck true --jsx react-jsx
+npx tailwindcss init -p
+
+# 4) write package.json scripts (overwrite package.json script section)
+cat > package.json <<'JSON'
+{
+  "name": "ai-process-readiness",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "jest",
+    "lint": "eslint --ext .ts,.tsx src"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.6.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jest": "^29.5.3",
+    "@vitejs/plugin-react": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.9.0",
+    "jest": "^29.7.0",
+    "postcss": "^8.4.23",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^4.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.9.0",
+    "vite": "^5.0.0"
+  }
+}
+JSON
+
+# 5) write vite config
+cat > vite.config.ts <<'TS'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+});
+TS
+
+# 6) Tailwind config with theme tokens
+cat > tailwind.config.js <<'TW'
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./index.html','./src/**/*.{ts,tsx,js,jsx}'],
+  theme: {
+    extend: {
+      colors: {
+        appBg: '#1F2937',
+        burntOrange: '#BF6A16',
+        sec1: '#FFB068',
+        sec2: '#C9A3FF',
+        sec3: '#A7D6FF',
+        sec4: '#FFC1D6',
+        sec5: '#FFF08A',
+        sec6: '#BFFFC4'
+      }
+    }
+  },
+  plugins: [],
+}
+TW
+
+# 7) PostCSS config
+cat > postcss.config.cjs <<'PC'
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+PC
+
+# 8) create index.html
+cat > index.html <<'HTML'
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>AI-Enabled Process Readiness</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+HTML
+
+# 9) create src directory and files
+mkdir -p src/components src/utils src/hooks src/tests
+
+# 9a) main.tsx
+cat > src/main.tsx <<'TSX'
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import './styles.css'
+
+createRoot(document.getElementById('root')!).render(<App />)
+TSX
+
+# 9b) styles.css (Tailwind base)
+cat > src/styles.css <<'CSS'
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body { background-color: theme('colors.appBg'); }
+CSS
+
+# 9c) utils/scoring.ts
+mkdir -p src/utils
+cat > src/utils/scoring.ts <<'TS'
+export type DimensionScore = { id: string; title: string; score: number; };
+
+export function computeScores(answers: Record<string, number>) {
+  const DIMENSIONS = getDimensions();
+  const dimensionScores: DimensionScore[] = DIMENSIONS.map((dim) => {
+    const vals = dim.questions.map((q) => answers[q.id] ?? 1);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const rounded = Math.round(avg);
+    return { id: dim.id, title: dim.title, score: rounded };
+  });
+  const total = dimensionScores.reduce((a, b) => a + b.score, 0);
+  const pct = Math.round(((total - 6) / (30 - 6)) * 100);
+  let band = { label: 'Not Ready', color: '#E11D48' };
+  if (total >= 25) band = { label: 'Advanced', color: '#16A34A' };
+  else if (total >= 18) band = { label: 'Ready', color: '#F59E0B' };
+  else if (total >= 11) band = { label: 'Emerging', color: '#FB923C' };
+  return { dimensionScores, total, pct, band };
+}
+
+// Minimal copy of dimensions for tests and local logic
+export function getDimensions() {
+  return [
+    { id: 'process', title: 'Process Maturity', questions: [{id:'proc_doc'},{id:'proc_metrics'},{id:'proc_variation'}] },
+    { id: 'data', title: 'Data Readiness', questions: [{id:'data_digitized'},{id:'data_quality'},{id:'data_access'}] },
+    { id: 'tech', title: 'Technology Infrastructure', questions: [{id:'tech_stack'},{id:'analytics'},{id:'experimentation'}] },
+    { id: 'people', title: 'People & Skills', questions: [{id:'ai_awareness'},{id:'training'},{id:'roles'}] },
+    { id: 'leadership', title: 'Leadership & Strategy Alignment', questions: [{id:'strategy'},{id:'funding'},{id:'outcomes'}] },
+    { id: 'change', title: 'Change Management & Culture', questions: [{id:'psych_safe'},{id:'collab'},{id:'scale'}] }
+  ] as const;
+}
+TS
+
+# 9d) components/Header.tsx
+mkdir -p src/components
+cat > src/components/Header.tsx <<'TSX'
+import React from 'react';
+export default function Header({logoUrl, onUpload}:{logoUrl:string,onUpload:(f:File)=>void}) {
+  return (
+    <header className="mb-6 flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold" style={{ color: '#BF6A16' }}>AI-Enabled Process Readiness</h1>
+        <p className="text-sm mt-1 text-white">Quick self-assessment for process improvement leaders (6 dimensions, ~3 minutes)</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <img src={logoUrl} alt="T-Logic" style={{ height: 44 }} onError={(e:any)=>{ e.currentTarget.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'200\\' height=\\'56\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%231f2937\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23BF6A16\\' font-family=\\'Arial,Helvetica,sans-serif\\' font-size=\\'20\\'>T-Logic</text></svg>'}} />
+        <label style={{ cursor:'pointer', color:'#fff', background:'#111827', padding:'6px 10px', borderRadius:6 }}>
+          Upload logo
+          <input type="file" accept="image/*" style={{ display: 'none' }} onChange={(e)=>{ if(e.target.files) onUpload(e.target.files[0]); }} />
+        </label>
+      </div>
+    </header>
+  );
+}
+TSX
+
+# 9e) components/ProgressArrows.tsx
+cat > src/components/ProgressArrows.tsx <<'TSX'
+import React from 'react';
+export default function ProgressArrows({current, colors}:{current:number, colors:string[]}) {
+  return (
+    <div className="flex gap-2 items-center">
+      {colors.map((col,i)=>{
+        const idx = i+1; const active = idx===current;
+        return (
+          <div key={i} className="flex items-center gap-2">
+            <div style={{ background: active ? col : 'transparent', borderColor: col }} className={`flex items-center justify-center px-3 py-2 rounded-md border text-sm font-semibold`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: 6 }}>
+                <path d="M5 12h14" stroke={active ? '#000' : col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 5l7 7-7 7" stroke={active ? '#000' : col} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {idx}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+TSX
+
+# 9f) App.tsx (main app — simplified for brevity; uses scoring util)
+cat > src/App.tsx <<'TSX'
+import React, { useState, useMemo } from 'react';
+import Header from './components/Header';
+import ProgressArrows from './components/ProgressArrows';
+import { computeScores, getDimensions } from './utils/scoring';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+
+const PALETTE = ['#FFB068','#C9A3FF','#A7D6FF','#FFC1D6','#FFF08A','#BFFFC4'];
+const DIMENSIONS = [
+  { id:'process', title:'Process Maturity', description:'How well defined and measured your processes are.', color:PALETTE[0], questions:[
+    {id:'proc_doc', text:'Are core processes documented and standardized across teams?'},
+    {id:'proc_metrics', text:'Are process performance metrics tracked regularly and reliably?'},
+    {id:'proc_variation', text:'Is process variation understood and root-causes identified?'},
+  ]},
+  { id:'data', title:'Data Readiness', description:'Quality, accessibility and structure of your data.', color:PALETTE[1], questions:[
+    {id:'data_digitized', text:'Is process data digitized and collected consistently?'},
+    {id:'data_quality', text:'Is the data cleaned, documented, and validated?'},
+    {id:'data_access', text:'Can teams access historical data for analysis and modelling?'},
+  ]},
+  { id:'tech', title:'Technology Infrastructure', description:'Tools and platforms available for analytics and automation.', color:PALETTE[2], questions:[
+    {id:'tech_stack', text:'Does your tech stack support integrations and APIs?'},
+    {id:'analytics', text:'Are analytics and reporting tools available to teams?'},
+    {id:'experimentation', text:'Is there an environment for ML experiments or pilots?'},
+  ]},
+  { id:'people', title:'People & Skills', description:'Workforce capability and understanding of AI and data-driven methods.', color:PALETTE[3], questions:[
+    {id:'ai_awareness', text:'Do teams understand basic AI concepts and use-cases?'},
+    {id:'training', text:'Are training programs in place for data and AI skills?'},
+    {id:'roles', text:'Are there named AI/data translators, champions or SMEs?'},
+  ]},
+  { id:'leadership', title:'Leadership & Strategy Alignment', description:'Executive commitment and strategic alignment for AI.', color:PALETTE[4], questions:[
+    {id:'strategy', text:'Is AI explicitly part of the organizational strategy?'},
+    {id:'funding', text:'Is there allocated funding for pilots and scale-up?'},
+    {id:'outcomes', text:'Are AI initiatives tied to measurable business outcomes?'},
+  ]},
+  { id:'change', title:'Change Management & Culture', description:\"Organization's openness to experimentation and cross-functional work.\", color:PALETTE[5], questions:[
+    {id:'psych_safe', text:'Does the culture accept small experiments and learning from failure?'},
+    {id:'collab', text:'Are cross-functional teams actively collaborating on process work?'},
+    {id:'scale', text:'Is there a framework to scale successful pilots into operations?'},
+  ]},
+];
+
+const FLATTENED = DIMENSIONS.flatMap(d=>d.questions);
+
+function buildDefaults(){ const a:any={}; FLATTENED.forEach(q=>a[q.id]=3); return a; }
+
+export default function App(){
+  const [answers, setAnswers] = useState(buildDefaults());
+  const [step,setStep] = useState(0);
+  const [logoUrl,setLogoUrl] = useState('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"56\"><rect width=\"100%\" height=\"100%\" fill=\"%231f2937\"/><text x=\"50%\" y=\"50%\" dominant-baseline=\"middle\" text-anchor=\"middle\" fill=\"%23BF6A16\" font-family=\"Arial,Helvetica,sans-serif\" font-size=\"20\">T-Logic</text></svg>');
+
+  const onAnswer = (qid:number|string, val:number)=> setAnswers(a=>({...a,[qid]:val}));
+  const {dimensionScores,total,pct,band} = useMemo(()=>computeScores(answers),[answers]);
+
+  const radarData = dimensionScores.map(d=>({subject:d.title,A:d.score,fullMark:5}));
+
+  const goNext = ()=>{ if(step < DIMENSIONS.length) setStep(s=>s+1); else setStep(DIMENSIONS.length+1); }
+  const goPrev = ()=> setStep(s=>Math.max(0,s-1));
+
+  const onLogoUpload = (file?:File)=>{ if(!file) return; const r = new FileReader(); r.onload = (e)=>{ if(e.target && typeof e.target.result === 'string') setLogoUrl(e.target.result); }; r.readAsDataURL(file); };
+
+  return (
+    <div className="min-h-screen p-6" style={{ background:'#1F2937', color:'#fff' }}>
+      <div className="max-w-5xl mx-auto">
+        <Header logoUrl={logoUrl} onUpload={onLogoUpload} />
+        {step === 0 && (
+          <div className="bg-gray-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-white">Start the assessment</h2>
+              <div style={{ background:'#111827' }} className="px-3 py-1 rounded text-white">Step 0 of {DIMENSIONS.length}</div>
+            </div>
+            <p className="text-white/90 mb-4">You'll answer 3 short questions for each of the 6 dimensions. Answers are on a 1–5 scale.</p>
+            <div className="flex gap-3">
+              <button onClick={()=>setStep(1)} className="px-4 py-2 rounded bg-orange-500 text-white">Start Assessment</button>
+            </div>
+          </div>
+        )}
+
+        {step >=1 && step <= DIMENSIONS.length && (
+          <>
+            <div className="mt-6 mb-4 flex items-center justify-between">
+              <ProgressArrows current={step} colors={PALETTE} />
+              <div style={{ background:'#111827' }} className="px-3 py-1 rounded text-white">Step {step} of {DIMENSIONS.length}</div>
+            </div>
+
+            <div className="rounded-lg p-6">
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-white">{DIMENSIONS[step-1].title}</h3>
+                <p className="text-white/90">{DIMENSIONS[step-1].description}</p>
+              </div>
+
+              <div className="space-y-6">
+                {DIMENSIONS[step-1].questions.map((q)=>{
+                  const idx = FLATTENED.findIndex(f=>f.id===q.id)+1;
+                  return (
+                    <div key={q.id} className="p-4 rounded-lg" style={{ background: DIMENSIONS[step-1].color }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium text-black">{idx}. {q.text}</div>
+                        <div className="text-sm text-gray-700">Answer: {answers[q.id]}</div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <input type="range" min={1} max={5} value={answers[q.id]} onChange={(e)=>onAnswer(q.id,Number(e.target.value))} className="w-full" />
+                        <div className="w-10 text-center text-gray-700">{answers[q.id]}</div>
+                      </div>
+                      <div className="text-xs text-gray-600 mt-2">1 = Low / Not in place — 5 = High / Fully in place</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex justify-between">
+                <button onClick={goPrev} className="px-4 py-2 rounded border" style={{ background:'#111827', color:'#fff' }}>Back</button>
+                <div className="flex gap-3">
+                  {step === DIMENSIONS.length ? (
+                    <button onClick={()=>setStep(DIMENSIONS.length+1)} className="px-4 py-2 rounded bg-amber-400 text-black">Go to Results</button>
+                  ) : (
+                    <button onClick={goNext} className="px-4 py-2 rounded bg-indigo-600 text-white">Next</button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {step === DIMENSIONS.length + 1 && (
+          <div className="bg-gray-800 p-6 rounded-lg mt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Your Readiness Results</h2>
+                <p className="text-white/90">Overall score: <span className="font-medium">{total} / 30</span> — <span className="font-semibold">{band.label}</span></p>
+              </div>
+              <div style={{ background: band.color }} className={`px-3 py-1 rounded text-black font-semibold`}>{band.label}</div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <div className="h-64 bg-gray-900 p-4 rounded">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius={80} data={radarData}>
+                    <PolarGrid stroke="#374151" />
+                    <PolarAngleAxis dataKey="subject" stroke="#ffffff" />
+                    <PolarRadiusAxis angle={30} domain={[0, 5]} stroke="#9CA3AF" />
+                    <Radar name="You" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="p-4">
+                <h3 className="font-semibold text-white mb-2">Snapshot</h3>
+                <ul className="space-y-2 text-white/90">{dimensionScores.map((d)=>(
+                  <li key={d.id} className="flex justify-between"><div>{d.title}</div><div className="font-medium">{d.score} / 5</div></li>
+                ))}</ul>
+
+                <div className="mt-4 text-white/90">
+                  <h4 className="font-semibold">Top recommendations</h4>
+                  <ol className="list-decimal list-inside mt-2 space-y-2 text-white/80">{[...Array(3)].map((_,i)=>(<li key={i} className="text-sm">Recommendation {i+1}</li>))}</ol>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button onClick={()=>{ setStep(0); setAnswers(buildDefaults()); }} className="px-4 py-2 rounded border" style={{ background:'#111827', color:'#fff' }}>Retake</button>
+              <button onClick={()=>{ const payload={answers,dimensionScores,total,pct,band}; const dataStr='data:text/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(payload,null,2)); const dl=document.createElement('a'); dl.setAttribute('href',dataStr); dl.setAttribute('download','ai-process-readiness-results.json'); dl.click(); }} className="px-4 py-2 rounded bg-emerald-600 text-white">Export Results (JSON)</button>
+            </div>
+          </div>
+        )}
+
+        <footer className="mt-6 text-sm text-white/70">
+          <div className="mb-2">This assessment provides a high-level representation based on subjective inputs and should not be interpreted as definitive readiness without a thorough professional evaluation.</div>
+          <div>© T-Logic Consulting LLP</div>
+        </footer>
+      </div>
+    </div>
+  );
+}
+TSX
+
+# 10) tests for scoring
+cat > src/tests/scoring.test.ts <<'JST'
+import { computeScores } from '../utils/scoring';
+
+test('scoring band boundaries', () => {
+  // helper: create answers where all questions equal a value 1..5
+  const build = (qv:number)=>({
+    proc_doc:qv,proc_metrics:qv,proc_variation:qv,
+    data_digitized:qv,data_quality:qv,data_access:qv,
+    tech_stack:qv,analytics:qv,experimentation:qv,
+    ai_awareness:qv,training:qv,roles:qv,
+    strategy:qv,funding:qv,outcomes:qv,
+    psych_safe:qv,collab:qv,scale:qv
+  });
+
+  // all 1s -> each dim avg=1 -> total = 6 => Not Ready
+  expect(computeScores(build(1)).band.label).toBe('Not Ready');
+
+  // all 2s => each dim 2 => total 12 => Emerging
+  expect(computeScores(build(2)).band.label).toBe('Emerging');
+
+  // mixed to reach Ready/Advanced boundaries can be added similarly
+});
+JST
+
+# 11) jest config
+cat > jest.config.js <<'JEST'
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  moduleFileExtensions: ['ts','tsx','js','jsx','json','node'],
+  transform: { '^.+\\\\.(ts|tsx)$': 'ts-jest' },
+};
+JEST
+
+# 12) basic README
+cat > README.md <<'MD'
+# AI-Enabled Process Readiness (Prototype)
+
+Run locally:
+
