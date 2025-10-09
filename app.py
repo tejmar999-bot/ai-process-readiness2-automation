@@ -6,6 +6,7 @@ from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
 from data.dimensions import DIMENSIONS, get_all_questions
 from utils.pdf_generator import generate_pdf_report
+from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
 
 # Page configuration
 st.set_page_config(
@@ -326,6 +327,130 @@ def render_results_dashboard():
                 </div>
             </div>
             """, unsafe_allow_html=True)
+    
+    # Benchmark Comparison Section
+    st.markdown("---")
+    st.markdown(f"### 📊 Industry Benchmark Comparison", unsafe_allow_html=True)
+    
+    # Benchmark selector
+    col1, col2 = st.columns([2, 3])
+    
+    with col1:
+        benchmark_name = st.selectbox(
+            "Compare against:",
+            options=get_all_benchmarks(),
+            index=4  # Default to "Industry Average"
+        )
+    
+    with col2:
+        benchmark_info = get_benchmark_data(benchmark_name)
+        st.info(benchmark_info['description'])
+    
+    # Get comparison data
+    comparison = get_benchmark_comparison(scores_data, benchmark_name)
+    
+    # Comparison summary
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="score-card">
+            <h4 style="color: {primary_color};">Your Score</h4>
+            <div style="font-size: 1.5rem; font-weight: bold;">{comparison['your_total']}/30</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="score-card">
+            <h4 style="color: {primary_color};">Benchmark Score</h4>
+            <div style="font-size: 1.5rem; font-weight: bold;">{comparison['benchmark_total']}/30</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        diff = comparison['total_difference']
+        diff_color = '#16A34A' if diff >= 0 else '#E11D48'
+        diff_symbol = '↑' if diff >= 0 else '↓'
+        diff_text = 'Above' if diff >= 0 else 'Below'
+        
+        st.markdown(f"""
+        <div class="score-card">
+            <h4 style="color: {primary_color};">Difference</h4>
+            <div style="font-size: 1.5rem; font-weight: bold; color: {diff_color};">
+                {diff_symbol} {abs(diff):.1f} ({diff_text})
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Dimension-by-dimension comparison
+    st.markdown("#### Dimension Comparison")
+    
+    # Create comparison chart
+    dimension_names = [d['title'] for d in comparison['dimensions']]
+    your_scores_list = [d['your_score'] for d in comparison['dimensions']]
+    benchmark_scores_list = [d['benchmark_score'] for d in comparison['dimensions']]
+    
+    fig_comparison = go.Figure()
+    
+    # Add your scores
+    fig_comparison.add_trace(go.Bar(
+        name='Your Scores',
+        x=dimension_names,
+        y=your_scores_list,
+        marker_color=primary_color
+    ))
+    
+    # Add benchmark scores
+    fig_comparison.add_trace(go.Bar(
+        name=f'{benchmark_name}',
+        x=dimension_names,
+        y=benchmark_scores_list,
+        marker_color='#6B7280'
+    ))
+    
+    fig_comparison.update_layout(
+        barmode='group',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        yaxis=dict(
+            title='Score',
+            range=[0, 5],
+            gridcolor='rgba(255,255,255,0.2)'
+        ),
+        xaxis=dict(
+            gridcolor='rgba(255,255,255,0.2)'
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        height=400
+    )
+    
+    st.plotly_chart(fig_comparison, use_container_width=True)
+    
+    # Detailed comparison table
+    st.markdown("#### Detailed Comparison")
+    
+    comparison_data = []
+    for dim in comparison['dimensions']:
+        diff = dim['difference']
+        status = '✅' if diff >= 0 else '⚠️'
+        comparison_data.append({
+            'Dimension': dim['title'],
+            'Your Score': f"{dim['your_score']}/5",
+            'Benchmark': f"{dim['benchmark_score']:.1f}/5",
+            'Difference': f"{diff:+.1f}",
+            'Status': status
+        })
+    
+    df_comparison = pd.DataFrame(comparison_data)
+    st.dataframe(df_comparison, use_container_width=True, hide_index=True)
     
     # Action buttons
     st.markdown("---")
