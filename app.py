@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
 from data.dimensions import DIMENSIONS, get_all_questions
 
@@ -66,17 +67,74 @@ def initialize_session_state():
         st.session_state.current_dimension = 0
     if 'assessment_complete' not in st.session_state:
         st.session_state.assessment_complete = False
+    if 'company_logo' not in st.session_state:
+        st.session_state.company_logo = None
+    if 'company_name' not in st.session_state:
+        st.session_state.company_name = "T-Logic"
+    if 'primary_color' not in st.session_state:
+        st.session_state.primary_color = "#BF6A16"
 
 def render_header():
-    """Render the main header"""
+    """Render the main header with logo and branding"""
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.markdown('<div class="main-header">AI-Enabled Process Readiness</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="main-header" style="color: {st.session_state.primary_color};">AI-Enabled Process Readiness</div>', unsafe_allow_html=True)
         st.markdown('<div class="sub-header">Quick self-assessment for process improvement leaders (6 dimensions, ~3 minutes)</div>', unsafe_allow_html=True)
     
     with col2:
-        st.markdown("**T-Logic**", unsafe_allow_html=True)
+        if st.session_state.company_logo is not None:
+            st.image(st.session_state.company_logo, width=200)
+        else:
+            st.markdown(f"**{st.session_state.company_name}**", unsafe_allow_html=True)
+
+def render_branding_sidebar():
+    """Render branding customization in sidebar"""
+    with st.sidebar:
+        st.markdown("### 🎨 Branding")
+        
+        # Company name input
+        company_name = st.text_input(
+            "Company Name",
+            value=st.session_state.company_name,
+            key="company_name_input"
+        )
+        if company_name != st.session_state.company_name:
+            st.session_state.company_name = company_name
+            st.rerun()
+        
+        # Logo upload
+        uploaded_file = st.file_uploader(
+            "Upload Company Logo",
+            type=['png', 'jpg', 'jpeg'],
+            help="Upload your company logo (PNG, JPG)"
+        )
+        
+        if uploaded_file is not None:
+            try:
+                image = Image.open(uploaded_file)
+                st.session_state.company_logo = image
+                st.success("Logo uploaded successfully!")
+            except Exception as e:
+                st.error(f"Error uploading logo: {str(e)}")
+        
+        # Option to remove logo
+        if st.session_state.company_logo is not None:
+            if st.button("Remove Logo"):
+                st.session_state.company_logo = None
+                st.rerun()
+        
+        # Primary color picker
+        primary_color = st.color_picker(
+            "Primary Brand Color",
+            value=st.session_state.primary_color,
+            help="Choose your brand's primary color"
+        )
+        if primary_color != st.session_state.primary_color:
+            st.session_state.primary_color = primary_color
+            st.rerun()
+        
+        st.markdown("---")
 
 def render_progress_bar():
     """Render progress bar"""
@@ -154,15 +212,21 @@ def create_radar_chart(dimension_scores):
     categories_closed = categories + [categories[0]]
     values_closed = values + [values[0]]
     
+    # Convert hex color to rgba for fill
+    primary_color = st.session_state.primary_color
+    hex_color = primary_color.lstrip('#')
+    rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    fillcolor = f'rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, 0.2)'
+    
     fig = go.Figure()
     
     fig.add_trace(go.Scatterpolar(
         r=values_closed,
         theta=categories_closed,
         fill='toself',
-        fillcolor='rgba(191, 106, 22, 0.2)',
-        line=dict(color='#BF6A16', width=2),
-        marker=dict(color='#BF6A16', size=8),
+        fillcolor=fillcolor,
+        line=dict(color=primary_color, width=2),
+        marker=dict(color=primary_color, size=8),
         name='Your Scores'
     ))
     
@@ -198,15 +262,18 @@ def render_results_dashboard():
     percentage = scores_data['percentage']
     readiness_band = scores_data['readiness_band']
     
-    st.markdown('<div class="main-header">Assessment Results</div>', unsafe_allow_html=True)
+    primary_color = st.session_state.primary_color
+    st.markdown(f'<div class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
     
     # Overall score cards
     col1, col2, col3 = st.columns(3)
     
+    primary_color = st.session_state.primary_color
+    
     with col1:
         st.markdown(f"""
         <div class="score-card">
-            <h3 style="color: #BF6A16;">Total Score</h3>
+            <h3 style="color: {primary_color};">Total Score</h3>
             <div style="font-size: 2rem; font-weight: bold;">{total_score}/30</div>
             <div style="color: #9CA3AF;">({percentage}%)</div>
         </div>
@@ -216,7 +283,7 @@ def render_results_dashboard():
         band_color = readiness_band['color']
         st.markdown(f"""
         <div class="score-card">
-            <h3 style="color: #BF6A16;">Readiness Level</h3>
+            <h3 style="color: {primary_color};">Readiness Level</h3>
             <div class="readiness-band" style="color: {band_color};">{readiness_band['label']}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -225,7 +292,7 @@ def render_results_dashboard():
         avg_score = round(total_score / 6, 1)
         st.markdown(f"""
         <div class="score-card">
-            <h3 style="color: #BF6A16;">Average Score</h3>
+            <h3 style="color: {primary_color};">Average Score</h3>
             <div style="font-size: 2rem; font-weight: bold;">{avg_score}/5</div>
         </div>
         """, unsafe_allow_html=True)
@@ -292,6 +359,10 @@ Dimension Breakdown:
 def main():
     """Main application function"""
     initialize_session_state()
+    
+    # Render branding sidebar first
+    render_branding_sidebar()
+    
     render_header()
     
     if not st.session_state.assessment_complete:
@@ -306,7 +377,7 @@ def main():
         
         # Show current answers summary in sidebar
         with st.sidebar:
-            st.markdown("### Current Progress")
+            st.markdown("### 📊 Current Progress")
             completed_questions = len([q for q in get_all_questions() if q['id'] in st.session_state.answers])
             total_questions = len(get_all_questions())
             st.write(f"Questions completed: {completed_questions}/{total_questions}")
