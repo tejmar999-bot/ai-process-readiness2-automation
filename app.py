@@ -199,34 +199,37 @@ def render_branding_sidebar():
         st.markdown("---")
 
 def render_progress_bar():
-    """Render progress bar with arrow indicators"""
+    """Render progress bar with arrow indicators - Sticky header"""
     current_dim = st.session_state.current_dimension
     dimension_color = DIMENSIONS[current_dim]['color']
+    dimension = DIMENSIONS[current_dim]
     
-    # Create arrow progress indicator with scroll anchor
+    # Create sticky header container with progress bar, counter, and dimension title
     # Add timestamp to force re-rendering
     import time
     timestamp = int(time.time() * 1000)
+    
+    # Build arrows HTML
     arrows_html = f'<div id="progress-anchor" data-render="{timestamp}" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
     
-    for i, dimension in enumerate(DIMENSIONS):
+    for i, dim in enumerate(DIMENSIONS):
         # Determine if this arrow should be lit up
         is_active = i <= current_dim
-        arrow_color = dimension['color'] if is_active else '#374151'
+        arrow_color = dim['color'] if is_active else '#374151'
         text_color = '#FFFFFF' if is_active else '#6B7280'
         margin_left = '-15px' if i > 0 else '0'
         z_index = len(DIMENSIONS) - i
         
         # Arrow shape using CSS - single line to avoid rendering issues
-        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 50px; flex: 1; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 20px;">{dimension["title"]}</span></div>'
+        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 50px; flex: 1; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 20px;">{dim["title"]}</span></div>'
         arrows_html += arrow_html
     
     arrows_html += '</div>'
     
-    # Colored line above dimension counter
-    st.markdown(f'<div style="height: 3px; background-color: {dimension_color}; margin-bottom: 0.5rem;"></div>', unsafe_allow_html=True)
-    st.markdown(arrows_html, unsafe_allow_html=True)
-    st.markdown(f'<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>', unsafe_allow_html=True)
+    # Create sticky header with background - single line HTML to avoid rendering issues
+    sticky_header_html = f'<div id="sticky-header" style="position: sticky; top: 0; z-index: 999; background-color: #1F2937; padding: 1rem 0 0.5rem 0; margin: -1rem 0 1rem 0;"><div style="height: 3px; background-color: {dimension_color}; margin-bottom: 0.5rem;"></div>{arrows_html}<p style="text-align: center; color: #9CA3AF; margin-bottom: 0.5rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p><h3 style="color: {dimension_color}; margin-bottom: 0.5rem; text-align: center;">{dimension["title"]}</h3><p style="color: #9CA3AF; font-style: italic; margin-bottom: 1rem; text-align: center;">{dimension["what_it_measures"]}</p></div>'
+    
+    st.markdown(sticky_header_html, unsafe_allow_html=True)
     
     # Auto-scroll to show progress indicators if flag is set
     if st.session_state.should_scroll_to_top:
@@ -259,32 +262,74 @@ def render_dimension_questions(dimension_idx):
     """Render questions for a specific dimension"""
     dimension = DIMENSIONS[dimension_idx]
     
-    # Dimension heading
-    st.markdown(f'<h3 style="color: {dimension["color"]}; margin-bottom: 0.5rem;">{dimension["title"]}</h3>', unsafe_allow_html=True)
-    
-    # "What it Measures" text directly below
-    st.markdown(f'<p style="color: #9CA3AF; font-style: italic; margin-bottom: 1.5rem;">{dimension["what_it_measures"]}</p>', unsafe_allow_html=True)
+    # Initialize scroll trigger if not exists
+    if 'scroll_to_question' not in st.session_state:
+        st.session_state.scroll_to_question = None
     
     # Get scoring labels for this dimension
     scoring_labels = dimension.get('scoring_labels', {
         1: "1", 2: "2", 3: "3", 4: "4", 5: "5"
     })
     
+    def on_answer_change(question_id, question_idx):
+        """Callback when a question is answered"""
+        # Only trigger scroll if not the last question
+        if question_idx < len(dimension['questions']) - 1:
+            st.session_state.scroll_to_question = question_idx + 1
+    
     for i, question in enumerate(dimension['questions']):
-        st.markdown(f'<div class="question-text">{i+1}. {question["text"]}</div>', unsafe_allow_html=True)
+        question_id = f"q_{question['id']}"
         
-        # Create rating scale with dimension-specific labels
+        # Create unique anchor for each question
+        st.markdown(f'<div id="question-{i}" class="question-text">{i+1}. {question["text"]}</div>', unsafe_allow_html=True)
+        
+        # Get current answer or default
+        current_answer = st.session_state.answers.get(question['id'], 3)
+        
+        # Create rating scale with dimension-specific labels with on_change callback
         rating = st.radio(
             "Rating",
             options=[1, 2, 3, 4, 5],
             format_func=lambda x: f"{x} - {scoring_labels[x]}",
-            key=f"q_{question['id']}",
-            index=2,  # Default to neutral
-            horizontal=True
+            key=question_id,
+            index=current_answer - 1,  # Convert to 0-indexed
+            horizontal=True,
+            on_change=on_answer_change,
+            args=(question['id'], i)
         )
         
         st.session_state.answers[question['id']] = rating
         st.markdown("---")
+    
+    # Execute auto-scroll script only if scroll is triggered for a specific question
+    if st.session_state.scroll_to_question is not None:
+        target_question_idx = st.session_state.scroll_to_question
+        components.html(
+            f"""
+            <script>
+                (function() {{
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    var nextQuestion = window.parent.document.getElementById('question-{target_question_idx}');
+                    
+                    if (nextQuestion && mainSection) {{
+                        setTimeout(function() {{
+                            var elementPosition = nextQuestion.offsetTop;
+                            var stickyHeader = window.parent.document.getElementById('sticky-header');
+                            var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 200;
+                            var offsetPosition = elementPosition - stickyHeight - 20;
+                            mainSection.scrollTo({{
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            }});
+                        }}, 200);
+                    }}
+                }})();
+            </script>
+            """,
+            height=0
+        )
+        # Clear the flag after scrolling
+        st.session_state.scroll_to_question = None
 
 def render_navigation_buttons():
     """Render navigation buttons"""
