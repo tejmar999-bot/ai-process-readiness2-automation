@@ -213,7 +213,7 @@ def render_progress_bar():
         # Determine if this arrow should be lit up
         is_active = i <= current_dim
         arrow_color = dimension['color'] if is_active else '#374151'
-        text_color = '#000000' if is_active else '#6B7280'
+        text_color = '#FFFFFF' if is_active else '#6B7280'
         margin_left = '-15px' if i > 0 else '0'
         z_index = len(DIMENSIONS) - i
         
