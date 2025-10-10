@@ -12,7 +12,10 @@ from db.operations import (
     save_assessment, 
     get_assessment_history,
     get_dimension_trends,
-    get_team_statistics
+    get_team_statistics,
+    get_team_members,
+    get_team_dimension_averages,
+    get_team_readiness_distribution
 )
 
 # Page configuration
@@ -93,6 +96,12 @@ def initialize_session_state():
         st.session_state.company_name = "T-Logic"
     if 'primary_color' not in st.session_state:
         st.session_state.primary_color = "#BF6A16"
+    if 'user_name' not in st.session_state:
+        st.session_state.user_name = ""
+    if 'user_email' not in st.session_state:
+        st.session_state.user_email = ""
+    if 'user_info_collected' not in st.session_state:
+        st.session_state.user_info_collected = False
 
 def render_header():
     """Render the main header with logo and branding"""
@@ -210,6 +219,9 @@ def render_navigation_buttons():
             st.session_state.answers = {}
             st.session_state.current_dimension = 0
             st.session_state.assessment_complete = False
+            st.session_state.user_info_collected = False
+            st.session_state.user_name = ""
+            st.session_state.user_email = ""
             st.rerun()
     
     with col3:
@@ -228,7 +240,9 @@ def render_navigation_buttons():
                         company_name=st.session_state.company_name,
                         scores_data=scores_data,
                         answers=st.session_state.answers,
-                        primary_color=st.session_state.primary_color
+                        primary_color=st.session_state.primary_color,
+                        user_name=st.session_state.user_name if st.session_state.user_name else None,
+                        user_email=st.session_state.user_email if st.session_state.user_email else None
                     )
                     st.session_state.current_assessment_id = assessment.id
                 except Exception as e:
@@ -594,6 +608,140 @@ def render_results_dashboard():
     except Exception as e:
         st.warning(f"Historical tracking unavailable: {str(e)}")
     
+    # Team Analytics Section
+    st.markdown("---")
+    st.markdown(f"### 👥 Team Analytics", unsafe_allow_html=True)
+    
+    try:
+        team_members = get_team_members(st.session_state.company_name)
+        
+        if team_members and len(team_members) > 0:
+            # Show team members table
+            st.markdown("#### Team Members")
+            
+            team_data = []
+            for member in team_members:
+                team_data.append({
+                    'Name': member['name'],
+                    'Email': member['email'],
+                    'Latest Score': f"{member['latest_score']}/30",
+                    'Percentage': f"{member['latest_percentage']}%",
+                    'Assessments': member['total_assessments'],
+                    'Last Assessment': member['latest_date']
+                })
+            
+            df_team = pd.DataFrame(team_data)
+            st.dataframe(df_team, use_container_width=True, hide_index=True)
+            
+            # Team dimension averages
+            dimension_averages = get_team_dimension_averages(st.session_state.company_name)
+            
+            if dimension_averages:
+                st.markdown("#### Team Dimension Averages")
+                
+                # Create radar chart for team averages
+                categories = [dim['title'] for dim in dimension_averages]
+                values = [dim['average'] for dim in dimension_averages]
+                
+                fig_team = go.Figure()
+                
+                # Add team average
+                fig_team.add_trace(go.Scatterpolar(
+                    r=values,
+                    theta=categories,
+                    fill='toself',
+                    name='Team Average',
+                    line=dict(color=st.session_state.primary_color, width=2),
+                    fillcolor=f"rgba({int(st.session_state.primary_color[1:3], 16)}, {int(st.session_state.primary_color[3:5], 16)}, {int(st.session_state.primary_color[5:7], 16)}, 0.3)"
+                ))
+                
+                # Add industry average benchmark for comparison
+                benchmark_data = get_benchmark_data('Industry Average')
+                benchmark_values = [benchmark_data[dim['id']] for dim in dimension_averages]
+                
+                fig_team.add_trace(go.Scatterpolar(
+                    r=benchmark_values,
+                    theta=categories,
+                    fill='toself',
+                    name='Industry Average',
+                    line=dict(color='#60A5FA', width=2),
+                    fillcolor='rgba(96, 165, 250, 0.2)'
+                ))
+                
+                fig_team.update_layout(
+                    polar=dict(
+                        radialaxis=dict(
+                            visible=True,
+                            range=[0, 5],
+                            gridcolor='rgba(255,255,255,0.2)'
+                        ),
+                        angularaxis=dict(
+                            gridcolor='rgba(255,255,255,0.2)'
+                        )
+                    ),
+                    showlegend=True,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=500
+                )
+                
+                st.plotly_chart(fig_team, use_container_width=True)
+                
+                # Readiness distribution
+                st.markdown("#### Team Readiness Distribution")
+                
+                distribution = get_team_readiness_distribution(st.session_state.company_name)
+                
+                if distribution:
+                    fig_dist = go.Figure(data=[go.Pie(
+                        labels=list(distribution.keys()),
+                        values=list(distribution.values()),
+                        hole=.3,
+                        marker=dict(
+                            colors=['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
+                        )
+                    )])
+                    
+                    fig_dist.update_layout(
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white'),
+                        height=400
+                    )
+                    
+                    st.plotly_chart(fig_dist, use_container_width=True)
+                
+                # Team statistics summary
+                st.markdown("#### Team Summary")
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.metric(
+                        label="Team Members",
+                        value=len(team_members)
+                    )
+                
+                with col2:
+                    team_avg_score = sum([m['latest_score'] for m in team_members]) / len(team_members)
+                    st.metric(
+                        label="Average Team Score",
+                        value=f"{team_avg_score:.1f}/30"
+                    )
+                
+                with col3:
+                    total_assessments = sum([m['total_assessments'] for m in team_members])
+                    st.metric(
+                        label="Total Team Assessments",
+                        value=total_assessments
+                    )
+        
+        else:
+            st.info("💡 Team analytics will appear here when team members complete assessments with their information.")
+    
+    except Exception as e:
+        st.warning(f"Team analytics unavailable: {str(e)}")
+    
     # Action buttons
     st.markdown("---")
     col1, col2, col3 = st.columns(3)
@@ -603,6 +751,9 @@ def render_results_dashboard():
             st.session_state.answers = {}
             st.session_state.current_dimension = 0
             st.session_state.assessment_complete = False
+            st.session_state.user_info_collected = False
+            st.session_state.user_name = ""
+            st.session_state.user_email = ""
             st.rerun()
     
     with col2:
@@ -654,14 +805,39 @@ def main():
     render_header()
     
     if not st.session_state.assessment_complete:
-        # Assessment mode
-        render_progress_bar()
+        # Show user info collection form if not yet collected
+        if not st.session_state.user_info_collected:
+            st.markdown("### 👤 Your Information (Optional)")
+            st.markdown("Add your details to enable team analytics and track individual progress.")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                user_name = st.text_input("Your Name", value=st.session_state.user_name, placeholder="e.g., John Smith")
+            with col2:
+                user_email = st.text_input("Your Email", value=st.session_state.user_email, placeholder="e.g., john@company.com")
+            
+            col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
+            with col_btn1:
+                if st.button("Continue", type="primary"):
+                    st.session_state.user_name = user_name
+                    st.session_state.user_email = user_email
+                    st.session_state.user_info_collected = True
+                    st.rerun()
+            
+            with col_btn2:
+                if st.button("Skip"):
+                    st.session_state.user_info_collected = True
+                    st.rerun()
         
-        # Render current dimension questions
-        render_dimension_questions(st.session_state.current_dimension)
-        
-        # Navigation
-        render_navigation_buttons()
+        else:
+            # Assessment mode
+            render_progress_bar()
+            
+            # Render current dimension questions
+            render_dimension_questions(st.session_state.current_dimension)
+            
+            # Navigation
+            render_navigation_buttons()
         
         # Show current answers summary in sidebar
         with st.sidebar:

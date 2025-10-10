@@ -27,6 +27,7 @@ class Assessment(Base):
     
     id = Column(Integer, primary_key=True)
     organization_id = Column(Integer, ForeignKey('organizations.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     company_name = Column(String(255), nullable=False)
     total_score = Column(Integer, nullable=False)
     percentage = Column(Integer, nullable=False)
