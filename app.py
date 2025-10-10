@@ -199,32 +199,11 @@ def render_progress_bar():
         is_active = i <= current_dim
         arrow_color = dimension['color'] if is_active else '#374151'
         text_color = '#FFFFFF' if is_active else '#6B7280'
+        margin_left = '-15px' if i > 0 else '0'
+        z_index = len(DIMENSIONS) - i
         
-        # Arrow shape using CSS
-        arrow_html = f'''
-        <div style="
-            position: relative;
-            background-color: {arrow_color};
-            height: 50px;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
-            margin-left: {'-15px' if i > 0 else '0'};
-            z-index: {len(DIMENSIONS) - i};
-        ">
-            <span style="
-                color: {text_color};
-                font-size: 0.75rem;
-                font-weight: 600;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                padding: 0 20px;
-            ">{dimension['title']}</span>
-        </div>
-        '''
+        # Arrow shape using CSS - single line to avoid rendering issues
+        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 50px; flex: 1; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 20px;">{dimension["title"]}</span></div>'
         arrows_html += arrow_html
     
     arrows_html += '</div>'
@@ -421,37 +400,19 @@ def render_results_dashboard():
         {"range": "25-30", "level": "🟩 Advanced", "meaning": "AI-ready culture and infrastructure for sustainable transformation", "min": 25, "max": 30}
     ]
     
-    # Create table HTML
-    table_html = '''
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
-        <thead>
-            <tr style="background-color: #374151;">
-                <th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Score Range</th>
-                <th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Readiness Level</th>
-                <th style="padding: 1rem; text-align: left; border: 1px solid #4B5563;">Meaning</th>
-            </tr>
-        </thead>
-        <tbody>
-    '''
+    # Create table HTML - single line format to avoid rendering issues
+    table_html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563;">Meaning</th></tr></thead><tbody>'
     
     for row in scoring_model:
         # Check if this is the user's readiness level
         is_current = row['min'] <= total_score <= row['max']
         border_style = f'border: 3px solid {primary_color};' if is_current else 'border: 1px solid #4B5563;'
         bg_color = 'background-color: #1F2937;' if is_current else 'background-color: #111827;'
+        font_weight = 'bold' if is_current else 'normal'
         
-        table_html += f'''
-        <tr style="{bg_color}">
-            <td style="padding: 1rem; text-align: center; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['range']}</td>
-            <td style="padding: 1rem; text-align: center; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['level']}</td>
-            <td style="padding: 1rem; text-align: left; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['meaning']}</td>
-        </tr>
-        '''
+        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight};">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight};">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} font-weight: {font_weight};">{row["meaning"]}</td></tr>'
     
-    table_html += '''
-        </tbody>
-    </table>
-    '''
+    table_html += '</tbody></table>'
     
     st.markdown(table_html, unsafe_allow_html=True)
     
