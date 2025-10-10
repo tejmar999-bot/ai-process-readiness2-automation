@@ -58,7 +58,7 @@ INDUSTRY_BENCHMARKS = {
 
 def get_benchmark_comparison(your_scores, benchmark_name='Industry Average'):
     """
-    Compare user scores against a specific benchmark
+    Compare user scores against a specific benchmark using ID-based matching
     
     Args:
         your_scores: Dictionary with dimension_scores from compute_scores
@@ -82,18 +82,27 @@ def get_benchmark_comparison(your_scores, benchmark_name='Industry Average'):
         'dimensions': []
     }
     
+    # Use ID-based matching to ensure correct benchmark alignment
     for score_data in dimension_scores:
         dim_id = score_data['id']
         your_score = score_data['score']
+        
+        # Get benchmark score by ID, default to 3.0 if not found
         benchmark_score = benchmark.get(dim_id, 3.0)
+        
+        # Ensure benchmark_score is valid for division
+        if benchmark_score == 0:
+            percentage = 0
+        else:
+            percentage = round((your_score / benchmark_score * 100), 1)
         
         comparison['dimensions'].append({
             'id': dim_id,
             'title': score_data['title'],
             'your_score': your_score,
-            'benchmark_score': benchmark_score,
-            'difference': your_score - benchmark_score,
-            'percentage_of_benchmark': round((your_score / benchmark_score * 100) if benchmark_score > 0 else 0, 1)
+            'benchmark_score': round(benchmark_score, 1),  # Round for display consistency
+            'difference': round(your_score - benchmark_score, 1),
+            'percentage_of_benchmark': percentage
         })
     
     return comparison

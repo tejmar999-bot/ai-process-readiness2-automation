@@ -21,15 +21,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'proc_doc',
-                'text': 'Are core processes documented and standardized across teams?'
+                'text': 'Core processes are documented and standardized across teams.'
             },
             {
                 'id': 'proc_metrics',
-                'text': 'Are process performance metrics tracked regularly and reliably?'
+                'text': 'Process performance metrics are tracked regularly and reliably.'
             },
             {
                 'id': 'proc_variation',
-                'text': 'Is process variation understood and root-causes identified?'
+                'text': 'Process variation is understood and root-causes are identified.'
             }
         ]
     },
@@ -41,15 +41,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'data_digitized',
-                'text': 'Is process data digitized and collected consistently?'
+                'text': 'Process data is digitized and collected consistently.'
             },
             {
                 'id': 'data_quality',
-                'text': 'Is the data cleaned, documented, and validated?'
+                'text': 'The data is cleaned, documented, and validated.'
             },
             {
                 'id': 'data_access',
-                'text': 'Can teams access historical data for analysis and modelling?'
+                'text': 'Teams can access historical data for analysis and modelling.'
             }
         ]
     },
@@ -61,15 +61,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'tech_stack',
-                'text': 'Does your tech stack support integrations and APIs?'
+                'text': 'Our tech stack supports integrations and APIs.'
             },
             {
                 'id': 'analytics',
-                'text': 'Are analytics and reporting tools available to teams?'
+                'text': 'Analytics and reporting tools are available to teams.'
             },
             {
                 'id': 'experimentation',
-                'text': 'Is there an environment for ML experiments or pilots?'
+                'text': 'There is an environment for ML experiments or pilots.'
             }
         ]
     },
@@ -81,15 +81,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'ai_awareness',
-                'text': 'Do teams understand basic AI concepts and use-cases?'
+                'text': 'Teams understand basic AI concepts and use-cases.'
             },
             {
                 'id': 'training',
-                'text': 'Are training programs in place for data and AI skills?'
+                'text': 'Training programs are in place for data and AI skills.'
             },
             {
                 'id': 'roles',
-                'text': 'Are there named AI/data translators, champions or SMEs?'
+                'text': 'There are named AI/data translators, champions or SMEs.'
             }
         ]
     },
@@ -101,15 +101,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'strategy',
-                'text': 'Is AI explicitly part of the organizational strategy?'
+                'text': 'AI is explicitly part of the organizational strategy.'
             },
             {
                 'id': 'funding',
-                'text': 'Is there allocated funding for pilots and scale-up?'
+                'text': 'There is allocated funding for pilots and scale-up.'
             },
             {
                 'id': 'outcomes',
-                'text': 'Are AI initiatives tied to measurable business outcomes?'
+                'text': 'AI initiatives are tied to measurable business outcomes.'
             }
         ]
     },
@@ -121,15 +121,15 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'psych_safe',
-                'text': 'Does the culture accept small experiments and learning from failure?'
+                'text': 'The culture accepts small experiments and learning from failure.'
             },
             {
                 'id': 'collab',
-                'text': 'Are cross-functional teams actively collaborating on process work?'
+                'text': 'Cross-functional teams actively collaborate on process work.'
             },
             {
                 'id': 'scale',
-                'text': 'Is there a framework to scale successful pilots into operations?'
+                'text': 'There is a framework to scale successful pilots into operations.'
             }
         ]
     }

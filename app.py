@@ -70,7 +70,12 @@ def initialize_session_state():
     if 'assessment_complete' not in st.session_state:
         st.session_state.assessment_complete = False
     if 'company_logo' not in st.session_state:
-        st.session_state.company_logo = None
+        # Load default T-Logic logo
+        try:
+            default_logo = Image.open('static/T_Logic_Logo.png')
+            st.session_state.company_logo = default_logo
+        except:
+            st.session_state.company_logo = None
     if 'company_name' not in st.session_state:
         st.session_state.company_name = "T-Logic"
     if 'primary_color' not in st.session_state:
@@ -336,10 +341,12 @@ def render_results_dashboard():
     col1, col2 = st.columns([2, 3])
     
     with col1:
+        all_benchmarks = get_all_benchmarks()
+        default_idx = all_benchmarks.index('Industry Average') if 'Industry Average' in all_benchmarks else 0
         benchmark_name = st.selectbox(
             "Compare against:",
-            options=get_all_benchmarks(),
-            index=4  # Default to "Industry Average"
+            options=all_benchmarks,
+            index=default_idx
         )
     
     with col2:
