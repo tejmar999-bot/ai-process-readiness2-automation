@@ -122,6 +122,8 @@ def initialize_session_state():
         st.session_state.user_info_collected = False
     if 'should_scroll_to_top' not in st.session_state:
         st.session_state.should_scroll_to_top = False
+    if 'feedback_submitted' not in st.session_state:
+        st.session_state.feedback_submitted = False
 
 def render_header():
     """Render the main header with logo and branding"""
@@ -639,6 +641,36 @@ Dimension Breakdown:
             )
         except Exception as e:
             st.error(f"Error generating PDF: {str(e)}")
+    
+    # Feedback Section
+    st.markdown("---")
+    st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-top: 2rem;">💬 Help Us Improve</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">We value your feedback! Please share your thoughts to help us improve this assessment tool.</p>', unsafe_allow_html=True)
+    
+    if not st.session_state.feedback_submitted:
+        feedback_text = st.text_area(
+            "Your Feedback",
+            placeholder="What did you like? What could be improved? Any suggestions?",
+            height=120,
+            key="feedback_input"
+        )
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("📧 Submit Feedback", type="primary", use_container_width=True):
+                if feedback_text and feedback_text.strip():
+                    # For now, just save to session state and show confirmation
+                    # Email functionality will be added separately
+                    st.session_state.feedback_text = feedback_text
+                    st.session_state.feedback_submitted = True
+                    st.rerun()
+                else:
+                    st.warning("Please enter your feedback before submitting.")
+    else:
+        st.success("✅ Thank you for your feedback! We appreciate your input.")
+        if st.button("Submit More Feedback"):
+            st.session_state.feedback_submitted = False
+            st.rerun()
 
 def main():
     """Main application function"""
