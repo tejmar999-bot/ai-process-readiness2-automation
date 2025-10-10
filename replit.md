@@ -43,7 +43,17 @@ Preferred communication style: Simple, everyday language.
   - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses
   - Arrow text color: White for active segments, gray for inactive (optimal contrast with earthy colors)
   - Colored line above dimension counter matches current dimension color
-- **Dimension Display**: "What it Measures" text displayed directly below dimension title in italic gray text
+- **Sticky Header on Dimension Pages**: 
+  - Header stays locked at top (position: sticky) while scrolling through questions
+  - Contains: colored line, progress arrows, "Dimension X of 6" counter, dimension title, and "What it Measures" description
+  - Background color #1F2937 matches app theme for seamless sticky effect
+  - Z-index 999 ensures header stays above content
+- **Auto-Scroll to Next Question**:
+  - When user answers a question, page smoothly scrolls to next question automatically
+  - Uses on_change callback to detect when answer is selected (prevents unwanted scroll on page load)
+  - Scroll accounts for sticky header height to ensure next question is visible below header
+  - No auto-scroll on last question (no next question to scroll to)
+  - Session state flag (`scroll_to_question`) controls when scroll executes and clears after completion
 - **Feedback Collection**: User feedback form on results page with text area and submit button (saves to session state, email integration pending)
 
 ### Backend Architecture
