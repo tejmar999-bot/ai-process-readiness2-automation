@@ -31,10 +31,14 @@ Preferred communication style: Simple, everyday language.
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
 - **User Flow**: User information collection on first page with 2 required fields (Name, Email) and 4 optional fields (Title, Company Name, Phone Number, Location). Email validation required before assessment begins. Continue button activates as soon as both required fields are filled.
 - **Navigation**: 
-  - Auto-scroll to top when Next button pressed and when assessment completed for better user orientation
+  - Auto-scroll when Next/Previous button pressed and when assessment completed
+  - Scroll offset: 200px to ensure progress arrows and dimension title are fully visible
+  - Scroll executes after progress bar is rendered to avoid timing issues
   - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses
+  - Arrow text color: Black for active segments, gray for inactive (improved readability)
   - Colored line above dimension counter matches current dimension color
 - **Dimension Display**: "What it Measures" text displayed directly below dimension title in italic gray text
+- **Feedback Collection**: User feedback form on results page with text area and submit button (saves to session state, email integration pending)
 
 ### Backend Architecture
 
