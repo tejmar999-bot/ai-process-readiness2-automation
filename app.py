@@ -225,6 +225,33 @@ def render_progress_bar():
     st.markdown(f'<div style="height: 3px; background-color: {dimension_color}; margin-bottom: 0.5rem;"></div>', unsafe_allow_html=True)
     st.markdown(arrows_html, unsafe_allow_html=True)
     st.markdown(f'<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>', unsafe_allow_html=True)
+    
+    # Auto-scroll to show progress indicators if flag is set
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                function attemptScroll(retries) {
+                    var progressAnchor = window.parent.document.getElementById('progress-anchor');
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    
+                    if (progressAnchor && mainSection) {
+                        // Scroll to ensure element is visible with extra padding to show dimension title
+                        var elementPosition = progressAnchor.offsetTop;
+                        var offsetPosition = elementPosition - 200;
+                        mainSection.scrollTop = Math.max(0, offsetPosition);
+                    } else if (retries > 0) {
+                        setTimeout(function() { attemptScroll(retries - 1); }, 100);
+                    } else if (mainSection) {
+                        mainSection.scrollTo(0, 0);
+                    }
+                }
+                setTimeout(function() { attemptScroll(5); }, 100);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
 
 def render_dimension_questions(dimension_idx):
     """Render questions for a specific dimension"""
@@ -373,6 +400,23 @@ def render_results_dashboard():
     
     primary_color = st.session_state.primary_color
     st.markdown(f'<div class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
+    
+    # Auto-scroll to top of results if flag is set
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                setTimeout(function() {
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {
+                        mainSection.scrollTo(0, 0);
+                    }
+                }, 100);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
     
     # Overall score cards
     col1, col2, col3 = st.columns(3)
@@ -680,33 +724,6 @@ def main():
     render_branding_sidebar()
     
     render_header()
-    
-    # Auto-scroll to show progress indicators if flag is set
-    if st.session_state.should_scroll_to_top:
-        components.html(
-            """
-            <script>
-                function attemptScroll(retries) {
-                    var progressAnchor = window.parent.document.getElementById('progress-anchor');
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    
-                    if (progressAnchor && mainSection) {
-                        // Scroll to ensure element is visible
-                        var elementPosition = progressAnchor.offsetTop;
-                        var offsetPosition = elementPosition - 50;
-                        mainSection.scrollTop = Math.max(0, offsetPosition);
-                    } else if (retries > 0) {
-                        setTimeout(function() { attemptScroll(retries - 1); }, 100);
-                    } else if (mainSection) {
-                        mainSection.scrollTo(0, 0);
-                    }
-                }
-                setTimeout(function() { attemptScroll(5); }, 100);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.should_scroll_to_top = False
     
     if not st.session_state.assessment_complete:
         # Show user info collection form if not yet collected
