@@ -2,14 +2,14 @@
 Dimension and question definitions for AI Process Readiness Assessment
 """
 
-# Color palette for dimensions
+# Color palette for dimensions - Green/Blue/Brown scheme
 PALETTE = [
-    '#FFB068',  # sec1 - Process Maturity
-    '#C9A3FF',  # sec2 - Data Readiness  
-    '#A7D6FF',  # sec3 - Technology Infrastructure
-    '#FFC1D6',  # sec4 - People & Skills
-    '#FFF08A',  # sec5 - Leadership & Strategy
-    '#BFFFC4'   # sec6 - Change Management
+    '#2D6A4F',  # sec1 - Process Maturity (Forest Green)
+    '#1B9AAA',  # sec2 - Data Readiness (Teal Blue)
+    '#2C5F8D',  # sec3 - Technology Infrastructure (Deep Blue)
+    '#8B6F47',  # sec4 - People & Skills (Warm Brown)
+    '#7A5C3D',  # sec5 - Leadership & Strategy (Earth Brown)
+    '#52B788'   # sec6 - Change Management (Sea Green)
 ]
 
 DIMENSIONS = [
