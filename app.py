@@ -187,25 +187,62 @@ def render_branding_sidebar():
         st.markdown("---")
 
 def render_progress_bar():
-    """Render progress bar"""
-    progress = (st.session_state.current_dimension + 1) / len(DIMENSIONS)
-    st.progress(progress)
-    st.write(f"Dimension {st.session_state.current_dimension + 1} of {len(DIMENSIONS)}")
+    """Render progress bar with arrow indicators"""
+    current_dim = st.session_state.current_dimension
+    dimension_color = DIMENSIONS[current_dim]['color']
+    
+    # Create arrow progress indicator
+    arrows_html = '<div style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
+    
+    for i, dimension in enumerate(DIMENSIONS):
+        # Determine if this arrow should be lit up
+        is_active = i <= current_dim
+        arrow_color = dimension['color'] if is_active else '#374151'
+        text_color = '#FFFFFF' if is_active else '#6B7280'
+        
+        # Arrow shape using CSS
+        arrow_html = f'''
+        <div style="
+            position: relative;
+            background-color: {arrow_color};
+            height: 50px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+            margin-left: {'-15px' if i > 0 else '0'};
+            z-index: {len(DIMENSIONS) - i};
+        ">
+            <span style="
+                color: {text_color};
+                font-size: 0.75rem;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 0 20px;
+            ">{dimension['title']}</span>
+        </div>
+        '''
+        arrows_html += arrow_html
+    
+    arrows_html += '</div>'
+    
+    # Colored line above dimension counter
+    st.markdown(f'<div style="height: 3px; background-color: {dimension_color}; margin-bottom: 0.5rem;"></div>', unsafe_allow_html=True)
+    st.markdown(arrows_html, unsafe_allow_html=True)
+    st.markdown(f'<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>', unsafe_allow_html=True)
 
 def render_dimension_questions(dimension_idx):
     """Render questions for a specific dimension"""
     dimension = DIMENSIONS[dimension_idx]
     
-    # Dimension heading with question mark icon
-    col1, col2 = st.columns([6, 1])
-    with col1:
-        st.markdown(f'<h3 style="color: {dimension["color"]}; margin-bottom: 0;">{dimension["title"]}</h3>', unsafe_allow_html=True)
+    # Dimension heading
+    st.markdown(f'<h3 style="color: {dimension["color"]}; margin-bottom: 0.5rem;">{dimension["title"]}</h3>', unsafe_allow_html=True)
     
-    # "What it Measures" expander with question mark icon
-    with st.expander("❓ What it Measures"):
-        st.markdown(f'<p style="color: #9CA3AF;">{dimension["what_it_measures"]}</p>', unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
+    # "What it Measures" text directly below
+    st.markdown(f'<p style="color: #9CA3AF; font-style: italic; margin-bottom: 1.5rem;">{dimension["what_it_measures"]}</p>', unsafe_allow_html=True)
     
     # Get scoring labels for this dimension
     scoring_labels = dimension.get('scoring_labels', {
@@ -274,6 +311,7 @@ def render_navigation_buttons():
                     st.error(f"Error saving assessment: {str(e)}")
                 
                 st.session_state.assessment_complete = True
+                st.session_state.should_scroll_to_top = True  # Scroll to top to show results
                 st.rerun()
 
 def create_radar_chart(dimension_scores):
@@ -370,6 +408,52 @@ def render_results_dashboard():
             <div style="font-size: 2rem; font-weight: bold;">{avg_score}/5</div>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Scoring Model Table
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-bottom: 1rem;">📊 Scoring Model</h3>', unsafe_allow_html=True)
+    
+    # Define scoring model data
+    scoring_model = [
+        {"range": "0-10", "level": "🟥 Not Ready", "meaning": "Foundational work needed before AI introduction", "min": 0, "max": 10},
+        {"range": "11-17", "level": "🟧 Emerging", "meaning": "Some digital and process maturity; pilot-level readiness", "min": 11, "max": 17},
+        {"range": "18-24", "level": "🟨 Ready", "meaning": "Data, processes, and leadership alignment in place for scaled AI use", "min": 18, "max": 24},
+        {"range": "25-30", "level": "🟩 Advanced", "meaning": "AI-ready culture and infrastructure for sustainable transformation", "min": 25, "max": 30}
+    ]
+    
+    # Create table HTML
+    table_html = '''
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+        <thead>
+            <tr style="background-color: #374151;">
+                <th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Score Range</th>
+                <th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Readiness Level</th>
+                <th style="padding: 1rem; text-align: left; border: 1px solid #4B5563;">Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+    '''
+    
+    for row in scoring_model:
+        # Check if this is the user's readiness level
+        is_current = row['min'] <= total_score <= row['max']
+        border_style = f'border: 3px solid {primary_color};' if is_current else 'border: 1px solid #4B5563;'
+        bg_color = 'background-color: #1F2937;' if is_current else 'background-color: #111827;'
+        
+        table_html += f'''
+        <tr style="{bg_color}">
+            <td style="padding: 1rem; text-align: center; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['range']}</td>
+            <td style="padding: 1rem; text-align: center; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['level']}</td>
+            <td style="padding: 1rem; text-align: left; {border_style} font-weight: {'bold' if is_current else 'normal'};">{row['meaning']}</td>
+        </tr>
+        '''
+    
+    table_html += '''
+        </tbody>
+    </table>
+    '''
+    
+    st.markdown(table_html, unsafe_allow_html=True)
     
     # Radar chart
     st.markdown("### Dimension Breakdown")
@@ -525,247 +609,6 @@ def render_results_dashboard():
     
     df_comparison = pd.DataFrame(comparison_data)
     st.dataframe(df_comparison, use_container_width=True, hide_index=True)
-    
-    # Historical Tracking Section
-    st.markdown("---")
-    st.markdown(f"### 📈 Historical Progress Tracking", unsafe_allow_html=True)
-    
-    try:
-        # Get assessment history
-        history = get_assessment_history(st.session_state.company_name)
-        
-        if len(history) > 1:
-            # Show assessment history table
-            st.markdown("#### Assessment History")
-            
-            history_data = []
-            for h in history:
-                history_data.append({
-                    'Date': h['date'],
-                    'Total Score': f"{h['total_score']}/30",
-                    'Percentage': f"{h['percentage']}%",
-                    'Readiness Level': h['readiness_band']
-                })
-            
-            df_history = pd.DataFrame(history_data)
-            st.dataframe(df_history, use_container_width=True, hide_index=True)
-            
-            # Get dimension trends
-            trends = get_dimension_trends(st.session_state.company_name)
-            
-            if trends:
-                st.markdown("#### Dimension Progress Over Time")
-                
-                # Create line chart for dimension trends
-                fig_trends = go.Figure()
-                
-                for dim_id, trend_data in trends.items():
-                    fig_trends.add_trace(go.Scatter(
-                        x=trend_data['dates'],
-                        y=trend_data['scores'],
-                        mode='lines+markers',
-                        name=trend_data['title'],
-                        line=dict(width=2),
-                        marker=dict(size=8)
-                    ))
-                
-                fig_trends.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
-                    yaxis=dict(
-                        title='Score',
-                        range=[0, 5],
-                        gridcolor='rgba(255,255,255,0.2)'
-                    ),
-                    xaxis=dict(
-                        title='Assessment Date',
-                        gridcolor='rgba(255,255,255,0.2)'
-                    ),
-                    legend=dict(
-                        orientation="v",
-                        yanchor="top",
-                        y=1,
-                        xanchor="left",
-                        x=1.02
-                    ),
-                    height=400,
-                    hovermode='x unified'
-                )
-                
-                st.plotly_chart(fig_trends, use_container_width=True)
-                
-                # Show improvement summary
-                st.markdown("#### Progress Summary")
-                col1, col2, col3 = st.columns(3)
-                
-                latest = history[0]
-                oldest = history[-1]
-                total_improvement = latest['total_score'] - oldest['total_score']
-                
-                with col1:
-                    st.metric(
-                        label="Total Assessments",
-                        value=len(history)
-                    )
-                
-                with col2:
-                    st.metric(
-                        label="Score Change",
-                        value=f"{latest['total_score']}/30",
-                        delta=f"{total_improvement:+d} points" if total_improvement != 0 else "No change"
-                    )
-                
-                with col3:
-                    percentage_change = latest['percentage'] - oldest['percentage']
-                    st.metric(
-                        label="Percentage Change",
-                        value=f"{latest['percentage']}%",
-                        delta=f"{percentage_change:+d}%" if percentage_change != 0 else "No change"
-                    )
-        
-        elif len(history) == 1:
-            st.info("📊 Complete more assessments to see your progress over time!")
-        
-        else:
-            st.info("💡 Your assessment history will appear here after completing assessments.")
-    
-    except Exception as e:
-        st.warning(f"Historical tracking unavailable: {str(e)}")
-    
-    # Team Analytics Section
-    st.markdown("---")
-    st.markdown(f"### 👥 Team Analytics", unsafe_allow_html=True)
-    
-    try:
-        team_members = get_team_members(st.session_state.company_name)
-        
-        if team_members and len(team_members) > 0:
-            # Show team members table
-            st.markdown("#### Team Members")
-            
-            team_data = []
-            for member in team_members:
-                team_data.append({
-                    'Name': member['name'],
-                    'Email': member['email'],
-                    'Latest Score': f"{member['latest_score']}/30",
-                    'Percentage': f"{member['latest_percentage']}%",
-                    'Assessments': member['total_assessments'],
-                    'Last Assessment': member['latest_date']
-                })
-            
-            df_team = pd.DataFrame(team_data)
-            st.dataframe(df_team, use_container_width=True, hide_index=True)
-            
-            # Team dimension averages
-            dimension_averages = get_team_dimension_averages(st.session_state.company_name)
-            
-            if dimension_averages:
-                st.markdown("#### Team Dimension Averages")
-                
-                # Create radar chart for team averages
-                categories = [dim['title'] for dim in dimension_averages]
-                values = [dim['average'] for dim in dimension_averages]
-                
-                fig_team = go.Figure()
-                
-                # Add team average
-                fig_team.add_trace(go.Scatterpolar(
-                    r=values,
-                    theta=categories,
-                    fill='toself',
-                    name='Team Average',
-                    line=dict(color=st.session_state.primary_color, width=2),
-                    fillcolor=f"rgba({int(st.session_state.primary_color[1:3], 16)}, {int(st.session_state.primary_color[3:5], 16)}, {int(st.session_state.primary_color[5:7], 16)}, 0.3)"
-                ))
-                
-                # Add industry average benchmark for comparison
-                benchmark_data = get_benchmark_data('Industry Average')
-                benchmark_values = [benchmark_data[dim['id']] for dim in dimension_averages]
-                
-                fig_team.add_trace(go.Scatterpolar(
-                    r=benchmark_values,
-                    theta=categories,
-                    fill='toself',
-                    name='Industry Average',
-                    line=dict(color='#60A5FA', width=2),
-                    fillcolor='rgba(96, 165, 250, 0.2)'
-                ))
-                
-                fig_team.update_layout(
-                    polar=dict(
-                        radialaxis=dict(
-                            visible=True,
-                            range=[0, 5],
-                            gridcolor='rgba(255,255,255,0.2)'
-                        ),
-                        angularaxis=dict(
-                            gridcolor='rgba(255,255,255,0.2)'
-                        )
-                    ),
-                    showlegend=True,
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
-                    height=500
-                )
-                
-                st.plotly_chart(fig_team, use_container_width=True)
-                
-                # Readiness distribution
-                st.markdown("#### Team Readiness Distribution")
-                
-                distribution = get_team_readiness_distribution(st.session_state.company_name)
-                
-                if distribution:
-                    fig_dist = go.Figure(data=[go.Pie(
-                        labels=list(distribution.keys()),
-                        values=list(distribution.values()),
-                        hole=.3,
-                        marker=dict(
-                            colors=['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6']
-                        )
-                    )])
-                    
-                    fig_dist.update_layout(
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='white'),
-                        height=400
-                    )
-                    
-                    st.plotly_chart(fig_dist, use_container_width=True)
-                
-                # Team statistics summary
-                st.markdown("#### Team Summary")
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.metric(
-                        label="Team Members",
-                        value=len(team_members)
-                    )
-                
-                with col2:
-                    team_avg_score = sum([m['latest_score'] for m in team_members]) / len(team_members)
-                    st.metric(
-                        label="Average Team Score",
-                        value=f"{team_avg_score:.1f}/30"
-                    )
-                
-                with col3:
-                    total_assessments = sum([m['total_assessments'] for m in team_members])
-                    st.metric(
-                        label="Total Team Assessments",
-                        value=total_assessments
-                    )
-        
-        else:
-            st.info("💡 Team analytics will appear here when team members complete assessments with their information.")
-    
-    except Exception as e:
-        st.warning(f"Team analytics unavailable: {str(e)}")
     
     # Action buttons
     st.markdown("---")
