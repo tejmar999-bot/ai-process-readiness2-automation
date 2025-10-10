@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
   - Scroll offset: 200px to ensure progress arrows and dimension title are fully visible
   - Scroll executes after progress bar is rendered to avoid timing issues
   - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses
-  - Arrow text color: Black for active segments, gray for inactive (improved readability)
+  - Arrow text color: White for active segments, gray for inactive (optimal contrast with earthy colors)
   - Colored line above dimension counter matches current dimension color
 - **Dimension Display**: "What it Measures" text displayed directly below dimension title in italic gray text
 - **Feedback Collection**: User feedback form on results page with text area and submit button (saves to session state, email integration pending)
