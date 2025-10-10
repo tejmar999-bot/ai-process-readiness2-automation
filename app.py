@@ -634,12 +634,27 @@ def main():
     
     render_header()
     
-    # Auto-scroll to top if flag is set
+    # Auto-scroll to show progress indicators if flag is set
     if st.session_state.should_scroll_to_top:
         components.html(
             """
             <script>
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+                function attemptScroll(retries) {
+                    var progressAnchor = window.parent.document.getElementById('progress-anchor');
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    
+                    if (progressAnchor && mainSection) {
+                        // Scroll to ensure element is visible
+                        var elementPosition = progressAnchor.offsetTop;
+                        var offsetPosition = elementPosition - 50;
+                        mainSection.scrollTop = Math.max(0, offsetPosition);
+                    } else if (retries > 0) {
+                        setTimeout(function() { attemptScroll(retries - 1); }, 100);
+                    } else if (mainSection) {
+                        mainSection.scrollTo(0, 0);
+                    }
+                }
+                setTimeout(function() { attemptScroll(5); }, 100);
             </script>
             """,
             height=0
