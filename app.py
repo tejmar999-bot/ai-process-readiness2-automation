@@ -191,8 +191,8 @@ def render_progress_bar():
     current_dim = st.session_state.current_dimension
     dimension_color = DIMENSIONS[current_dim]['color']
     
-    # Create arrow progress indicator
-    arrows_html = '<div style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
+    # Create arrow progress indicator with scroll anchor
+    arrows_html = '<div id="progress-anchor" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
     
     for i, dimension in enumerate(DIMENSIONS):
         # Determine if this arrow should be lit up
@@ -252,6 +252,7 @@ def render_navigation_buttons():
         if st.session_state.current_dimension > 0:
             if st.button("← Previous", type="secondary"):
                 st.session_state.current_dimension -= 1
+                st.session_state.should_scroll_to_top = True
                 st.rerun()
     
     with col2:
