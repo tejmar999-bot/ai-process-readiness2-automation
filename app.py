@@ -1,7 +1,10 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import base64
+from io import BytesIO
 from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
 from data.dimensions import DIMENSIONS, get_all_questions
@@ -71,6 +74,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def image_to_base64(image):
+    """Convert PIL Image to base64 string"""
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    return img_str
+
 def initialize_session_state():
     """Initialize session state variables"""
     # Initialize database
@@ -102,10 +112,12 @@ def initialize_session_state():
         st.session_state.user_email = ""
     if 'user_info_collected' not in st.session_state:
         st.session_state.user_info_collected = False
+    if 'should_scroll_to_top' not in st.session_state:
+        st.session_state.should_scroll_to_top = False
 
 def render_header():
     """Render the main header with logo and branding"""
-    col1, col2 = st.columns([3, 1])
+    col1, col2 = st.columns([4, 1])
     
     with col1:
         st.markdown(f'<div class="main-header" style="color: {st.session_state.primary_color};">AI-Enabled Process Readiness</div>', unsafe_allow_html=True)
@@ -113,9 +125,18 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            st.image(st.session_state.company_logo, width=200)
+            # Display logo with rectangular styling (no border-radius)
+            st.markdown(
+                f"""
+                <div style="text-align: right; margin-top: 0.5rem;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
+                         style="height: 2.5rem; width: auto; border-radius: 0px;" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         else:
-            st.markdown(f"**{st.session_state.company_name}**", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: right; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
 def render_branding_sidebar():
     """Render branding customization in sidebar"""
@@ -175,27 +196,30 @@ def render_dimension_questions(dimension_idx):
     """Render questions for a specific dimension"""
     dimension = DIMENSIONS[dimension_idx]
     
-    st.markdown(f"""
-    <div class="dimension-card">
-        <h3 style="color: {dimension['color']}; margin-bottom: 1rem;">{dimension['title']}</h3>
-        <p style="color: #9CA3AF; margin-bottom: 1.5rem;">{dimension['description']}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Dimension heading with question mark icon
+    col1, col2 = st.columns([6, 1])
+    with col1:
+        st.markdown(f'<h3 style="color: {dimension["color"]}; margin-bottom: 0;">{dimension["title"]}</h3>', unsafe_allow_html=True)
+    
+    # "What it Measures" expander with question mark icon
+    with st.expander("❓ What it Measures"):
+        st.markdown(f'<p style="color: #9CA3AF;">{dimension["what_it_measures"]}</p>', unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Get scoring labels for this dimension
+    scoring_labels = dimension.get('scoring_labels', {
+        1: "1", 2: "2", 3: "3", 4: "4", 5: "5"
+    })
     
     for i, question in enumerate(dimension['questions']):
         st.markdown(f'<div class="question-text">{i+1}. {question["text"]}</div>', unsafe_allow_html=True)
         
-        # Create rating scale
+        # Create rating scale with dimension-specific labels
         rating = st.radio(
             "Rating",
             options=[1, 2, 3, 4, 5],
-            format_func=lambda x: {
-                1: "1 - Strongly Disagree",
-                2: "2 - Disagree", 
-                3: "3 - Neutral",
-                4: "4 - Agree",
-                5: "5 - Strongly Agree"
-            }[x],
+            format_func=lambda x: f"{x} - {scoring_labels[x]}",
             key=f"q_{question['id']}",
             index=2,  # Default to neutral
             horizontal=True
@@ -228,6 +252,7 @@ def render_navigation_buttons():
         if st.session_state.current_dimension < len(DIMENSIONS) - 1:
             if st.button("Next →", type="primary"):
                 st.session_state.current_dimension += 1
+                st.session_state.should_scroll_to_top = True
                 st.rerun()
         else:
             if st.button("Complete Assessment", type="primary"):
@@ -804,30 +829,47 @@ def main():
     
     render_header()
     
+    # Auto-scroll to top if flag is set
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                window.parent.document.querySelector('section.main').scrollTo(0, 0);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
+    
     if not st.session_state.assessment_complete:
         # Show user info collection form if not yet collected
         if not st.session_state.user_info_collected:
-            st.markdown("### 👤 Your Information (Optional)")
-            st.markdown("Add your details to enable team analytics and track individual progress.")
+            st.markdown("### 👤 Your Information")
+            st.markdown("Please enter your details to begin the assessment.")
             
             col1, col2 = st.columns(2)
             with col1:
-                user_name = st.text_input("Your Name", value=st.session_state.user_name, placeholder="e.g., John Smith")
+                user_name = st.text_input("Name *", value=st.session_state.user_name, placeholder="e.g., John Smith")
             with col2:
-                user_email = st.text_input("Your Email", value=st.session_state.user_email, placeholder="e.g., john@company.com")
+                user_email = st.text_input("Email *", value=st.session_state.user_email, placeholder="e.g., john@company.com")
             
-            col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
-            with col_btn1:
-                if st.button("Continue", type="primary"):
-                    st.session_state.user_name = user_name
-                    st.session_state.user_email = user_email
-                    st.session_state.user_info_collected = True
-                    st.rerun()
+            # Email validation regex
+            import re
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            is_valid_email = bool(re.match(email_pattern, user_email)) if user_email else False
             
-            with col_btn2:
-                if st.button("Skip"):
-                    st.session_state.user_info_collected = True
-                    st.rerun()
+            # Validation messages
+            if user_email and not is_valid_email:
+                st.error("⚠️ Please enter a valid email address")
+            
+            # Continue button - only enabled when both fields filled and email valid
+            can_continue = bool(user_name and user_name.strip()) and is_valid_email
+            
+            if st.button("Continue", type="primary", disabled=not can_continue):
+                st.session_state.user_name = user_name
+                st.session_state.user_email = user_email
+                st.session_state.user_info_collected = True
+                st.rerun()
         
         else:
             # Assessment mode

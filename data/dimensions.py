@@ -16,120 +16,168 @@ DIMENSIONS = [
     {
         'id': 'process',
         'title': 'Process Maturity',
+        'what_it_measures': 'How well-defined, measured, and optimized processes are before applying AI.',
         'description': 'How well defined and measured your processes are.',
         'color': PALETTE[0],
+        'scoring_labels': {
+            1: 'Ad hoc',
+            2: 'Defined',
+            3: 'Measured',
+            4: 'Controlled',
+            5: 'Optimized'
+        },
         'questions': [
             {
                 'id': 'proc_doc',
-                'text': 'Core processes are documented and standardized across teams.'
+                'text': 'Are your processes documented and standardized?'
             },
             {
                 'id': 'proc_metrics',
-                'text': 'Process performance metrics are tracked regularly and reliably.'
+                'text': 'Are performance metrics tracked regularly?'
             },
             {
                 'id': 'proc_variation',
-                'text': 'Process variation is understood and root-causes are identified.'
+                'text': 'Is process variation understood?'
             }
         ]
     },
     {
         'id': 'data',
         'title': 'Data Readiness',
+        'what_it_measures': 'Quality, accessibility, and structure of process data available for AI analysis.',
         'description': 'Quality, accessibility and structure of your data.',
         'color': PALETTE[1],
+        'scoring_labels': {
+            1: 'Mostly manual',
+            2: 'Some digital data',
+            3: 'Structured data in silos',
+            4: 'Integrated systems',
+            5: 'Unified, high-quality data'
+        },
         'questions': [
             {
                 'id': 'data_digitized',
-                'text': 'Process data is digitized and collected consistently.'
+                'text': 'Is process data digitized?'
             },
             {
                 'id': 'data_quality',
-                'text': 'The data is cleaned, documented, and validated.'
+                'text': 'Is data cleaned and integrated?'
             },
             {
                 'id': 'data_access',
-                'text': 'Teams can access historical data for analysis and modelling.'
+                'text': 'Do you have access to historical data for model training?'
             }
         ]
     },
     {
         'id': 'tech',
         'title': 'Technology Infrastructure',
+        'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
         'description': 'Tools and platforms available for analytics and automation.',
         'color': PALETTE[2],
+        'scoring_labels': {
+            1: 'Minimal',
+            2: 'Basic tools',
+            3: 'Analytics in place',
+            4: 'Automation + ML tools',
+            5: 'AI-integrated platforms'
+        },
         'questions': [
             {
                 'id': 'tech_stack',
-                'text': 'Our tech stack supports integrations and APIs.'
+                'text': 'Does your tech stack support APIs, analytics, and automation?'
             },
             {
-                'id': 'analytics',
-                'text': 'Analytics and reporting tools are available to teams.'
+                'id': 'tech_secure',
+                'text': 'Do you have secure cloud or on-prem data systems?'
             },
             {
-                'id': 'experimentation',
-                'text': 'There is an environment for ML experiments or pilots.'
+                'id': 'tech_ml',
+                'text': 'Is there access to AI experimentation environments (e.g., ML tools)?'
             }
         ]
     },
     {
         'id': 'people',
         'title': 'People & Skills',
+        'what_it_measures': 'Workforce awareness, capability, and openness toward AI and digital transformation.',
         'description': 'Workforce capability and understanding of AI and data-driven methods.',
         'color': PALETTE[3],
+        'scoring_labels': {
+            1: 'Unaware',
+            2: 'Skeptical',
+            3: 'Learning',
+            4: 'Engaged',
+            5: 'Proactive AI advocates'
+        },
         'questions': [
             {
-                'id': 'ai_awareness',
-                'text': 'Teams understand basic AI concepts and use-cases.'
+                'id': 'people_understand',
+                'text': 'Do teams understand AI fundamentals?'
             },
             {
-                'id': 'training',
-                'text': 'Training programs are in place for data and AI skills.'
+                'id': 'people_training',
+                'text': 'Are employees trained in data-driven decision-making?'
             },
             {
-                'id': 'roles',
-                'text': 'There are named AI/data translators, champions or SMEs.'
+                'id': 'people_champions',
+                'text': 'Are there AI champions or data translators?'
             }
         ]
     },
     {
         'id': 'leadership',
         'title': 'Leadership & Strategy Alignment',
+        'what_it_measures': 'Executive commitment and strategic clarity for AI adoption.',
         'description': 'Executive commitment and strategic alignment for AI.',
         'color': PALETTE[4],
+        'scoring_labels': {
+            1: 'No alignment',
+            2: 'Conceptual interest',
+            3: 'Pilot discussions',
+            4: 'Clear roadmap',
+            5: 'Fully integrated vision'
+        },
         'questions': [
             {
-                'id': 'strategy',
-                'text': 'AI is explicitly part of the organizational strategy.'
+                'id': 'leadership_strategy',
+                'text': 'Is AI part of your organizational strategy?'
             },
             {
-                'id': 'funding',
-                'text': 'There is allocated funding for pilots and scale-up.'
+                'id': 'leadership_funding',
+                'text': 'Is leadership committed to funding pilots?'
             },
             {
-                'id': 'outcomes',
-                'text': 'AI initiatives are tied to measurable business outcomes.'
+                'id': 'leadership_goals',
+                'text': 'Are goals aligned with business impact?'
             }
         ]
     },
     {
         'id': 'change',
         'title': 'Change Management & Culture',
+        'what_it_measures': "Organizational culture's adaptability to change and innovation.",
         'description': "Organization's openness to experimentation and cross-functional work.",
         'color': PALETTE[5],
+        'scoring_labels': {
+            1: 'Resistant',
+            2: 'Limited openness',
+            3: 'Accepting',
+            4: 'Adaptive',
+            5: 'Agile & innovation-oriented'
+        },
         'questions': [
             {
-                'id': 'psych_safe',
-                'text': 'The culture accepts small experiments and learning from failure.'
+                'id': 'change_experiment',
+                'text': 'How open is your culture to experimenting and learning from failure?'
             },
             {
-                'id': 'collab',
-                'text': 'Cross-functional teams actively collaborate on process work.'
+                'id': 'change_collab',
+                'text': 'Are cross-functional collaborations encouraged?'
             },
             {
-                'id': 'scale',
-                'text': 'There is a framework to scale successful pilots into operations.'
+                'id': 'change_scale',
+                'text': 'Is there a framework for scaling successful pilots?'
             }
         ]
     }
