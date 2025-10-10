@@ -29,7 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Color Palette**: Six-color scheme mapped to assessment dimensions (#FFB068, #C9A3FF, #A7D6FF, #FFC1D6, #FFF08A, #BFFFC4)
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
-- **User Flow**: Mandatory name and email collection on first page with email validation before assessment begins
+- **User Flow**: User information collection on first page with 2 required fields (Name, Email) and 4 optional fields (Title, Company Name, Phone Number, Location). Email validation required before assessment begins. Continue button activates as soon as both required fields are filled.
 - **Navigation**: 
   - Auto-scroll to top when Next button pressed and when assessment completed for better user orientation
   - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses

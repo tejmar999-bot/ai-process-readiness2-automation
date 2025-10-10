@@ -110,6 +110,14 @@ def initialize_session_state():
         st.session_state.user_name = ""
     if 'user_email' not in st.session_state:
         st.session_state.user_email = ""
+    if 'user_title' not in st.session_state:
+        st.session_state.user_title = ""
+    if 'user_company' not in st.session_state:
+        st.session_state.user_company = ""
+    if 'user_phone' not in st.session_state:
+        st.session_state.user_phone = ""
+    if 'user_location' not in st.session_state:
+        st.session_state.user_location = ""
     if 'user_info_collected' not in st.session_state:
         st.session_state.user_info_collected = False
     if 'should_scroll_to_top' not in st.session_state:
@@ -263,6 +271,10 @@ def render_navigation_buttons():
             st.session_state.user_info_collected = False
             st.session_state.user_name = ""
             st.session_state.user_email = ""
+            st.session_state.user_title = ""
+            st.session_state.user_company = ""
+            st.session_state.user_phone = ""
+            st.session_state.user_location = ""
             st.rerun()
     
     with col3:
@@ -667,11 +679,25 @@ def main():
             st.markdown("### 👤 Your Information")
             st.markdown("Please enter your details to begin the assessment.")
             
+            # Required fields
             col1, col2 = st.columns(2)
             with col1:
                 user_name = st.text_input("Name *", value=st.session_state.user_name, placeholder="e.g., John Smith")
             with col2:
                 user_email = st.text_input("Email *", value=st.session_state.user_email, placeholder="e.g., john@company.com")
+            
+            # Optional fields
+            col3, col4 = st.columns(2)
+            with col3:
+                user_title = st.text_input("Title", value=st.session_state.user_title, placeholder="e.g., Director of Operations")
+            with col4:
+                user_company = st.text_input("Company Name", value=st.session_state.user_company, placeholder="e.g., Acme Corp")
+            
+            col5, col6 = st.columns(2)
+            with col5:
+                user_phone = st.text_input("Phone Number", value=st.session_state.user_phone, placeholder="e.g., (555) 123-4567")
+            with col6:
+                user_location = st.text_input("Location", value=st.session_state.user_location, placeholder="e.g., New York, NY")
             
             # Email validation regex
             import re
@@ -682,12 +708,16 @@ def main():
             if user_email and not is_valid_email:
                 st.error("⚠️ Please enter a valid email address")
             
-            # Continue button - only enabled when both fields filled and email valid
+            # Continue button - only enabled when required fields filled and email valid
             can_continue = bool(user_name and user_name.strip()) and is_valid_email
             
             if st.button("Continue", type="primary", disabled=not can_continue):
                 st.session_state.user_name = user_name
                 st.session_state.user_email = user_email
+                st.session_state.user_title = user_title
+                st.session_state.user_company = user_company
+                st.session_state.user_phone = user_phone
+                st.session_state.user_location = user_location
                 st.session_state.user_info_collected = True
                 st.rerun()
         
