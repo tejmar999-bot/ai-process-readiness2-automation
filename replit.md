@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Streamlit-based web application that assesses organizational readiness for AI process implementation. The tool evaluates readiness across six key dimensions through a questionnaire format, then provides visual analytics and scoring to help organizations understand their AI adoption preparedness. Users answer questions rated on a 1-5 scale, and the application generates comprehensive reports including radar charts, dimension breakdowns, actionable recommendations, PDF exports, industry benchmarking, historical progress tracking, and multi-user team analytics.
+This is a Streamlit-based web application that assesses organizational readiness for AI process implementation. The tool evaluates readiness across six key dimensions through a question-format questionnaire, then provides visual analytics and scoring to help organizations understand their AI adoption preparedness. Users answer questions rated on a dimension-specific 1-5 scale with custom labels (e.g., Process Maturity: Ad hoc → Defined → Measured → Controlled → Optimized). The application generates comprehensive reports including radar charts, dimension breakdowns, actionable recommendations, PDF exports, industry benchmarking, historical progress tracking, and multi-user team analytics.
 
 ## User Preferences
 
@@ -28,6 +28,9 @@ Preferred communication style: Simple, everyday language.
 - **Rationale**: Direct CSS injection allows brand-specific styling while maintaining Streamlit's simplicity
 - **Color Palette**: Six-color scheme mapped to assessment dimensions (#FFB068, #C9A3FF, #A7D6FF, #FFC1D6, #FFF08A, #BFFFC4)
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
+- **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
+- **User Flow**: Mandatory name and email collection on first page with email validation before assessment begins
+- **Navigation**: Auto-scroll to top when Next button pressed for better user orientation across dimension pages
 
 ### Backend Architecture
 
@@ -44,12 +47,27 @@ Preferred communication style: Simple, everyday language.
 5. Leadership & Strategy - Organizational direction and commitment
 6. Change Management - Change adoption and support mechanisms
 
+**Question Format**:
+- **Design**: Question-format prompts (e.g., "Are your processes documented and standardized?")
+- **Scoring Labels**: Dimension-specific 1-5 scale labels that reflect maturity progression
+  - Process Maturity: Ad hoc → Defined → Measured → Controlled → Optimized
+  - Data Readiness: Mostly manual → Some digital data → Structured data in silos → Integrated systems → Unified, high-quality data
+  - Technology Infrastructure: Minimal → Basic tools → Analytics in place → Automation + ML tools → AI-integrated platforms
+  - People & Skills: Unaware → Skeptical → Learning → Engaged → Proactive AI advocates
+  - Leadership & Strategy: No alignment → Conceptual interest → Pilot discussions → Clear roadmap → Fully integrated vision
+  - Change Management: Resistant → Limited openness → Accepting → Adaptive → Agile & innovation-oriented
+- **"What it Measures"**: Each dimension includes expandable context accessible via ❓ icon explaining the dimension's purpose
+
 **Scoring Algorithm**:
-- **Input**: 1-5 Likert scale responses per question
+- **Input**: 1-5 scale responses per question with dimension-specific labels
 - **Calculation**: Dimension scores averaged from constituent questions
 - **Total Score Range**: 6-30 (6 dimensions × 1-5 scale)
 - **Percentage Conversion**: Normalized to 0-100% scale using formula: ((total - 6) / (30 - 6)) × 100
-- **Readiness Bands**: Total scores mapped to qualitative readiness levels via `get_readiness_band()` function
+- **Readiness Bands**: 
+  - 0-10: Not Ready (foundational work needed)
+  - 11-17: Emerging (pilot-level readiness)
+  - 18-24: Ready (scaled AI use)
+  - 25-30: Advanced (AI-ready culture and infrastructure)
 
 **State Management**: Streamlit session state
 - **Rationale**: Built-in session state eliminates need for external state management
