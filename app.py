@@ -7,6 +7,13 @@ from utils.scoring import compute_scores, get_readiness_band
 from data.dimensions import DIMENSIONS, get_all_questions
 from utils.pdf_generator import generate_pdf_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
+from db.operations import (
+    ensure_tables_exist, 
+    save_assessment, 
+    get_assessment_history,
+    get_dimension_trends,
+    get_team_statistics
+)
 
 # Page configuration
 st.set_page_config(
@@ -63,12 +70,18 @@ st.markdown("""
 
 def initialize_session_state():
     """Initialize session state variables"""
+    # Initialize database
+    if 'db_initialized' not in st.session_state:
+        st.session_state.db_initialized = ensure_tables_exist()
+    
     if 'answers' not in st.session_state:
         st.session_state.answers = {}
     if 'current_dimension' not in st.session_state:
         st.session_state.current_dimension = 0
     if 'assessment_complete' not in st.session_state:
         st.session_state.assessment_complete = False
+    if 'current_assessment_id' not in st.session_state:
+        st.session_state.current_assessment_id = None
     if 'company_logo' not in st.session_state:
         # Load default T-Logic logo
         try:
@@ -206,6 +219,21 @@ def render_navigation_buttons():
                 st.rerun()
         else:
             if st.button("Complete Assessment", type="primary"):
+                # Calculate scores
+                scores_data = compute_scores(st.session_state.answers)
+                
+                # Save to database
+                try:
+                    assessment = save_assessment(
+                        company_name=st.session_state.company_name,
+                        scores_data=scores_data,
+                        answers=st.session_state.answers,
+                        primary_color=st.session_state.primary_color
+                    )
+                    st.session_state.current_assessment_id = assessment.id
+                except Exception as e:
+                    st.error(f"Error saving assessment: {str(e)}")
+                
                 st.session_state.assessment_complete = True
                 st.rerun()
 
@@ -458,6 +486,113 @@ def render_results_dashboard():
     
     df_comparison = pd.DataFrame(comparison_data)
     st.dataframe(df_comparison, use_container_width=True, hide_index=True)
+    
+    # Historical Tracking Section
+    st.markdown("---")
+    st.markdown(f"### 📈 Historical Progress Tracking", unsafe_allow_html=True)
+    
+    try:
+        # Get assessment history
+        history = get_assessment_history(st.session_state.company_name)
+        
+        if len(history) > 1:
+            # Show assessment history table
+            st.markdown("#### Assessment History")
+            
+            history_data = []
+            for h in history:
+                history_data.append({
+                    'Date': h['date'],
+                    'Total Score': f"{h['total_score']}/30",
+                    'Percentage': f"{h['percentage']}%",
+                    'Readiness Level': h['readiness_band']
+                })
+            
+            df_history = pd.DataFrame(history_data)
+            st.dataframe(df_history, use_container_width=True, hide_index=True)
+            
+            # Get dimension trends
+            trends = get_dimension_trends(st.session_state.company_name)
+            
+            if trends:
+                st.markdown("#### Dimension Progress Over Time")
+                
+                # Create line chart for dimension trends
+                fig_trends = go.Figure()
+                
+                for dim_id, trend_data in trends.items():
+                    fig_trends.add_trace(go.Scatter(
+                        x=trend_data['dates'],
+                        y=trend_data['scores'],
+                        mode='lines+markers',
+                        name=trend_data['title'],
+                        line=dict(width=2),
+                        marker=dict(size=8)
+                    ))
+                
+                fig_trends.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    yaxis=dict(
+                        title='Score',
+                        range=[0, 5],
+                        gridcolor='rgba(255,255,255,0.2)'
+                    ),
+                    xaxis=dict(
+                        title='Assessment Date',
+                        gridcolor='rgba(255,255,255,0.2)'
+                    ),
+                    legend=dict(
+                        orientation="v",
+                        yanchor="top",
+                        y=1,
+                        xanchor="left",
+                        x=1.02
+                    ),
+                    height=400,
+                    hovermode='x unified'
+                )
+                
+                st.plotly_chart(fig_trends, use_container_width=True)
+                
+                # Show improvement summary
+                st.markdown("#### Progress Summary")
+                col1, col2, col3 = st.columns(3)
+                
+                latest = history[0]
+                oldest = history[-1]
+                total_improvement = latest['total_score'] - oldest['total_score']
+                
+                with col1:
+                    st.metric(
+                        label="Total Assessments",
+                        value=len(history)
+                    )
+                
+                with col2:
+                    st.metric(
+                        label="Score Change",
+                        value=f"{latest['total_score']}/30",
+                        delta=f"{total_improvement:+d} points" if total_improvement != 0 else "No change"
+                    )
+                
+                with col3:
+                    percentage_change = latest['percentage'] - oldest['percentage']
+                    st.metric(
+                        label="Percentage Change",
+                        value=f"{latest['percentage']}%",
+                        delta=f"{percentage_change:+d}%" if percentage_change != 0 else "No change"
+                    )
+        
+        elif len(history) == 1:
+            st.info("📊 Complete more assessments to see your progress over time!")
+        
+        else:
+            st.info("💡 Your assessment history will appear here after completing assessments.")
+    
+    except Exception as e:
+        st.warning(f"Historical tracking unavailable: {str(e)}")
     
     # Action buttons
     st.markdown("---")
