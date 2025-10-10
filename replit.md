@@ -26,7 +26,13 @@ Preferred communication style: Simple, everyday language.
 
 **Styling Approach**: Custom CSS embedded in Streamlit
 - **Rationale**: Direct CSS injection allows brand-specific styling while maintaining Streamlit's simplicity
-- **Color Palette**: Six-color scheme mapped to assessment dimensions (#FFB068, #C9A3FF, #A7D6FF, #FFC1D6, #FFF08A, #BFFFC4)
+- **Color Palette**: Green/Blue/Brown scheme mapped to assessment dimensions
+  - Process Maturity: #2D6A4F (Forest Green)
+  - Data Readiness: #1B9AAA (Teal Blue)
+  - Technology Infrastructure: #2C5F8D (Deep Blue)
+  - People & Skills: #8B6F47 (Warm Brown)
+  - Leadership & Strategy: #7A5C3D (Earth Brown)
+  - Change Management: #52B788 (Sea Green)
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
 - **User Flow**: User information collection on first page with 2 required fields (Name, Email) and 4 optional fields (Title, Company Name, Phone Number, Location). Email validation required before assessment begins. Continue button activates as soon as both required fields are filled.
