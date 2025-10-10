@@ -200,13 +200,16 @@ def render_progress_bar():
     dimension_color = DIMENSIONS[current_dim]['color']
     
     # Create arrow progress indicator with scroll anchor
-    arrows_html = '<div id="progress-anchor" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
+    # Add timestamp to force re-rendering
+    import time
+    timestamp = int(time.time() * 1000)
+    arrows_html = f'<div id="progress-anchor" data-render="{timestamp}" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
     
     for i, dimension in enumerate(DIMENSIONS):
         # Determine if this arrow should be lit up
         is_active = i <= current_dim
         arrow_color = dimension['color'] if is_active else '#374151'
-        text_color = '#FFFFFF' if is_active else '#6B7280'
+        text_color = '#000000' if is_active else '#6B7280'
         margin_left = '-15px' if i > 0 else '0'
         z_index = len(DIMENSIONS) - i
         
