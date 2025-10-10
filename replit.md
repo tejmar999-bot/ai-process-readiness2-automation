@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Streamlit-based web application that assesses organizational readiness for AI process implementation. The tool evaluates readiness across six key dimensions through a question-format questionnaire, then provides visual analytics and scoring to help organizations understand their AI adoption preparedness. Users answer questions rated on a dimension-specific 1-5 scale with custom labels (e.g., Process Maturity: Ad hoc → Defined → Measured → Controlled → Optimized). The application generates comprehensive reports including radar charts, dimension breakdowns, actionable recommendations, PDF exports, industry benchmarking, historical progress tracking, and multi-user team analytics.
+This is a Streamlit-based web application that assesses organizational readiness for AI process implementation. The tool evaluates readiness across six key dimensions through a question-format questionnaire, then provides visual analytics and scoring to help organizations understand their AI adoption preparedness. Users answer questions rated on a dimension-specific 1-5 scale with custom labels (e.g., Process Maturity: Ad hoc → Defined → Measured → Controlled → Optimized). The application generates comprehensive reports including radar charts, dimension breakdowns, scoring model visualization, actionable recommendations, PDF exports, and industry benchmarking.
 
 ## User Preferences
 
@@ -30,7 +30,11 @@ Preferred communication style: Simple, everyday language.
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
 - **User Flow**: Mandatory name and email collection on first page with email validation before assessment begins
-- **Navigation**: Auto-scroll to top when Next button pressed for better user orientation across dimension pages
+- **Navigation**: 
+  - Auto-scroll to top when Next button pressed and when assessment completed for better user orientation
+  - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses
+  - Colored line above dimension counter matches current dimension color
+- **Dimension Display**: "What it Measures" text displayed directly below dimension title in italic gray text
 
 ### Backend Architecture
 
@@ -103,6 +107,18 @@ Preferred communication style: Simple, everyday language.
 - **Text Export**: Plain text format with scores and readiness summary
 - **Use Case**: Downloadable assessment reports for stakeholder sharing and documentation
 
+### Results Display
+
+**Scoring Model Table**: Interactive readiness level visualization
+- **Table Structure**: 3-column table (Score Range, Readiness Level, Meaning)
+- **Readiness Bands**:
+  - 0-10: 🟥 Not Ready - Foundational work needed
+  - 11-17: 🟧 Emerging - Pilot-level readiness
+  - 18-24: 🟨 Ready - Scaled AI use readiness
+  - 25-30: 🟩 Advanced - AI-ready culture and infrastructure
+- **Visual Highlighting**: User's readiness level highlighted with 3px border in primary brand color and bold text
+- **Dynamic Display**: Table shown immediately below score cards on results page
+
 ### Branding Customization
 
 **Company Branding**: Personalized assessment experience
@@ -124,26 +140,6 @@ Preferred communication style: Simple, everyday language.
 - **Comparison Metrics**: Dimension-by-dimension comparison showing gaps and strengths
 - **Visual Indicators**: Color-coded status (Below/At/Above benchmark)
 - **ID-Based Matching**: Reliable dimension matching using dimension IDs ('process', 'data', 'tech', 'people', 'leadership', 'change')
-
-### Historical Tracking
-
-**Progress Monitoring**: Track readiness improvement over time
-- **Assessment History**: Table showing all past assessments with dates, scores, and readiness levels
-- **Dimension Trends**: Line chart visualizing score changes across all six dimensions over time
-- **Progress Summary**: Metrics showing total assessments, score change, and percentage improvement
-- **Organization Scoping**: History filtered by company/organization for accurate tracking
-- **Database Persistence**: All assessments stored in PostgreSQL for long-term historical analysis
-
-### Multi-User Team Analytics
-
-**Team Collaboration**: Support for multiple users from the same organization
-- **User Profiles**: Optional name and email collection at assessment start
-- **Team Members Table**: Display all team members with their latest scores and assessment counts
-- **Team Dimension Averages**: Radar chart comparing team average scores to industry benchmarks
-- **Readiness Distribution**: Pie chart showing distribution of readiness levels across team
-- **Team Summary**: Aggregate metrics including team size, average score, and total assessments
-- **Organization Linking**: All users and assessments linked to organization for proper team aggregation
-- **Database Schema**: Users table with organization_id foreign key, assessments with optional user_id
 
 ## External Dependencies
 
