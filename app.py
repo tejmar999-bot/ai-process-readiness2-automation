@@ -39,9 +39,11 @@ st.markdown("""
     margin-bottom: 0.5rem;
 }
 .sub-header {
-    color: #9CA3AF;
-    font-size: 1rem;
+    color: #D1D5DB;
+    font-size: 1.15rem;
+    font-weight: 500;
     margin-bottom: 2rem;
+    letter-spacing: 0.01em;
 }
 .dimension-card {
     background-color: #374151;
