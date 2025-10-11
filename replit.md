@@ -26,13 +26,9 @@ Preferred communication style: Simple, everyday language.
 
 **Styling Approach**: Custom CSS embedded in Streamlit
 - **Rationale**: Direct CSS injection allows brand-specific styling while maintaining Streamlit's simplicity
-- **Color Palette**: Green/Blue/Brown scheme mapped to assessment dimensions
-  - Process Maturity: #2D6A4F (Forest Green)
-  - Data Readiness: #1B9AAA (Teal Blue)
-  - Technology Infrastructure: #2C5F8D (Deep Blue)
-  - People & Skills: #8B6F47 (Warm Brown)
-  - Leadership & Strategy: #7A5C3D (Earth Brown)
-  - Change Management: #52B788 (Sea Green)
+- **Color Palette**: Green/Blue/Brown scheme with bright variants for titles
+  - Progress Arrows (Dark): #2D6A4F, #1B9AAA, #2C5F8D, #8B6F47, #7A5C3D, #52B788
+  - Dimension Titles (Bright): #4ADE80 (Bright Green), #22D3EE (Bright Cyan), #60A5FA (Bright Blue), #F59E0B (Bright Amber), #D97706 (Bright Orange), #34D399 (Bright Emerald)
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
 - **User Flow**: User information collection on first page with 2 required fields (Name, Email) and 4 optional fields (Title, Company Name, Phone Number, Location). Email validation required before assessment begins. Continue button activates as soon as both required fields are filled.
@@ -44,10 +40,13 @@ Preferred communication style: Simple, everyday language.
   - Arrow text color: White for active segments, gray for inactive (optimal contrast with earthy colors)
   - Colored line above dimension counter matches current dimension color
 - **Sticky Header on Dimension Pages**: 
-  - Header stays locked at top (position: sticky) while scrolling through questions
-  - Contains: colored line, progress arrows, "Dimension X of 6" counter, dimension title, and "What it Measures" description
-  - Background color #1F2937 matches app theme for seamless sticky effect
-  - Z-index 999 ensures header stays above content
+  - Header stays locked at top (position: -webkit-sticky/sticky, top: -1px) while scrolling through questions
+  - Contains: colored line (4px), progress arrows (fixed width 160px), "Dimension X of 6" counter, dimension title, and "What it Measures" description
+  - Background color #1F2937 with box-shadow for depth
+  - Z-index 1000 ensures header stays above content
+  - Dimension title: 2rem font, bold (700 weight), bright colors from BRIGHT_PALETTE for visibility against dark background
+  - "What it Measures" text: 1.05rem font, #D1D5DB color for improved readability
+  - Progress arrows: Fixed width (160px/140px min) with text wrapping enabled for uniform appearance
 - **Auto-Scroll to Next Question**:
   - When user answers a question, page smoothly scrolls to next question automatically
   - Uses on_change callback to detect when answer is selected (prevents unwanted scroll on page load)
