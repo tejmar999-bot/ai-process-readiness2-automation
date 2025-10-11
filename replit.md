@@ -26,9 +26,14 @@ Preferred communication style: Simple, everyday language.
 
 **Styling Approach**: Custom CSS embedded in Streamlit
 - **Rationale**: Direct CSS injection allows brand-specific styling while maintaining Streamlit's simplicity
-- **Color Palette**: Green/Blue/Brown scheme with bright variants for titles
-  - Progress Arrows (Dark): #2D6A4F, #1B9AAA, #2C5F8D, #8B6F47, #7A5C3D, #52B788
-  - Dimension Titles (Bright): #4ADE80 (Bright Green), #22D3EE (Bright Cyan), #60A5FA (Bright Blue), #F59E0B (Bright Amber), #D97706 (Bright Orange), #34D399 (Bright Emerald)
+- **Color Palette**: Distinct pastel colors for all dimensions
+  - Process Maturity: #A8E6CF (Pastel Mint Green)
+  - Data Readiness: #C7CEEA (Pastel Lavender)
+  - Technology Infrastructure: #B4D4FF (Pastel Sky Blue)
+  - People & Skills: #FFCBA4 (Pastel Peach)
+  - Leadership & Strategy: #FFE5A0 (Pastel Yellow)
+  - Change Management: #FFAEC9 (Pastel Rose)
+  - All colors are distinct and easily distinguishable
 - **Design Pattern**: Card-based layouts with left-border dimension indicators
 - **Logo Display**: Company logo rendered in top-right corner at 2.5rem height with rectangular shape (no border-radius)
 - **User Flow**: User information collection on first page with 2 required fields (Name, Email) and 4 optional fields (Title, Company Name, Phone Number, Location). Email validation required before assessment begins. Continue button activates as soon as both required fields are filled.
@@ -39,14 +44,16 @@ Preferred communication style: Simple, everyday language.
   - Progress indicator: 6 connected arrow segments that light up in dimension colors as user progresses
   - Arrow text color: White for active segments, gray for inactive (optimal contrast with earthy colors)
   - Colored line above dimension counter matches current dimension color
-- **Sticky Header on Dimension Pages**: 
-  - Header stays locked at top (position: -webkit-sticky/sticky, top: -1px) while scrolling through questions
+- **Fixed Header on Dimension Pages**: 
+  - Header is FIXED to viewport top (position: fixed, top: 0) and stays visible while scrolling
   - Contains: colored line (4px), progress arrows (fixed width 160px), "Dimension X of 6" counter, dimension title, and "What it Measures" description
   - Background color #1F2937 with box-shadow for depth
-  - Z-index 1000 ensures header stays above content
-  - Dimension title: 2rem font, bold (700 weight), bright colors from BRIGHT_PALETTE for visibility against dark background
-  - "What it Measures" text: 1.05rem font, #D1D5DB color for improved readability
-  - Progress arrows: Fixed width (160px/140px min) with text wrapping enabled for uniform appearance
+  - Z-index 9999 ensures header stays above all content
+  - Streamlit header hidden on dimension pages for clean appearance
+  - Content margin-top: 300px prevents overlap with fixed header
+  - Dimension title: 2rem font, bold (700 weight), pastel colors for visibility
+  - "What it Measures" text: 1.05rem font, #D1D5DB color for readability
+  - Progress arrows: Fixed width (160px/140px min) with text wrapping, white text on pastel backgrounds
 - **Auto-Scroll to Next Question**:
   - When user answers a question, page smoothly scrolls to next question automatically
   - Uses on_change callback to detect when answer is selected (prevents unwanted scroll on page load)
