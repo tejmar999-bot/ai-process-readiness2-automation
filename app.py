@@ -299,27 +299,33 @@ def render_progress_bar():
         unsafe_allow_html=True
     )
     
-    # Auto-scroll to top if flag is set (for Next button and page transitions)
+    # Auto-scroll to first question if flag is set (for Next button and page transitions)
     if st.session_state.should_scroll_to_top:
         components.html(
             """
             <script>
-                function scrollToTop(retries) {
+                function scrollToFirstQuestion(retries) {
                     var mainSection = window.parent.document.querySelector('section.main');
-                    var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                    var firstQuestion = window.parent.document.querySelector('#question-0');
                     
-                    if (mainSection) {
-                        // Scroll to absolute top
+                    if (mainSection && firstQuestion) {
+                        // Get the position of the first question
+                        var questionRect = firstQuestion.getBoundingClientRect();
+                        var mainRect = mainSection.getBoundingClientRect();
+                        var scrollTop = mainSection.scrollTop;
+                        
+                        // Calculate scroll position: question position + current scroll - some offset for visibility
+                        var targetScroll = scrollTop + questionRect.top - mainRect.top - 20;
+                        
                         mainSection.scrollTo({
-                            top: 0,
+                            top: targetScroll,
                             behavior: 'smooth'
                         });
-                        mainSection.scrollTop = 0;
                     } else if (retries > 0) {
-                        setTimeout(function() { scrollToTop(retries - 1); }, 100);
+                        setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
                     }
                 }
-                setTimeout(function() { scrollToTop(10); }, 150);
+                setTimeout(function() { scrollToFirstQuestion(10); }, 150);
             </script>
             """,
             height=0
@@ -545,7 +551,7 @@ def render_results_dashboard():
         <div class="score-card">
             <h3 style="color: {primary_color};">Total Score</h3>
             <div style="font-size: 2rem; font-weight: bold;">{total_score}/30</div>
-            <div style="color: #9CA3AF;">({percentage}%)</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #9CA3AF;">({percentage}%)</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -593,24 +599,44 @@ def render_results_dashboard():
         {"range": "25-30", "level": "🟩 Advanced", "meaning": "AI-ready culture and infrastructure for sustainable transformation", "min": 25, "max": 30}
     ]
     
-    # Create table HTML with proper alignment - single line format to avoid rendering issues
-    table_html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563; vertical-align: middle;">Meaning</th></tr></thead><tbody>'
+    # Create table with clean, properly aligned cells
+    # Map emoji colors to their hex equivalents for CSS squares
+    color_map = {
+        "🟥 Not Ready": ("#DC2626", "Not Ready"),
+        "🟧 Emerging": ("#F97316", "Emerging"),
+        "🟨 Ready": ("#EAB308", "Ready"),
+        "🟩 Advanced": ("#16A34A", "Advanced")
+    }
     
+    # Build table rows
+    table_rows = ""
     for row in scoring_model:
-        # Check if this is the user's readiness level
         is_current = row['min'] <= total_score <= row['max']
-        # Use consistent border width to prevent misalignment
-        border_style = 'border: 1px solid #4B5563;'
-        # Add box-shadow for highlighting instead of thicker border
+        bg_color = '#1F2937' if is_current else '#111827'
         box_shadow = f'box-shadow: inset 0 0 0 2px {primary_color};' if is_current else ''
-        bg_color = 'background-color: #1F2937;' if is_current else 'background-color: #111827;'
         font_weight = 'bold' if is_current else 'normal'
         
-        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
+        color_hex, level_text = color_map[row["level"]]
+        
+        table_rows += f'<tr style="background-color: {bg_color};"><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;"><span style="display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: middle; background-color: {color_hex};"></span>{level_text}</td><td style="padding: 1rem; text-align: left; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
     
-    table_html += '</tbody></table>'
+    # Complete table HTML
+    table_html = f'<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563; vertical-align: middle;">Meaning</th></tr></thead><tbody>{table_rows}</tbody></table>'
     
     st.markdown(table_html, unsafe_allow_html=True)
+    
+    # Add "See Recommended Actions" button at bottom center of Scoring Model
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; margin-top: 1rem; margin-bottom: 2rem;">
+            <a href="#recommended-actions" style="text-decoration: none;">
+                <button style="background-color: #ADD8E6; color: #000000; padding: 0.75rem 2rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s;">
+                    See Recommended Actions
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Radar chart
     st.markdown("### Dimension Breakdown")
@@ -633,10 +659,31 @@ def render_results_dashboard():
             """, unsafe_allow_html=True)
         
         with col2:
+            # Map scores to labels
+            score_labels = {
+                1: "Weak",
+                2: "Needs Work",
+                3: "Average",
+                4: "Good",
+                5: "Excellent"
+            }
+            score = score_data['score']
+            label = score_labels.get(score, "Average")
+            percentage = (score / 5) * 100
+            
+            # Adjust font size based on label length to fit in oval
+            font_size = "0.7rem" if len(label) > 8 else "0.8rem"
+            
             st.markdown(f"""
             <div style="text-align: center; padding: 1rem;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: {dimension['color']};">
                     {score_data['score']}/5
+                </div>
+                <div style="color: #9CA3AF; font-size: 0.9rem; margin-top: 0.25rem;">
+                    ({percentage:.0f}%)
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <span style="display: inline-block; background-color: #D4C5B9; color: #000000; padding: 0.4rem 1rem; border-radius: 50px; min-width: 100px; font-size: {font_size}; font-weight: 600;">{label}</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
