@@ -24,7 +24,7 @@ PostgreSQL is the chosen database, managed via SQLAlchemy ORM. It stores organiz
 -   **Industry Benchmarking**: Compares organizational readiness against various industry benchmarks (e.g., Small Business, Enterprise, Technology Leaders) with visual indicators.
 -   **Recommended Actions**: Provides holistic, insightful analysis of each dimension with acknowledgment of strengths and weaknesses, specific bullet-point recommendations, and a soft plug for complimentary 45-minute consultation regardless of score.
 -   **Request Assistance**: A feature on the results page allows users to request professional support from T-Logic.
--   **Navigation**: Includes auto-scrolling, a progress indicator, and a home button on the results page to reset the assessment.
+-   **Navigation**: Includes auto-scrolling, a progress indicator, a home button on the results page to reset the assessment, and a "See Recommendations" button above the scoring table that scrolls to the Recommended Actions section.
 
 ## External Dependencies
 
