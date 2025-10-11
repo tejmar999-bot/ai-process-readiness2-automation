@@ -569,6 +569,20 @@ def render_results_dashboard():
     
     # Scoring Model Table
     st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Add "See Recommendations" button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <a href="#recommended-actions" style="text-decoration: none;">
+                <button style="background-color: {primary_color}; color: white; padding: 0.75rem 2rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s;">
+                    👇 See Recommendations
+                </button>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+    
     st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-bottom: 1rem;">📊 Scoring Model</h3>', unsafe_allow_html=True)
     
     # Define scoring model data
@@ -755,7 +769,7 @@ def render_results_dashboard():
     
     # Recommended Actions Section
     st.markdown("---")
-    st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
+    st.markdown(f'<h3 id="recommended-actions" style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
     st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey.</p>', unsafe_allow_html=True)
     
     # Analyze each dimension holistically
