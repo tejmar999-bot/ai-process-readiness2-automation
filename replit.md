@@ -3,6 +3,14 @@
 ## Overview
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
+## Recent Changes (October 11, 2025)
+-   **Next Button Scroll Enhancement**: Fixed Next button to scroll to first visible question (#question-0) accounting for sticky header, preventing questions from being hidden
+-   **Total Score Display**: Enhanced Total Score card with 2rem bold percentage font (matching score number size) for improved visibility
+-   **Table Alignment Fix**: Replaced emoji readiness indicators with CSS-based colored squares for consistent cross-browser alignment in Scoring Model table
+-   **Navigation Button**: Added light blue (#ADD8E6) "See Recommended Actions" button below Scoring Model table with bold black text for easy navigation
+-   **Score Labels**: Added beige oval labels (Weak/Needs Work/Average/Good/Excellent) with #D4C5B9 background, 50px border-radius, and 100px min-width in Detailed Scores section
+-   **Percentage Display**: Added percentage values (20%, 40%, 60%, 80%, 100%) below numerical scores in Detailed Scores section
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
