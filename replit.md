@@ -22,7 +22,7 @@ PostgreSQL is the chosen database, managed via SQLAlchemy ORM. It stores organiz
 -   **Results Display**: Presents an interactive scoring model table that visually highlights the user's readiness level.
 -   **Branding Customization**: Allows users to upload a custom logo, set a primary brand color for UI theming, and define the company name, all persistent via session state.
 -   **Industry Benchmarking**: Compares organizational readiness against various industry benchmarks (e.g., Small Business, Enterprise, Technology Leaders) with visual indicators.
--   **Recommended Actions**: Provides personalized, actionable recommendations for low-scoring areas, grouped by dimension with clear calls to action.
+-   **Recommended Actions**: Provides holistic, insightful analysis of each dimension with acknowledgment of strengths and weaknesses, specific bullet-point recommendations, and a soft plug for complimentary 45-minute consultation regardless of score.
 -   **Request Assistance**: A feature on the results page allows users to request professional support from T-Logic.
 -   **Navigation**: Includes auto-scrolling, a progress indicator, and a home button on the results page to reset the assessment.
 

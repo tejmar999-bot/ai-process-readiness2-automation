@@ -756,68 +756,130 @@ def render_results_dashboard():
     # Recommended Actions Section
     st.markdown("---")
     st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Based on your assessment, here are specific areas where focused improvement could accelerate your AI readiness.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey.</p>', unsafe_allow_html=True)
     
-    # Collect low-scoring questions (≤3)
-    low_scoring_items = []
+    # Analyze each dimension holistically
+    dimension_analyses = []
+    
     for dim_idx, dimension in enumerate(DIMENSIONS):
+        # Calculate dimension average score
+        dim_scores = []
         for question in dimension['questions']:
             score = st.session_state.answers.get(question['id'], 3)
-            if score <= 3:
-                answer_choices = question.get('answer_choices', dimension.get('scoring_labels', {}))
-                current_level = answer_choices.get(score, str(score))
-                low_scoring_items.append({
-                    'dimension': dimension['title'],
-                    'dimension_color': dimension['color'],
-                    'question': question['text'],
-                    'score': score,
-                    'current_level': current_level,
-                    'dimension_id': dimension['id']
-                })
-    
-    if low_scoring_items:
-        # Group by dimension
-        from itertools import groupby
-        low_scoring_items.sort(key=lambda x: x['dimension'])
+            dim_scores.append(score)
         
-        for dimension_name, items_iter in groupby(low_scoring_items, key=lambda x: x['dimension']):
-            items = list(items_iter)
-            dimension_color = items[0]['dimension_color']
-            
+        avg_score = sum(dim_scores) / len(dim_scores) if dim_scores else 0
+        
+        # Count strengths (4-5) and weaknesses (1-3)
+        strengths = [s for s in dim_scores if s >= 4]
+        weaknesses = [s for s in dim_scores if s <= 3]
+        
+        dimension_analyses.append({
+            'dimension': dimension,
+            'avg_score': avg_score,
+            'strengths_count': len(strengths),
+            'weaknesses_count': len(weaknesses),
+            'total_questions': len(dim_scores)
+        })
+    
+    # Generate holistic recommendations for each dimension
+    for analysis in dimension_analyses:
+        dimension = analysis['dimension']
+        avg_score = analysis['avg_score']
+        strengths_count = analysis['strengths_count']
+        weaknesses_count = analysis['weaknesses_count']
+        total = analysis['total_questions']
+        
+        # Determine insight based on score distribution
+        if avg_score >= 4.0:
+            insight = f"🌟 **Strong Foundation:** Your {dimension['title'].lower()} shows excellent maturity with {strengths_count}/{total} areas rated highly. This dimension is a key strength that can serve as a foundation for AI implementation."
+        elif avg_score >= 3.0:
+            insight = f"✅ **Solid Progress:** Your {dimension['title'].lower()} demonstrates good progress with {strengths_count} strong area(s) and {weaknesses_count} area(s) needing attention. Building on your strengths while addressing gaps will accelerate readiness."
+        else:
+            insight = f"📈 **Growth Opportunity:** Your {dimension['title'].lower()} presents a significant opportunity for improvement. With focused attention on {weaknesses_count} key area(s), you can build the foundation needed for successful AI adoption."
+        
+        # Dimension-specific recommendations
+        recommendations_map = {
+            'process': [
+                "Document and standardize critical business processes with clear workflows and performance metrics",
+                "Implement regular process monitoring and variation analysis to identify optimization opportunities",
+                "Establish a continuous improvement culture with data-driven decision making",
+                "Create process maps that highlight where AI could deliver the most impact"
+            ],
+            'data': [
+                "Digitize manual data collection processes and eliminate paper-based workflows",
+                "Implement data quality frameworks including cleaning, validation, and integration protocols",
+                "Build historical data repositories with proper governance and accessibility controls",
+                "Ensure data is structured and labeled appropriately for AI model training",
+                "Address any data silos by creating unified data access layers"
+            ],
+            'tech': [
+                "Develop API-first infrastructure to enable seamless AI integration",
+                "Invest in secure cloud or hybrid systems with scalability in mind",
+                "Establish AI experimentation platforms or sandboxes for safe testing",
+                "Ensure robust cybersecurity measures are in place before AI deployment",
+                "Evaluate and select AI/ML platforms aligned with your use cases"
+            ],
+            'people': [
+                "Launch AI literacy and awareness programs across all organizational levels",
+                "Provide hands-on training in data-driven decision making and AI tools",
+                "Identify and empower AI champions who can drive adoption within teams",
+                "Create cross-functional teams to bridge technical and business expertise",
+                "Develop clear career paths that reward AI skill development"
+            ],
+            'leadership': [
+                "Integrate AI into strategic planning with clear business objectives and ROI expectations",
+                "Secure executive sponsorship and dedicated funding for AI pilots and initiatives",
+                "Align AI goals with measurable business outcomes and KPIs",
+                "Establish governance frameworks for ethical AI use and risk management",
+                "Communicate a compelling AI vision that connects to organizational mission"
+            ],
+            'change': [
+                "Foster a culture of experimentation where failure is treated as a learning opportunity",
+                "Encourage cross-functional collaboration to break down departmental barriers",
+                "Develop frameworks for scaling successful AI pilots across the organization",
+                "Create feedback loops to continuously refine AI initiatives based on results",
+                "Build change management capacity to support AI-driven transformations"
+            ]
+        }
+        
+        recommendations = recommendations_map.get(dimension['id'], ["Focus on building foundational capabilities in this area."])
+        
+        # Display dimension analysis card
+        st.markdown(f"""
+        <div style="background-color: #374151; border-left: 4px solid {dimension['color']}; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem;">
+            <h4 style="color: {dimension['color']}; margin-bottom: 1rem;">📌 {dimension['title']}</h4>
+            <p style="color: #E5E7EB; line-height: 1.6; margin-bottom: 1rem;">{insight}</p>
+            <p style="color: #D1D5DB; margin-bottom: 0.5rem;"><strong>Specific Recommendations:</strong></p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display recommendations as bullet points
+        for rec in recommendations:
             st.markdown(f"""
-            <div style="background-color: #374151; border-left: 4px solid {dimension_color}; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem;">
-                <h4 style="color: {dimension_color}; margin-bottom: 0.5rem;">📌 {dimension_name}</h4>
-            """, unsafe_allow_html=True)
-            
-            for item in items:
-                st.markdown(f"""
-                <div style="margin-left: 1rem; margin-bottom: 0.75rem;">
-                    <p style="color: #E5E7EB; margin-bottom: 0.25rem;"><strong>→ {item['question']}</strong></p>
-                    <p style="color: #9CA3AF; font-size: 0.9rem; margin-bottom: 0.5rem;">Current: {item['current_level']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            # Add dimension-specific recommendations
-            recommendations = {
-                'process': "Consider documenting key processes, establishing regular metrics tracking, and analyzing process variations to build a foundation for AI-driven optimization.",
-                'data': "Focus on digitizing manual processes, improving data quality through cleaning and integration, and building historical data repositories for AI model training.",
-                'tech': "Invest in API-enabled infrastructure, secure cloud or on-premise systems, and AI experimentation platforms to support future AI deployments.",
-                'people': "Develop AI awareness programs, provide data-driven decision-making training, and identify AI champions within your organization.",
-                'leadership': "Integrate AI into your organizational strategy, secure leadership commitment and funding for pilots, and align AI goals with business impact metrics.",
-                'change': "Foster a culture of experimentation and learning from failure, encourage cross-functional collaboration, and establish frameworks for scaling successful pilots."
-            }
-            
-            dim_id = items[0]['dimension_id']
-            recommendation = recommendations.get(dim_id, "Focus on improving this dimension to enhance your AI readiness.")
-            
-            st.markdown(f"""
-                <p style="background-color: #1F2937; padding: 0.75rem; border-radius: 0.375rem; color: #D1D5DB; font-size: 0.95rem; margin-top: 0.5rem;">
-                    💡 <strong>Recommendation:</strong> {recommendation}
-                </p>
+            <div style="margin-left: 2rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                <p style="color: #D1D5DB; line-height: 1.5;">• {rec}</p>
             </div>
             """, unsafe_allow_html=True)
-    else:
-        st.success("🎉 Excellent work! All dimensions are scoring above 3. Continue maintaining these strong practices while looking for opportunities to reach advanced levels.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Add consultation plug (regardless of score)
+    st.markdown(f"""
+    <div style="background-color: #1F2937; border: 2px solid {primary_color}; padding: 1.5rem; margin: 2rem 0; border-radius: 0.75rem; text-align: center;">
+        <h4 style="color: {primary_color}; margin-bottom: 1rem;">🤝 Let's Discuss Your AI Journey</h4>
+        <p style="color: #E5E7EB; line-height: 1.6; margin-bottom: 1rem;">
+            Whether you're looking to understand these results better, develop a detailed action plan, or need guidance on implementation, 
+            we're here to help. Our team specializes in helping organizations like yours navigate the AI readiness journey.
+        </p>
+        <p style="color: #D1D5DB; font-size: 1.1rem; margin-bottom: 0.5rem;">
+            <strong>Schedule a complimentary 45-minute consultation</strong> to discuss your results and explore how we can support your AI transformation.
+        </p>
+        <p style="color: #9CA3AF; font-size: 0.9rem;">
+            No obligations—just expert insights tailored to your organization's unique needs.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Request Assistance Section
     st.markdown("<br>", unsafe_allow_html=True)
