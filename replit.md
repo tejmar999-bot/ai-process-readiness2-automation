@@ -79,13 +79,20 @@ Preferred communication style: Simple, everyday language.
 
 **Question Format**:
 - **Design**: Question-format prompts (e.g., "Are your processes documented and standardized?")
-- **Scoring Labels**: Dimension-specific 1-5 scale labels that reflect maturity progression
+- **Answer Choices**: Question-specific 1-5 scale labels that match each question's context
+  - Each of the 18 questions has unique answer choices tailored to that specific question
+  - Examples:
+    - "Are your processes documented and standardized?" → No documentation → Basic documentation → Documented → Standardized → Fully standardized & optimized
+    - "Is process data digitized?" → Mostly manual → Partially digital → Mostly digital → Fully digital → Automated capture
+    - "Is data cleaned and integrated?" → Uncleaned/siloed → Basic cleaning → Cleaned in silos → Integrated → Automated cleaning & integration
+- **Dimension Scoring Labels** (used for dimension-level summaries):
   - Process Maturity: Ad hoc → Defined → Measured → Controlled → Optimized
   - Data Readiness: Mostly manual → Some digital data → Structured data in silos → Integrated systems → Unified, high-quality data
   - Technology Infrastructure: Minimal → Basic tools → Analytics in place → Automation + ML tools → AI-integrated platforms
   - People & Skills: Unaware → Skeptical → Learning → Engaged → Proactive AI advocates
   - Leadership & Strategy: No alignment → Conceptual interest → Pilot discussions → Clear roadmap → Fully integrated vision
   - Change Management: Resistant → Limited openness → Accepting → Adaptive → Agile & innovation-oriented
+- **Implementation**: Questions store answer choices in 'answer_choices' dict, with fallback to dimension 'scoring_labels' for backwards compatibility
 - **"What it Measures"**: Each dimension includes expandable context accessible via ❓ icon explaining the dimension's purpose
 
 **Scoring Algorithm**:
