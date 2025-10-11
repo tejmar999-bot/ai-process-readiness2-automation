@@ -137,16 +137,51 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo with rectangular styling (no border-radius)
-            st.markdown(
-                f"""
-                <div style="text-align: right; margin-top: 0.5rem;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="height: 2.5rem; width: auto; border-radius: 0px;" />
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            # On results page, make logo clickable to go home
+            if st.session_state.assessment_complete:
+                # Create a clickable button styled as the logo
+                logo_clicked = st.button(
+                    label="↻ Home",
+                    key="logo_home",
+                    help="Click to start over",
+                    use_container_width=False
+                )
+                if logo_clicked:
+                    st.session_state.answers = {}
+                    st.session_state.current_dimension = 0
+                    st.session_state.assessment_complete = False
+                    st.session_state.user_info_collected = False
+                    st.session_state.user_name = ""
+                    st.session_state.user_email = ""
+                    st.session_state.user_title = ""
+                    st.session_state.user_company = ""
+                    st.session_state.user_phone = ""
+                    st.session_state.user_location = ""
+                    st.rerun()
+                # Display logo with click indicator
+                st.markdown(
+                    f"""
+                    <div style="text-align: right; margin-top: -3rem;">
+                        <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
+                             style="height: 2.5rem; width: auto; border-radius: 0px;" />
+                    </div>
+                    <div style="text-align: right; color: #9CA3AF; font-size: 0.7rem; margin-top: -0.5rem;">
+                        ↑ Click "↻ Home" to restart
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            else:
+                # Non-clickable logo on other pages
+                st.markdown(
+                    f"""
+                    <div style="text-align: right; margin-top: 0.5rem;">
+                        <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
+                             style="height: 2.5rem; width: auto; border-radius: 0px;" />
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
         else:
             st.markdown(f"<div style='text-align: right; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
@@ -216,7 +251,7 @@ def render_progress_bar():
         # Determine if this arrow should be lit up
         is_active = i <= current_dim
         arrow_color = dim['color'] if is_active else '#374151'
-        text_color = '#FFFFFF' if is_active else '#6B7280'
+        text_color = '#000000' if is_active else '#6B7280'
         margin_left = '-15px' if i > 0 else '0'
         z_index = len(DIMENSIONS) - i
         
@@ -373,6 +408,7 @@ def render_navigation_buttons():
             if st.button("← Previous", type="secondary"):
                 st.session_state.current_dimension -= 1
                 st.session_state.should_scroll_to_top = True
+                st.session_state.scroll_to_question = None  # Clear question scroll when changing dimensions
                 st.rerun()
     
     with col2:
@@ -394,6 +430,7 @@ def render_navigation_buttons():
             if st.button("Next →", type="primary"):
                 st.session_state.current_dimension += 1
                 st.session_state.should_scroll_to_top = True
+                st.session_state.scroll_to_question = None  # Clear question scroll when changing dimensions
                 st.rerun()
         else:
             if st.button("Complete Assessment", type="primary"):
@@ -548,11 +585,14 @@ def render_results_dashboard():
     for row in scoring_model:
         # Check if this is the user's readiness level
         is_current = row['min'] <= total_score <= row['max']
-        border_style = f'border: 3px solid {primary_color};' if is_current else 'border: 1px solid #4B5563;'
+        # Use consistent border width to prevent misalignment
+        border_style = 'border: 1px solid #4B5563;'
+        # Add box-shadow for highlighting instead of thicker border
+        box_shadow = f'box-shadow: inset 0 0 0 2px {primary_color};' if is_current else ''
         bg_color = 'background-color: #1F2937;' if is_current else 'background-color: #111827;'
         font_weight = 'bold' if is_current else 'normal'
         
-        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
+        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
     
     table_html += '</tbody></table>'
     
@@ -712,6 +752,96 @@ def render_results_dashboard():
     
     df_comparison = pd.DataFrame(comparison_data)
     st.dataframe(df_comparison, use_container_width=True, hide_index=True)
+    
+    # Recommended Actions Section
+    st.markdown("---")
+    st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Based on your assessment, here are specific areas where focused improvement could accelerate your AI readiness.</p>', unsafe_allow_html=True)
+    
+    # Collect low-scoring questions (≤3)
+    low_scoring_items = []
+    for dim_idx, dimension in enumerate(DIMENSIONS):
+        for question in dimension['questions']:
+            score = st.session_state.answers.get(question['id'], 3)
+            if score <= 3:
+                answer_choices = question.get('answer_choices', dimension.get('scoring_labels', {}))
+                current_level = answer_choices.get(score, str(score))
+                low_scoring_items.append({
+                    'dimension': dimension['title'],
+                    'dimension_color': dimension['color'],
+                    'question': question['text'],
+                    'score': score,
+                    'current_level': current_level,
+                    'dimension_id': dimension['id']
+                })
+    
+    if low_scoring_items:
+        # Group by dimension
+        from itertools import groupby
+        low_scoring_items.sort(key=lambda x: x['dimension'])
+        
+        for dimension_name, items_iter in groupby(low_scoring_items, key=lambda x: x['dimension']):
+            items = list(items_iter)
+            dimension_color = items[0]['dimension_color']
+            
+            st.markdown(f"""
+            <div style="background-color: #374151; border-left: 4px solid {dimension_color}; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem;">
+                <h4 style="color: {dimension_color}; margin-bottom: 0.5rem;">📌 {dimension_name}</h4>
+            """, unsafe_allow_html=True)
+            
+            for item in items:
+                st.markdown(f"""
+                <div style="margin-left: 1rem; margin-bottom: 0.75rem;">
+                    <p style="color: #E5E7EB; margin-bottom: 0.25rem;"><strong>→ {item['question']}</strong></p>
+                    <p style="color: #9CA3AF; font-size: 0.9rem; margin-bottom: 0.5rem;">Current: {item['current_level']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Add dimension-specific recommendations
+            recommendations = {
+                'process': "Consider documenting key processes, establishing regular metrics tracking, and analyzing process variations to build a foundation for AI-driven optimization.",
+                'data': "Focus on digitizing manual processes, improving data quality through cleaning and integration, and building historical data repositories for AI model training.",
+                'tech': "Invest in API-enabled infrastructure, secure cloud or on-premise systems, and AI experimentation platforms to support future AI deployments.",
+                'people': "Develop AI awareness programs, provide data-driven decision-making training, and identify AI champions within your organization.",
+                'leadership': "Integrate AI into your organizational strategy, secure leadership commitment and funding for pilots, and align AI goals with business impact metrics.",
+                'change': "Foster a culture of experimentation and learning from failure, encourage cross-functional collaboration, and establish frameworks for scaling successful pilots."
+            }
+            
+            dim_id = items[0]['dimension_id']
+            recommendation = recommendations.get(dim_id, "Focus on improving this dimension to enhance your AI readiness.")
+            
+            st.markdown(f"""
+                <p style="background-color: #1F2937; padding: 0.75rem; border-radius: 0.375rem; color: #D1D5DB; font-size: 0.95rem; margin-top: 0.5rem;">
+                    💡 <strong>Recommendation:</strong> {recommendation}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.success("🎉 Excellent work! All dimensions are scoring above 3. Continue maintaining these strong practices while looking for opportunities to reach advanced levels.")
+    
+    # Request Assistance Section
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(f'<h4 style="color: {primary_color}; text-align: center;">Need Help Implementing These Recommendations?</h4>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">Our team can help you understand your results, develop an action plan, or implement these recommendations.</p>', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("📧 Request Assistance from T-Logic", type="primary", use_container_width=True):
+            st.info("""
+            **Email integration is pending setup.**
+            
+            For assistance, please contact us at:
+            📧 info@tlogicconsulting.com
+            
+            Include:
+            - Your assessment results
+            - Specific areas where you need help
+            - Your contact information
+            
+            We'll get back to you within 24 hours!
+            """)
+            # TODO: Implement email sending functionality
+            # This will require SMTP credentials or email API integration
     
     # Action buttons
     st.markdown("---")

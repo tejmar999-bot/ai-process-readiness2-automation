@@ -7,9 +7,9 @@ PALETTE = [
     '#A8E6CF',  # sec1 - Process Maturity (Pastel Mint Green)
     '#C7CEEA',  # sec2 - Data Readiness (Pastel Lavender)
     '#B4D4FF',  # sec3 - Technology Infrastructure (Pastel Sky Blue)
-    '#FFCBA4',  # sec4 - People & Skills (Pastel Peach)
+    '#FFB347',  # sec4 - People & Skills (Pastel Orange)
     '#FFE5A0',  # sec5 - Leadership & Strategy (Pastel Yellow)
-    '#FFAEC9'   # sec6 - Change Management (Pastel Rose)
+    '#DDA0DD'   # sec6 - Change Management (Pastel Plum)
 ]
 
 # Same colors used for titles (pastel colors work on dark backgrounds)
@@ -17,9 +17,9 @@ BRIGHT_PALETTE = [
     '#A8E6CF',  # Pastel Mint Green (Process Maturity)
     '#C7CEEA',  # Pastel Lavender (Data Readiness)
     '#B4D4FF',  # Pastel Sky Blue (Technology Infrastructure)
-    '#FFCBA4',  # Pastel Peach (People & Skills)
+    '#FFB347',  # Pastel Orange (People & Skills)
     '#FFE5A0',  # Pastel Yellow (Leadership & Strategy)
-    '#FFAEC9'   # Pastel Rose (Change Management)
+    '#DDA0DD'   # Pastel Plum (Change Management)
 ]
 
 DIMENSIONS = [
