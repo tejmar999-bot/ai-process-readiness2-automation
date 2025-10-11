@@ -246,9 +246,10 @@ def render_progress_bar():
             padding: 1.5rem 1rem 1rem 1rem !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
         }}
-        /* Add top margin to body content to account for fixed header height */
-        section.main > div:first-child {{
-            margin-top: 300px !important;
+        /* Add spacer after sticky header */
+        .header-spacer {{
+            height: 300px !important;
+            width: 100% !important;
         }}
         </style>
         <div class="sticky-header-container">
@@ -258,6 +259,7 @@ def render_progress_bar():
             <h2 style="color: {bright_color}; margin: 0.5rem 0; text-align: center; font-size: 2rem; font-weight: 700;">{dimension["title"]}</h2>
             <p style="color: #D1D5DB; font-style: italic; margin: 0.75rem 0 0 0; text-align: center; font-size: 1.05rem; line-height: 1.5;">{dimension["what_it_measures"]}</p>
         </div>
+        <div class="header-spacer"></div>
         """,
         unsafe_allow_html=True
     )
