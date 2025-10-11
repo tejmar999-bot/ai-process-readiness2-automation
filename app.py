@@ -7,7 +7,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
-from data.dimensions import DIMENSIONS, get_all_questions
+from data.dimensions import DIMENSIONS, BRIGHT_PALETTE, get_all_questions
 from utils.pdf_generator import generate_pdf_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
 from db.operations import (
@@ -202,15 +202,15 @@ def render_progress_bar():
     """Render progress bar with arrow indicators - Sticky header"""
     current_dim = st.session_state.current_dimension
     dimension_color = DIMENSIONS[current_dim]['color']
+    bright_color = BRIGHT_PALETTE[current_dim]
     dimension = DIMENSIONS[current_dim]
     
-    # Create sticky header container with progress bar, counter, and dimension title
     # Add timestamp to force re-rendering
     import time
     timestamp = int(time.time() * 1000)
     
-    # Build arrows HTML
-    arrows_html = f'<div id="progress-anchor" data-render="{timestamp}" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0;">'
+    # Build arrows HTML with fixed width and text wrapping
+    arrows_html = f'<div id="progress-anchor" data-render="{timestamp}" style="display: flex; align-items: center; margin-bottom: 1rem; gap: 0; max-width: 100%;">'
     
     for i, dim in enumerate(DIMENSIONS):
         # Determine if this arrow should be lit up
@@ -220,38 +220,44 @@ def render_progress_bar():
         margin_left = '-15px' if i > 0 else '0'
         z_index = len(DIMENSIONS) - i
         
-        # Arrow shape using CSS - single line to avoid rendering issues
-        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 50px; flex: 1; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 20px;">{dim["title"]}</span></div>'
+        # Fixed width arrows with text wrapping - single line to avoid rendering issues
+        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 60px; width: 160px; min-width: 140px; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.7rem; font-weight: 600; text-align: center; padding: 0 22px; line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;">{dim["title"]}</span></div>'
         arrows_html += arrow_html
     
     arrows_html += '</div>'
     
-    # Create sticky header with background - single line HTML to avoid rendering issues
-    sticky_header_html = f'<div id="sticky-header" style="position: sticky; top: 0; z-index: 999; background-color: #1F2937; padding: 1rem 0 0.5rem 0; margin: -1rem 0 1rem 0;"><div style="height: 3px; background-color: {dimension_color}; margin-bottom: 0.5rem;"></div>{arrows_html}<p style="text-align: center; color: #9CA3AF; margin-bottom: 0.5rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p><h3 style="color: {dimension_color}; margin-bottom: 0.5rem; text-align: center;">{dimension["title"]}</h3><p style="color: #9CA3AF; font-style: italic; margin-bottom: 1rem; text-align: center;">{dimension["what_it_measures"]}</p></div>'
+    # Enhanced sticky header with bright title colors and larger fonts
+    sticky_header_html = f'''<div id="sticky-header" style="position: -webkit-sticky; position: sticky; top: -1px; z-index: 1000; background-color: #1F2937; padding: 1.5rem 1rem 1rem 1rem; margin: -1.5rem -1rem 1.5rem -1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);">
+        <div style="height: 4px; background-color: {dimension_color}; margin-bottom: 1rem;"></div>
+        {arrows_html}
+        <p style="text-align: center; color: #9CA3AF; margin: 0.75rem 0; font-size: 0.9rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>
+        <h2 style="color: {bright_color}; margin: 0.5rem 0; text-align: center; font-size: 2rem; font-weight: 700;">{dimension["title"]}</h2>
+        <p style="color: #D1D5DB; font-style: italic; margin: 0.75rem 0 0 0; text-align: center; font-size: 1.05rem; line-height: 1.5;">{dimension["what_it_measures"]}</p>
+    </div>'''
     
     st.markdown(sticky_header_html, unsafe_allow_html=True)
     
-    # Auto-scroll to show progress indicators if flag is set
+    # Auto-scroll to top if flag is set (for Next button and page transitions)
     if st.session_state.should_scroll_to_top:
         components.html(
             """
             <script>
-                function attemptScroll(retries) {
-                    var progressAnchor = window.parent.document.getElementById('progress-anchor');
+                function scrollToTop(retries) {
                     var mainSection = window.parent.document.querySelector('section.main');
+                    var stickyHeader = window.parent.document.getElementById('sticky-header');
                     
-                    if (progressAnchor && mainSection) {
-                        // Scroll to ensure element is visible with extra padding to show dimension title
-                        var elementPosition = progressAnchor.offsetTop;
-                        var offsetPosition = elementPosition - 200;
-                        mainSection.scrollTop = Math.max(0, offsetPosition);
+                    if (mainSection) {
+                        // Scroll to absolute top
+                        mainSection.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                        mainSection.scrollTop = 0;
                     } else if (retries > 0) {
-                        setTimeout(function() { attemptScroll(retries - 1); }, 100);
-                    } else if (mainSection) {
-                        mainSection.scrollTo(0, 0);
+                        setTimeout(function() { scrollToTop(retries - 1); }, 100);
                     }
                 }
-                setTimeout(function() { attemptScroll(5); }, 100);
+                setTimeout(function() { scrollToTop(10); }, 150);
             </script>
             """,
             height=0
@@ -509,8 +515,8 @@ def render_results_dashboard():
         {"range": "25-30", "level": "🟩 Advanced", "meaning": "AI-ready culture and infrastructure for sustainable transformation", "min": 25, "max": 30}
     ]
     
-    # Create table HTML - single line format to avoid rendering issues
-    table_html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563;">Meaning</th></tr></thead><tbody>'
+    # Create table HTML with proper alignment - single line format to avoid rendering issues
+    table_html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563; vertical-align: middle;">Meaning</th></tr></thead><tbody>'
     
     for row in scoring_model:
         # Check if this is the user's readiness level
@@ -519,7 +525,7 @@ def render_results_dashboard():
         bg_color = 'background-color: #1F2937;' if is_current else 'background-color: #111827;'
         font_weight = 'bold' if is_current else 'normal'
         
-        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight};">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight};">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} font-weight: {font_weight};">{row["meaning"]}</td></tr>'
+        table_html += f'<tr style="{bg_color}"><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["level"]}</td><td style="padding: 1rem; text-align: left; {border_style} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
     
     table_html += '</tbody></table>'
     

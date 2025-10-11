@@ -12,6 +12,16 @@ PALETTE = [
     '#52B788'   # sec6 - Change Management (Sea Green)
 ]
 
+# Bright versions for titles on dark backgrounds
+BRIGHT_PALETTE = [
+    '#4ADE80',  # Bright Light Green (Process Maturity)
+    '#22D3EE',  # Bright Cyan (Data Readiness)
+    '#60A5FA',  # Bright Sky Blue (Technology Infrastructure)
+    '#F59E0B',  # Bright Amber (People & Skills)
+    '#D97706',  # Bright Orange (Leadership & Strategy)
+    '#34D399'   # Bright Emerald (Change Management)
+]
+
 DIMENSIONS = [
     {
         'id': 'process',
