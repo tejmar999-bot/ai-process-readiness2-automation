@@ -297,11 +297,6 @@ def render_dimension_questions(dimension_idx):
     if 'scroll_to_question' not in st.session_state:
         st.session_state.scroll_to_question = None
     
-    # Get scoring labels for this dimension
-    scoring_labels = dimension.get('scoring_labels', {
-        1: "1", 2: "2", 3: "3", 4: "4", 5: "5"
-    })
-    
     def on_answer_change(question_id, question_idx):
         """Callback when a question is answered"""
         # Only trigger scroll if not the last question
@@ -317,11 +312,16 @@ def render_dimension_questions(dimension_idx):
         # Get current answer or default
         current_answer = st.session_state.answers.get(question['id'], 3)
         
-        # Create rating scale with dimension-specific labels with on_change callback
+        # Use question-specific answer choices if available, otherwise use dimension scoring labels
+        answer_choices = question.get('answer_choices', dimension.get('scoring_labels', {
+            1: "1", 2: "2", 3: "3", 4: "4", 5: "5"
+        }))
+        
+        # Create rating scale with question-specific labels with on_change callback
         rating = st.radio(
             "Rating",
             options=[1, 2, 3, 4, 5],
-            format_func=lambda x: f"{x} - {scoring_labels[x]}",
+            format_func=lambda x: f"{x} - {answer_choices[x]}",
             key=question_id,
             index=current_answer - 1,  # Convert to 0-indexed
             horizontal=True,
