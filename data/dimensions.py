@@ -2,24 +2,24 @@
 Dimension and question definitions for AI Process Readiness Assessment
 """
 
-# Color palette for dimensions - Green/Blue/Brown scheme
+# Pastel color palette for dimensions - Distinct pastel colors
 PALETTE = [
-    '#2D6A4F',  # sec1 - Process Maturity (Forest Green)
-    '#1B9AAA',  # sec2 - Data Readiness (Teal Blue)
-    '#2C5F8D',  # sec3 - Technology Infrastructure (Deep Blue)
-    '#8B6F47',  # sec4 - People & Skills (Warm Brown)
-    '#7A5C3D',  # sec5 - Leadership & Strategy (Earth Brown)
-    '#52B788'   # sec6 - Change Management (Sea Green)
+    '#A8E6CF',  # sec1 - Process Maturity (Pastel Mint Green)
+    '#C7CEEA',  # sec2 - Data Readiness (Pastel Lavender)
+    '#B4D4FF',  # sec3 - Technology Infrastructure (Pastel Sky Blue)
+    '#FFCBA4',  # sec4 - People & Skills (Pastel Peach)
+    '#FFE5A0',  # sec5 - Leadership & Strategy (Pastel Yellow)
+    '#FFAEC9'   # sec6 - Change Management (Pastel Rose)
 ]
 
-# Bright versions for titles on dark backgrounds
+# Same colors used for titles (pastel colors work on dark backgrounds)
 BRIGHT_PALETTE = [
-    '#4ADE80',  # Bright Light Green (Process Maturity)
-    '#22D3EE',  # Bright Cyan (Data Readiness)
-    '#60A5FA',  # Bright Sky Blue (Technology Infrastructure)
-    '#F59E0B',  # Bright Amber (People & Skills)
-    '#D97706',  # Bright Orange (Leadership & Strategy)
-    '#34D399'   # Bright Emerald (Change Management)
+    '#A8E6CF',  # Pastel Mint Green (Process Maturity)
+    '#C7CEEA',  # Pastel Lavender (Data Readiness)
+    '#B4D4FF',  # Pastel Sky Blue (Technology Infrastructure)
+    '#FFCBA4',  # Pastel Peach (People & Skills)
+    '#FFE5A0',  # Pastel Yellow (Leadership & Strategy)
+    '#FFAEC9'   # Pastel Rose (Change Management)
 ]
 
 DIMENSIONS = [

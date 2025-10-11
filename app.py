@@ -226,16 +226,41 @@ def render_progress_bar():
     
     arrows_html += '</div>'
     
-    # Enhanced sticky header with bright title colors and larger fonts
-    sticky_header_html = f'''<div id="sticky-header" style="position: -webkit-sticky; position: sticky; top: -1px; z-index: 1000; background-color: #1F2937; padding: 1.5rem 1rem 1rem 1rem; margin: -1.5rem -1rem 1.5rem -1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);">
-        <div style="height: 4px; background-color: {dimension_color}; margin-bottom: 1rem;"></div>
-        {arrows_html}
-        <p style="text-align: center; color: #9CA3AF; margin: 0.75rem 0; font-size: 0.9rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>
-        <h2 style="color: {bright_color}; margin: 0.5rem 0; text-align: center; font-size: 2rem; font-weight: 700;">{dimension["title"]}</h2>
-        <p style="color: #D1D5DB; font-style: italic; margin: 0.75rem 0 0 0; text-align: center; font-size: 1.05rem; line-height: 1.5;">{dimension["what_it_measures"]}</p>
-    </div>'''
-    
-    st.markdown(sticky_header_html, unsafe_allow_html=True)
+    # Use Streamlit container with custom CSS for sticky positioning
+    st.markdown(
+        f"""
+        <style>
+        /* Hide Streamlit header on dimension pages for clean sticky header */
+        [data-testid="stHeader"] {{
+            display: none !important;
+        }}
+        /* Use fixed positioning to truly freeze header at viewport top */
+        .sticky-header-container {{
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999 !important;
+            background-color: #1F2937 !important;
+            padding: 1.5rem 1rem 1rem 1rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        }}
+        /* Add top margin to body content to account for fixed header height */
+        section.main > div:first-child {{
+            margin-top: 300px !important;
+        }}
+        </style>
+        <div class="sticky-header-container">
+            <div style="height: 4px; background-color: {dimension_color}; margin-bottom: 1rem;"></div>
+            {arrows_html}
+            <p style="text-align: center; color: #9CA3AF; margin: 0.75rem 0; font-size: 0.9rem;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</p>
+            <h2 style="color: {bright_color}; margin: 0.5rem 0; text-align: center; font-size: 2rem; font-weight: 700;">{dimension["title"]}</h2>
+            <p style="color: #D1D5DB; font-style: italic; margin: 0.75rem 0 0 0; text-align: center; font-size: 1.05rem; line-height: 1.5;">{dimension["what_it_measures"]}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
     # Auto-scroll to top if flag is set (for Next button and page transitions)
     if st.session_state.should_scroll_to_top:
@@ -244,7 +269,7 @@ def render_progress_bar():
             <script>
                 function scrollToTop(retries) {
                     var mainSection = window.parent.document.querySelector('section.main');
-                    var stickyHeader = window.parent.document.getElementById('sticky-header');
+                    var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
                     
                     if (mainSection) {
                         // Scroll to absolute top
@@ -320,7 +345,7 @@ def render_dimension_questions(dimension_idx):
                     if (nextQuestion && mainSection) {{
                         setTimeout(function() {{
                             var elementPosition = nextQuestion.offsetTop;
-                            var stickyHeader = window.parent.document.getElementById('sticky-header');
+                            var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
                             var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 200;
                             var offsetPosition = elementPosition - stickyHeight - 20;
                             mainSection.scrollTo({{
