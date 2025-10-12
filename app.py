@@ -57,6 +57,7 @@ st.markdown("""
     font-size: 1.1rem;
     margin-bottom: 1rem;
     color: #F3F4F6;
+    scroll-margin-top: 250px;
 }
 .score-card {
     background-color: #374151;
@@ -361,21 +362,13 @@ def render_dimension_questions(dimension_idx):
             """
             <script>
                 function scrollToFirstQuestion(retries) {
-                    var mainSection = window.parent.document.querySelector('section.main');
                     var firstQuestion = window.parent.document.querySelector('#question-0');
                     
-                    if (mainSection && firstQuestion) {
-                        // Get sticky header height for proper offset
-                        var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
-                        var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 200;
-                        
-                        // Get first question position
-                        var elementPosition = firstQuestion.offsetTop;
-                        var offsetPosition = elementPosition - stickyHeight - 30;
-                        
-                        mainSection.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
+                    if (firstQuestion) {
+                        // Use scrollIntoView with CSS scroll-padding handling sticky header
+                        firstQuestion.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
                         });
                     } else if (retries > 0) {
                         setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
@@ -1025,17 +1018,22 @@ Dimension Breakdown:
             """
             <script>
                 function scrollToTopResults(retries) {
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    if (mainSection) {
-                        mainSection.scrollTo({
-                            top: 0,
-                            behavior: 'smooth'
-                        });
-                    } else if (retries > 0) {
-                        setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
+                    try {
+                        // Use document.documentElement to bypass scroll-padding
+                        if (window.parent.document.documentElement) {
+                            window.parent.document.documentElement.scrollTop = 0;
+                        } else if (window.parent.document.body) {
+                            window.parent.document.body.scrollTop = 0;
+                        }
+                        // Also try window.parent.scrollTo as fallback
+                        window.parent.scrollTo(0, 0);
+                    } catch (e) {
+                        if (retries > 0) {
+                            setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
+                        }
                     }
                 }
-                setTimeout(function() { scrollToTopResults(10); }, 300);
+                setTimeout(function() { scrollToTopResults(10); }, 1000);
             </script>
             """,
             height=0
@@ -1049,7 +1047,9 @@ def main():
     # Render branding sidebar first
     render_branding_sidebar()
     
-    render_header()
+    # Only render header on assessment pages, not on results page
+    if not st.session_state.assessment_complete:
+        render_header()
     
     if not st.session_state.assessment_complete:
         # Show user info collection form if not yet collected
