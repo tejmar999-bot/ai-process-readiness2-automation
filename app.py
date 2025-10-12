@@ -78,8 +78,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def image_to_base64(image):
-    """Convert PIL Image to base64 string"""
+def image_to_base64(image, max_height=None):
+    """Convert PIL Image to base64 string, optionally resizing to max height"""
+    if max_height:
+        # Calculate new dimensions maintaining aspect ratio
+        aspect_ratio = image.width / image.height
+        new_height = max_height
+        new_width = int(new_height * aspect_ratio)
+        image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    
     buffered = BytesIO()
     image.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
@@ -139,12 +146,13 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo as sharp rectangle matching title size
+            # Display logo matching title size (40px = 2.5rem)
+            # Logo is pre-resized to 40px height via PIL, CSS provides fallback constraints
             st.markdown(
                 f"""
-                <div style="text-align: right; height: 40px;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="height: 40px !important; max-height: 40px !important; min-height: 40px !important; width: auto !important; object-fit: contain !important; border-radius: 0 !important; display: block !important; margin-left: auto !important;" />
+                <div style="text-align: right;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
+                         style="height: 40px; width: auto; border-radius: 0; display: block; margin-left: auto;" />
                 </div>
                 """,
                 unsafe_allow_html=True
