@@ -139,12 +139,12 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo as sharp rectangle
+            # Display logo as sharp rectangle matching title size
             st.markdown(
                 f"""
-                <div style="text-align: right;">
+                <div style="text-align: right; height: 40px;">
                     <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="height: 1.8rem !important; width: auto !important; border-radius: 0 !important; display: block; margin-left: auto;" />
+                         style="height: 40px !important; max-height: 40px !important; min-height: 40px !important; width: auto !important; object-fit: contain !important; border-radius: 0 !important; display: block !important; margin-left: auto !important;" />
                 </div>
                 """,
                 unsafe_allow_html=True
