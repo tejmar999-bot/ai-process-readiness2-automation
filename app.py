@@ -160,7 +160,7 @@ def render_footer():
                 © T-Logic Training & Consulting Pvt. Ltd.
             </div>
             <div style="text-align: right;">
-                tlogicconsulting.com
+                www.tlogicconsulting.com
             </div>
         </div>
         """,
