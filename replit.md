@@ -4,6 +4,11 @@
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
 ## Recent Changes (October 12, 2025)
+-   **Progress Arrow Optimization**: Reduced arrow width from 160px/140px to 120px/100px and font from 0.7rem to 0.65rem to fit within page frame without extending beyond solid line
+-   **Process Maturity Color Update**: Changed from #A8E6CF (mint green) to #FFB6C1 (light pink pastel) for better visual distinction from Data Readiness (#ADD8E6 light blue) and Technology Infrastructure (#90EE90 light green)
+-   **Continue Button Reactivity**: Enhanced with input keys (user_name_input, user_email_input) for immediate enablement when valid name and email entered (no tab/enter required)
+-   **Logo Display**: Simplified to native st.image() component with width=100px for better Streamlit compatibility (note: Streamlit layout system has positioning limitations that prevent moving logo higher without off-screen issues)
+-   **Scroll to Top**: Verified existing implementation at lines 425-426 and 493-507 - Complete Assessment button successfully scrolls Results page to top
 -   **Home Button Removal**: Removed clickable home button and hint text from header on Results page for cleaner UI
 -   **Navigation Streamlining**: Removed orange "See Recommendations" button above Scoring Model; kept light blue "See Recommended Actions" button below table
 -   **Recommendations Layout**: Moved "Specific Recommendations" bullet points inside dimension gray boxes for better visual grouping
