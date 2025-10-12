@@ -517,25 +517,17 @@ def render_results_dashboard():
                     try {
                         // Find the Assessment Results header by ID
                         var header = window.parent.document.getElementById('assessment-results-header');
+                        
                         if (header) {
-                            // Scroll the header into view at the top
+                            // Simply scroll the header into view at the top
                             header.scrollIntoView({behavior: 'instant', block: 'start'});
-                            // Also set scroll position to ensure we're at top
-                            window.parent.scrollTo(0, 0);
-                        } else {
-                            // Fallback to position 0 if header not found
-                            window.parent.scrollTo(0, 0);
                         }
                     } catch (e) {
                         console.error('Scroll error:', e);
-                        // Final fallback
-                        try {
-                            window.parent.scrollTo(0, 0);
-                        } catch (e2) {}
                     }
                 }
                 
-                // Try immediately and keep retrying for 2 seconds
+                // Try immediately and keep retrying for 3 seconds
                 setTimeout(scrollToResultsHeader, 100);
                 setTimeout(scrollToResultsHeader, 300);
                 setTimeout(scrollToResultsHeader, 500);
@@ -543,6 +535,8 @@ def render_results_dashboard():
                 setTimeout(scrollToResultsHeader, 1200);
                 setTimeout(scrollToResultsHeader, 1600);
                 setTimeout(scrollToResultsHeader, 2000);
+                setTimeout(scrollToResultsHeader, 2500);
+                setTimeout(scrollToResultsHeader, 3000);
             </script>
             """,
             height=0
@@ -1130,6 +1124,7 @@ def main():
                 )
                 
                 st.session_state.user_info_collected = True
+                st.session_state.should_scroll_to_top = True  # Scroll to first question
                 st.rerun()
         
         else:
