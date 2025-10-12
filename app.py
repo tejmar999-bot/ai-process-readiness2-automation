@@ -137,51 +137,16 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # On results page, make logo clickable to go home
-            if st.session_state.assessment_complete:
-                # Create a clickable button styled as the logo
-                logo_clicked = st.button(
-                    label="↻ Home",
-                    key="logo_home",
-                    help="Click to start over",
-                    use_container_width=False
-                )
-                if logo_clicked:
-                    st.session_state.answers = {}
-                    st.session_state.current_dimension = 0
-                    st.session_state.assessment_complete = False
-                    st.session_state.user_info_collected = False
-                    st.session_state.user_name = ""
-                    st.session_state.user_email = ""
-                    st.session_state.user_title = ""
-                    st.session_state.user_company = ""
-                    st.session_state.user_phone = ""
-                    st.session_state.user_location = ""
-                    st.rerun()
-                # Display logo with click indicator
-                st.markdown(
-                    f"""
-                    <div style="text-align: right; margin-top: -3rem;">
-                        <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                             style="height: 2.5rem; width: auto; border-radius: 0px;" />
-                    </div>
-                    <div style="text-align: right; color: #9CA3AF; font-size: 0.7rem; margin-top: -0.5rem;">
-                        ↑ Click "↻ Home" to restart
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-            else:
-                # Non-clickable logo on other pages
-                st.markdown(
-                    f"""
-                    <div style="text-align: right; margin-top: 0.5rem;">
-                        <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                             style="height: 2.5rem; width: auto; border-radius: 0px;" />
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+            # Display logo (non-clickable)
+            st.markdown(
+                f"""
+                <div style="text-align: right; margin-top: 0.5rem;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
+                         style="height: 2.5rem; width: auto; border-radius: 0px;" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         else:
             st.markdown(f"<div style='text-align: right; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
@@ -576,19 +541,6 @@ def render_results_dashboard():
     # Scoring Model Table
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Add "See Recommendations" button
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown(f"""
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <a href="#recommended-actions" style="text-decoration: none;">
-                <button style="background-color: {primary_color}; color: white; padding: 0.75rem 2rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s;">
-                    👇 See Recommendations
-                </button>
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
-    
     st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-bottom: 1rem;">📊 Scoring Model</h3>', unsafe_allow_html=True)
     
     # Define scoring model data
@@ -618,7 +570,7 @@ def render_results_dashboard():
         
         color_hex, level_text = color_map[row["level"]]
         
-        table_rows += f'<tr style="background-color: {bg_color};"><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;"><span style="display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: middle; background-color: {color_hex};"></span>{level_text}</td><td style="padding: 1rem; text-align: left; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
+        table_rows += f'<tr style="background-color: {bg_color};"><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["range"]}</td><td style="padding: 1rem; text-align: center; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;"><span style="display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: baseline; position: relative; top: 1px; background-color: {color_hex};"></span>{level_text}</td><td style="padding: 1rem; text-align: left; border: 1px solid #4B5563; {box_shadow} font-weight: {font_weight}; vertical-align: middle;">{row["meaning"]}</td></tr>'
     
     # Complete table HTML
     table_html = f'<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563; vertical-align: middle;">Meaning</th></tr></thead><tbody>{table_rows}</tbody></table>'
@@ -817,7 +769,7 @@ def render_results_dashboard():
     # Recommended Actions Section
     st.markdown("---")
     st.markdown(f'<h3 id="recommended-actions" style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem; font-size: 1.1rem;">Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey.</p>', unsafe_allow_html=True)
     
     # Analyze each dimension holistically
     dimension_analyses = []
@@ -906,22 +858,17 @@ def render_results_dashboard():
         
         recommendations = recommendations_map.get(dimension['id'], ["Focus on building foundational capabilities in this area."])
         
-        # Display dimension analysis card
+        # Display dimension analysis card with recommendations inside
+        recommendations_html = "".join([f'<p style="color: #D1D5DB; line-height: 1.5; margin-left: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">• {rec}</p>' for rec in recommendations])
+        
         st.markdown(f"""
         <div style="background-color: #374151; border-left: 4px solid {dimension['color']}; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem;">
             <h4 style="color: {dimension['color']}; margin-bottom: 1rem;">📌 {dimension['title']}</h4>
             <p style="color: #E5E7EB; line-height: 1.6; margin-bottom: 1rem;">{insight}</p>
             <p style="color: #D1D5DB; margin-bottom: 0.5rem;"><strong>Specific Recommendations:</strong></p>
+            {recommendations_html}
         </div>
         """, unsafe_allow_html=True)
-        
-        # Display recommendations as bullet points
-        for rec in recommendations:
-            st.markdown(f"""
-            <div style="margin-left: 2rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                <p style="color: #D1D5DB; line-height: 1.5;">• {rec}</p>
-            </div>
-            """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     
@@ -945,7 +892,7 @@ def render_results_dashboard():
     # Request Assistance Section
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown(f'<h4 style="color: {primary_color}; text-align: center;">Need Help Implementing These Recommendations?</h4>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">Our team can help you understand your results, develop an action plan, or implement these recommendations.</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">Reach out to us by clicking here.</p>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:

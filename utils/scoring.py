@@ -39,8 +39,8 @@ def compute_scores(answers: Dict[str, int]) -> Dict[str, Any]:
     # Calculate total score
     total_score = sum(score['score'] for score in dimension_scores)
     
-    # Calculate percentage (6 dimensions × 5 max = 30 max, 6 dimensions × 1 min = 6 min)
-    percentage = round(((total_score - 6) / (30 - 6)) * 100)
+    # Calculate percentage (simple percentage out of 30 max)
+    percentage = round((total_score / 30) * 100)
     
     # Determine readiness band
     readiness_band = get_readiness_band(total_score)

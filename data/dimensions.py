@@ -5,8 +5,8 @@ Dimension and question definitions for AI Process Readiness Assessment
 # Pastel color palette for dimensions - Distinct pastel colors
 PALETTE = [
     '#A8E6CF',  # sec1 - Process Maturity (Pastel Mint Green)
-    '#C7CEEA',  # sec2 - Data Readiness (Pastel Lavender)
-    '#B4D4FF',  # sec3 - Technology Infrastructure (Pastel Sky Blue)
+    '#ADD8E6',  # sec2 - Data Readiness (Light Blue Pastel)
+    '#90EE90',  # sec3 - Technology Infrastructure (Light Grass Green Pastel)
     '#FFB347',  # sec4 - People & Skills (Pastel Orange)
     '#FFE5A0',  # sec5 - Leadership & Strategy (Pastel Yellow)
     '#DDA0DD'   # sec6 - Change Management (Pastel Plum)
@@ -15,8 +15,8 @@ PALETTE = [
 # Same colors used for titles (pastel colors work on dark backgrounds)
 BRIGHT_PALETTE = [
     '#A8E6CF',  # Pastel Mint Green (Process Maturity)
-    '#C7CEEA',  # Pastel Lavender (Data Readiness)
-    '#B4D4FF',  # Pastel Sky Blue (Technology Infrastructure)
+    '#ADD8E6',  # Light Blue Pastel (Data Readiness)
+    '#90EE90',  # Light Grass Green Pastel (Technology Infrastructure)
     '#FFB347',  # Pastel Orange (People & Skills)
     '#FFE5A0',  # Pastel Yellow (Leadership & Strategy)
     '#DDA0DD'   # Pastel Plum (Change Management)
