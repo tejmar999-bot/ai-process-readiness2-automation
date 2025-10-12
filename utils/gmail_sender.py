@@ -15,10 +15,13 @@ def get_gmail_access_token():
         x_replit_token = None
         
         # Check for REPL_IDENTITY (repl token) or WEB_REPL_RENEWAL (deployment token)
-        if os.environ.get('REPL_IDENTITY'):
-            x_replit_token = 'repl ' + os.environ.get('REPL_IDENTITY')
-        elif os.environ.get('WEB_REPL_RENEWAL'):
-            x_replit_token = 'depl ' + os.environ.get('WEB_REPL_RENEWAL')
+        repl_identity = os.environ.get('REPL_IDENTITY')
+        web_repl_renewal = os.environ.get('WEB_REPL_RENEWAL')
+        
+        if repl_identity:
+            x_replit_token = 'repl ' + repl_identity
+        elif web_repl_renewal:
+            x_replit_token = 'depl ' + web_repl_renewal
         
         if not hostname or not x_replit_token:
             raise Exception('Replit connection environment variables not found')
@@ -127,6 +130,52 @@ Sent from AI Process Readiness Assessment Tool
     <p style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
         {feedback_text.replace(chr(10), '<br>')}
     </p>
+    
+    <hr style="margin-top: 30px;">
+    <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>
+</body>
+</html>
+"""
+    
+    return send_email('info@tlogicconsulting.com', subject, body_text, body_html)
+
+def send_user_registration_email(user_name, user_email, user_title=None, user_company=None, user_phone=None, user_location=None):
+    """Send user registration notification email to T-Logic"""
+    subject = f"New Assessment Started - {user_name}"
+    
+    body_text = f"""
+New User Started AI Process Readiness Assessment
+
+Contact Information:
+- Name: {user_name}
+- Email: {user_email}
+{f'- Title: {user_title}' if user_title else ''}
+{f'- Company: {user_company}' if user_company else ''}
+{f'- Phone: {user_phone}' if user_phone else ''}
+{f'- Location: {user_location}' if user_location else ''}
+
+The user has just started the assessment process.
+
+---
+Sent from AI Process Readiness Assessment Tool
+"""
+    
+    body_html = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2 style="color: #BF6A16;">📋 New Assessment Started</h2>
+    
+    <h3>Contact Information:</h3>
+    <ul>
+        <li><strong>Name:</strong> {user_name}</li>
+        <li><strong>Email:</strong> {user_email}</li>
+        {f'<li><strong>Title:</strong> {user_title}</li>' if user_title else ''}
+        {f'<li><strong>Company:</strong> {user_company}</li>' if user_company else ''}
+        {f'<li><strong>Phone:</strong> {user_phone}</li>' if user_phone else ''}
+        {f'<li><strong>Location:</strong> {user_location}</li>' if user_location else ''}
+    </ul>
+    
+    <p style="margin-top: 20px;">The user has just started the assessment process.</p>
     
     <hr style="margin-top: 30px;">
     <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>

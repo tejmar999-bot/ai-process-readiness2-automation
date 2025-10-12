@@ -20,7 +20,7 @@ from db.operations import (
     get_team_dimension_averages,
     get_team_readiness_distribution
 )
-from utils.gmail_sender import send_assistance_request_email, send_feedback_email
+from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email
 
 # Page configuration
 st.set_page_config(
@@ -1084,12 +1084,24 @@ def main():
             can_continue = bool(user_name and user_name.strip()) and is_valid_email
             
             if st.button("Continue", type="primary", disabled=not can_continue):
+                # Save user info to session state
                 st.session_state.user_name = user_name
                 st.session_state.user_email = user_email
                 st.session_state.user_title = user_title
                 st.session_state.user_company = user_company
                 st.session_state.user_phone = user_phone
                 st.session_state.user_location = user_location
+                
+                # Send registration email to T-Logic
+                send_user_registration_email(
+                    user_name=user_name,
+                    user_email=user_email,
+                    user_title=user_title if user_title else None,
+                    user_company=user_company if user_company else None,
+                    user_phone=user_phone if user_phone else None,
+                    user_location=user_location if user_location else None
+                )
+                
                 st.session_state.user_info_collected = True
                 st.rerun()
         

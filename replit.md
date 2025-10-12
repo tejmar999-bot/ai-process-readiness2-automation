@@ -4,7 +4,10 @@
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
 ## Recent Changes (October 12, 2025)
--   **Gmail Integration**: Connected communication boxes (feedback and assistance requests) to send emails to info@tlogicconsulting.com using Gmail API with OAuth authentication
+-   **Gmail Integration**: Connected all communication touchpoints to send emails to info@tlogicconsulting.com using Gmail API with OAuth authentication:
+    - User registration: Sends email when "Continue" button pressed with all contact details
+    - Assistance requests: Sends email with assessment results when assistance requested
+    - Feedback: Sends email when feedback form submitted
 -   **Website Address Added**: Added "www.tlogicconsulting.com" to right bottom corner of footer on all pages
 -   **Logo Size Optimized**: Reduced logo height to 1.8rem for better visual balance in header
 -   **Copyright Footer**: Added copyright notice "© T-Logic Training & Consulting Pvt. Ltd." at the bottom of all pages (home, assessment, results)
