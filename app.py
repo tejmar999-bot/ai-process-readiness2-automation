@@ -150,6 +150,18 @@ def render_header():
         else:
             st.markdown(f"<div style='text-align: center; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
+def render_footer():
+    """Render copyright footer at the bottom of the page"""
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 1rem 0; color: #9CA3AF; font-size: 0.9rem; border-top: 1px solid #374151; margin-top: 2rem;">
+            © T-Logic Training & Consulting Pvt. Ltd.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 def render_branding_sidebar():
     """Render branding customization in sidebar"""
     with st.sidebar:
@@ -1085,6 +1097,9 @@ def main():
     else:
         # Results mode
         render_results_dashboard()
+    
+    # Render copyright footer at the bottom
+    render_footer()
 
 if __name__ == "__main__":
     main()
