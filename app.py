@@ -137,8 +137,16 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo with proper alignment
-            st.image(st.session_state.company_logo, width=100)
+            # Display logo as sharp rectangle with no rounded corners
+            st.markdown(
+                f"""
+                <div style="text-align: right;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
+                         style="width: 100px; height: auto; border-radius: 0; display: block; margin-left: auto;" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         else:
             st.markdown(f"<div style='text-align: center; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
