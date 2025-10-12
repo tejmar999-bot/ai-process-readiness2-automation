@@ -138,12 +138,12 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo as sharp rectangle matching title font size (2.5rem)
+            # Display logo as sharp rectangle
             st.markdown(
                 f"""
                 <div style="text-align: right;">
                     <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="height: 2.5rem !important; width: auto !important; border-radius: 0 !important; display: block; margin-left: auto;" />
+                         style="height: 1.8rem !important; width: auto !important; border-radius: 0 !important; display: block; margin-left: auto;" />
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -433,8 +433,8 @@ def render_navigation_buttons():
                         scores_data=scores_data,
                         answers=st.session_state.answers,
                         primary_color=st.session_state.primary_color,
-                        user_name=st.session_state.user_name if st.session_state.user_name else None,
-                        user_email=st.session_state.user_email if st.session_state.user_email else None
+                        user_name=st.session_state.user_name or "",
+                        user_email=st.session_state.user_email or ""
                     )
                     st.session_state.current_assessment_id = assessment.id
                 except Exception as e:
