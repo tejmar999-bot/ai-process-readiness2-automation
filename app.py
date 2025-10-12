@@ -503,23 +503,34 @@ def render_results_dashboard():
         components.html(
             """
             <script>
-                function scrollToTopResults(retries) {
+                function forceScrollToTop() {
                     try {
-                        // Use document.documentElement to bypass scroll-padding
+                        // Multiple scroll methods for maximum compatibility
                         if (window.parent.document.documentElement) {
                             window.parent.document.documentElement.scrollTop = 0;
-                        } else if (window.parent.document.body) {
+                        }
+                        if (window.parent.document.body) {
                             window.parent.document.body.scrollTop = 0;
                         }
-                        // Also try window.parent.scrollTo as fallback
+                        window.parent.scrollTo({top: 0, behavior: 'instant'});
                         window.parent.scrollTo(0, 0);
                     } catch (e) {
-                        if (retries > 0) {
-                            setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
-                        }
+                        console.error('Scroll error:', e);
                     }
                 }
-                setTimeout(function() { scrollToTopResults(10); }, 500);
+                
+                // Execute immediately
+                forceScrollToTop();
+                
+                // Keep trying for 3 seconds to ensure it works
+                var attempts = 0;
+                var scrollInterval = setInterval(function() {
+                    forceScrollToTop();
+                    attempts++;
+                    if (attempts >= 15) {
+                        clearInterval(scrollInterval);
+                    }
+                }, 200);
             </script>
             """,
             height=0
@@ -798,8 +809,8 @@ def render_results_dashboard():
     
     # Recommended Actions Section
     st.markdown("---")
-    st.markdown(f'<h3 id="recommended-actions" style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions</h3>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem; font-size: 1.1rem;">Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey.</p>', unsafe_allow_html=True)
+    st.markdown(f'<h3 id="recommended-actions" style="color: {primary_color}; text-align: center; margin-top: 2rem;">🎯 Recommended Actions*</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem; font-size: 1.1rem;">*Based on your assessment, here are holistic insights and specific recommendations to accelerate your AI readiness journey. This assessment provides a high-level representation based on subjective inputs and should not be interpreted as definitive readiness without a thorough professional evaluation.</p>', unsafe_allow_html=True)
     
     # Analyze each dimension holistically
     dimension_analyses = []
