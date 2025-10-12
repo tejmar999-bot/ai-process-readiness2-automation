@@ -498,6 +498,34 @@ def create_radar_chart(dimension_scores):
 
 def render_results_dashboard():
     """Render the results dashboard"""
+    # Execute scroll to top FIRST, before rendering any content
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                function scrollToTopResults(retries) {
+                    try {
+                        // Use document.documentElement to bypass scroll-padding
+                        if (window.parent.document.documentElement) {
+                            window.parent.document.documentElement.scrollTop = 0;
+                        } else if (window.parent.document.body) {
+                            window.parent.document.body.scrollTop = 0;
+                        }
+                        // Also try window.parent.scrollTo as fallback
+                        window.parent.scrollTo(0, 0);
+                    } catch (e) {
+                        if (retries > 0) {
+                            setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
+                        }
+                    }
+                }
+                setTimeout(function() { scrollToTopResults(10); }, 500);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
+    
     # Calculate scores
     scores_data = compute_scores(st.session_state.answers)
     dimension_scores = scores_data['dimension_scores']
@@ -1019,34 +1047,6 @@ Dimension Breakdown:
         if st.button("Submit More Feedback"):
             st.session_state.feedback_submitted = False
             st.rerun()
-    
-    # Auto-scroll to top of results if flag is set (after all content is rendered)
-    if st.session_state.should_scroll_to_top:
-        components.html(
-            """
-            <script>
-                function scrollToTopResults(retries) {
-                    try {
-                        // Use document.documentElement to bypass scroll-padding
-                        if (window.parent.document.documentElement) {
-                            window.parent.document.documentElement.scrollTop = 0;
-                        } else if (window.parent.document.body) {
-                            window.parent.document.body.scrollTop = 0;
-                        }
-                        // Also try window.parent.scrollTo as fallback
-                        window.parent.scrollTo(0, 0);
-                    } catch (e) {
-                        if (retries > 0) {
-                            setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
-                        }
-                    }
-                }
-                setTimeout(function() { scrollToTopResults(10); }, 1000);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.should_scroll_to_top = False
 
 def main():
     """Main application function"""
