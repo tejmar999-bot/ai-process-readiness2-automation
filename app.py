@@ -498,45 +498,6 @@ def create_radar_chart(dimension_scores):
 
 def render_results_dashboard():
     """Render the results dashboard"""
-    # Execute scroll to top FIRST, before rendering any content
-    if st.session_state.should_scroll_to_top:
-        components.html(
-            """
-            <script>
-                function forceScrollToTop() {
-                    try {
-                        // Multiple scroll methods for maximum compatibility
-                        if (window.parent.document.documentElement) {
-                            window.parent.document.documentElement.scrollTop = 0;
-                        }
-                        if (window.parent.document.body) {
-                            window.parent.document.body.scrollTop = 0;
-                        }
-                        window.parent.scrollTo({top: 0, behavior: 'instant'});
-                        window.parent.scrollTo(0, 0);
-                    } catch (e) {
-                        console.error('Scroll error:', e);
-                    }
-                }
-                
-                // Execute immediately
-                forceScrollToTop();
-                
-                // Keep trying for 3 seconds to ensure it works
-                var attempts = 0;
-                var scrollInterval = setInterval(function() {
-                    forceScrollToTop();
-                    attempts++;
-                    if (attempts >= 15) {
-                        clearInterval(scrollInterval);
-                    }
-                }, 200);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.should_scroll_to_top = False
-    
     # Calculate scores
     scores_data = compute_scores(st.session_state.answers)
     dimension_scores = scores_data['dimension_scores']
@@ -545,7 +506,48 @@ def render_results_dashboard():
     readiness_band = scores_data['readiness_band']
     
     primary_color = st.session_state.primary_color
-    st.markdown(f'<div class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
+    st.markdown(f'<div id="assessment-results-header" class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
+    
+    # Scroll to header AFTER it's been rendered
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                function scrollToResultsHeader() {
+                    try {
+                        // Find the Assessment Results header by ID
+                        var header = window.parent.document.getElementById('assessment-results-header');
+                        if (header) {
+                            // Scroll the header into view at the top
+                            header.scrollIntoView({behavior: 'instant', block: 'start'});
+                            // Also set scroll position to ensure we're at top
+                            window.parent.scrollTo(0, 0);
+                        } else {
+                            // Fallback to position 0 if header not found
+                            window.parent.scrollTo(0, 0);
+                        }
+                    } catch (e) {
+                        console.error('Scroll error:', e);
+                        // Final fallback
+                        try {
+                            window.parent.scrollTo(0, 0);
+                        } catch (e2) {}
+                    }
+                }
+                
+                // Try immediately and keep retrying for 2 seconds
+                setTimeout(scrollToResultsHeader, 100);
+                setTimeout(scrollToResultsHeader, 300);
+                setTimeout(scrollToResultsHeader, 500);
+                setTimeout(scrollToResultsHeader, 800);
+                setTimeout(scrollToResultsHeader, 1200);
+                setTimeout(scrollToResultsHeader, 1600);
+                setTimeout(scrollToResultsHeader, 2000);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
     
     # Overall score cards
     col1, col2, col3 = st.columns(3)
