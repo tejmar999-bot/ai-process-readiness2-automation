@@ -137,12 +137,12 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo as sharp rectangle with no rounded corners
+            # Display logo as sharp rectangle matching title font size (2.5rem)
             st.markdown(
                 f"""
                 <div style="text-align: right;">
                     <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="width: 100px; height: auto; border-radius: 0; display: block; margin-left: auto;" />
+                         style="height: 2.5rem !important; width: auto !important; border-radius: 0 !important; display: block; margin-left: auto;" />
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -155,8 +155,13 @@ def render_footer():
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown(
         """
-        <div style="text-align: center; padding: 1rem 0; color: #9CA3AF; font-size: 0.9rem; border-top: 1px solid #374151; margin-top: 2rem;">
-            © T-Logic Training & Consulting Pvt. Ltd.
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; color: #9CA3AF; font-size: 0.9rem; border-top: 1px solid #374151; margin-top: 2rem;">
+            <div style="text-align: center; flex: 1;">
+                © T-Logic Training & Consulting Pvt. Ltd.
+            </div>
+            <div style="text-align: right;">
+                tlogicconsulting.com
+            </div>
         </div>
         """,
         unsafe_allow_html=True
