@@ -20,6 +20,7 @@ from db.operations import (
     get_team_dimension_averages,
     get_team_readiness_distribution
 )
+from utils.gmail_sender import send_assistance_request_email, send_feedback_email
 
 # Page configuration
 st.set_page_config(
@@ -914,21 +915,33 @@ def render_results_dashboard():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         if st.button("📧 Request Assistance from T-Logic", type="primary", use_container_width=True):
-            st.info("""
-            **Email integration is pending setup.**
+            # Send assistance request email
+            success, message = send_assistance_request_email(
+                user_name=st.session_state.user_name or "Anonymous",
+                user_email=st.session_state.user_email or "No email provided",
+                user_company=st.session_state.user_company or "Not specified",
+                assessment_results=scores_data
+            )
             
-            For assistance, please contact us at:
-            📧 info@tlogicconsulting.com
-            
-            Include:
-            - Your assessment results
-            - Specific areas where you need help
-            - Your contact information
-            
-            We'll get back to you within 24 hours!
-            """)
-            # TODO: Implement email sending functionality
-            # This will require SMTP credentials or email API integration
+            if success:
+                st.success("""
+                ✅ **Request sent successfully!**
+                
+                We've received your assistance request and will contact you at:
+                📧 """ + st.session_state.user_email + """
+                
+                Our team will reach out within 24 hours to discuss how we can help with your AI process implementation.
+                """)
+            else:
+                st.error(f"""
+                ❌ **Unable to send request automatically.**
+                
+                Please email us directly at: info@tlogicconsulting.com
+                
+                Include your assessment results and contact information.
+                
+                Error: {message}
+                """)
     
     # Action buttons
     st.markdown("---")
@@ -1000,11 +1013,21 @@ Dimension Breakdown:
         with col2:
             if st.button("📧 Submit Feedback", type="primary", use_container_width=True):
                 if feedback_text and feedback_text.strip():
-                    # For now, just save to session state and show confirmation
-                    # Email functionality will be added separately
-                    st.session_state.feedback_text = feedback_text
-                    st.session_state.feedback_submitted = True
-                    st.rerun()
+                    # Send feedback email
+                    success, message = send_feedback_email(
+                        user_name=st.session_state.user_name or "Anonymous",
+                        user_email=st.session_state.user_email or "No email provided",
+                        feedback_text=feedback_text,
+                        assessment_score=f"{total_score}/30 ({percentage}%)"
+                    )
+                    
+                    if success:
+                        st.session_state.feedback_text = feedback_text
+                        st.session_state.feedback_submitted = True
+                        st.rerun()
+                    else:
+                        st.error(f"Unable to send feedback automatically. Error: {message}")
+                        st.info("Please email your feedback to: info@tlogicconsulting.com")
                 else:
                     st.warning("Please enter your feedback before submitting.")
     else:
