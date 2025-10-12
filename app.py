@@ -281,39 +281,6 @@ def render_progress_bar():
         """,
         unsafe_allow_html=True
     )
-    
-    # Auto-scroll to first question if flag is set (for Next button and page transitions)
-    if st.session_state.should_scroll_to_top:
-        components.html(
-            """
-            <script>
-                function scrollToFirstQuestion(retries) {
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    var firstQuestion = window.parent.document.querySelector('#question-0');
-                    
-                    if (mainSection && firstQuestion) {
-                        // Get the position of the first question
-                        var questionRect = firstQuestion.getBoundingClientRect();
-                        var mainRect = mainSection.getBoundingClientRect();
-                        var scrollTop = mainSection.scrollTop;
-                        
-                        // Calculate scroll position: question position + current scroll - some offset for visibility
-                        var targetScroll = scrollTop + questionRect.top - mainRect.top - 20;
-                        
-                        mainSection.scrollTo({
-                            top: targetScroll,
-                            behavior: 'smooth'
-                        });
-                    } else if (retries > 0) {
-                        setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
-                    }
-                }
-                setTimeout(function() { scrollToFirstQuestion(10); }, 150);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.should_scroll_to_top = False
 
 def render_dimension_questions(dimension_idx):
     """Render questions for a specific dimension"""
@@ -387,6 +354,39 @@ def render_dimension_questions(dimension_idx):
         )
         # Clear the flag after scrolling
         st.session_state.scroll_to_question = None
+    
+    # Auto-scroll to first question if flag is set (for Next button and dimension changes)
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                function scrollToFirstQuestion(retries) {
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    var firstQuestion = window.parent.document.querySelector('#question-0');
+                    
+                    if (mainSection && firstQuestion) {
+                        // Get sticky header height for proper offset
+                        var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                        var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 200;
+                        
+                        // Get first question position
+                        var elementPosition = firstQuestion.offsetTop;
+                        var offsetPosition = elementPosition - stickyHeight - 30;
+                        
+                        mainSection.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    } else if (retries > 0) {
+                        setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
+                    }
+                }
+                setTimeout(function() { scrollToFirstQuestion(15); }, 200);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
 
 def render_navigation_buttons():
     """Render navigation buttons"""
@@ -506,23 +506,6 @@ def render_results_dashboard():
     
     primary_color = st.session_state.primary_color
     st.markdown(f'<div class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
-    
-    # Auto-scroll to top of results if flag is set
-    if st.session_state.should_scroll_to_top:
-        components.html(
-            """
-            <script>
-                setTimeout(function() {
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    if (mainSection) {
-                        mainSection.scrollTo(0, 0);
-                    }
-                }, 100);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.should_scroll_to_top = False
     
     # Overall score cards
     col1, col2, col3 = st.columns(3)
@@ -1035,6 +1018,29 @@ Dimension Breakdown:
         if st.button("Submit More Feedback"):
             st.session_state.feedback_submitted = False
             st.rerun()
+    
+    # Auto-scroll to top of results if flag is set (after all content is rendered)
+    if st.session_state.should_scroll_to_top:
+        components.html(
+            """
+            <script>
+                function scrollToTopResults(retries) {
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {
+                        mainSection.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    } else if (retries > 0) {
+                        setTimeout(function() { scrollToTopResults(retries - 1); }, 100);
+                    }
+                }
+                setTimeout(function() { scrollToTopResults(10); }, 300);
+            </script>
+            """,
+            height=0
+        )
+        st.session_state.should_scroll_to_top = False
 
 def main():
     """Main application function"""
