@@ -137,18 +137,10 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo (non-clickable)
-            st.markdown(
-                f"""
-                <div style="text-align: right; margin-top: 0.5rem;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo)}" 
-                         style="height: 2.5rem; width: auto; border-radius: 0px;" />
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            # Display logo with proper alignment
+            st.image(st.session_state.company_logo, width=100)
         else:
-            st.markdown(f"<div style='text-align: right; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center; margin-top: 0.5rem;'><strong>{st.session_state.company_name}</strong></div>", unsafe_allow_html=True)
 
 def render_branding_sidebar():
     """Render branding customization in sidebar"""
@@ -221,7 +213,7 @@ def render_progress_bar():
         z_index = len(DIMENSIONS) - i
         
         # Fixed width arrows with text wrapping - single line to avoid rendering issues
-        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 60px; width: 160px; min-width: 140px; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.7rem; font-weight: 600; text-align: center; padding: 0 22px; line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word;">{dim["title"]}</span></div>'
+        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 60px; width: 120px; min-width: 100px; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.65rem; font-weight: 600; text-align: center; padding: 0 18px; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word;">{dim["title"]}</span></div>'
         arrows_html += arrow_html
     
     arrows_html += '</div>'
@@ -1014,9 +1006,9 @@ def main():
             # Required fields
             col1, col2 = st.columns(2)
             with col1:
-                user_name = st.text_input("Name *", value=st.session_state.user_name, placeholder="e.g., John Smith")
+                user_name = st.text_input("Name *", value=st.session_state.user_name, placeholder="e.g., John Smith", key="user_name_input")
             with col2:
-                user_email = st.text_input("Email *", value=st.session_state.user_email, placeholder="e.g., john@company.com")
+                user_email = st.text_input("Email *", value=st.session_state.user_email, placeholder="e.g., john@company.com", key="user_email_input")
             
             # Optional fields
             col3, col4 = st.columns(2)
