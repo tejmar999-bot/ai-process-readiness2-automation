@@ -10,6 +10,7 @@ dependencies = [
     "google-auth-oauthlib>=1.2.2",
     "matplotlib>=3.10.7",
     "numpy>=2.3.3",
+    "openai>=2.3.0",
     "pandas>=2.3.3",
     "pillow>=11.3.0",
     "plotly>=6.3.1",

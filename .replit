@@ -93,4 +93,4 @@ localPort = 46481
 externalPort = 8080
 
 [agent]
-integrations = ["google-mail:1.0.0"]
+integrations = ["google-mail:1.0.0", "python_openai:1.0.0"]
