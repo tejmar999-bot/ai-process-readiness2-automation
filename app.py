@@ -143,6 +143,10 @@ def initialize_session_state():
         st.session_state.ai_insights_generated = False
     if 'ai_insights_text' not in st.session_state:
         st.session_state.ai_insights_text = ""
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "assessment"
+    if 'standalone_chat_messages' not in st.session_state:
+        st.session_state.standalone_chat_messages = []
 
 def render_header():
     """Render the main header with logo and branding"""
@@ -1187,12 +1191,145 @@ Dimension Breakdown:
             st.session_state.feedback_submitted = False
             st.rerun()
 
+def render_chatgpt_assistant():
+    """Render standalone ChatGPT AI assistant page"""
+    primary_color = st.session_state.primary_color
+    
+    # Header with logo
+    col1, col2 = st.columns([4, 1])
+    
+    with col1:
+        st.markdown(f'<div class="main-header" style="color: {primary_color};">🤖 ChatGPT AI Assistant</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sub-header">Chat with AI about anything - process improvement, AI strategy, or general questions</div>', unsafe_allow_html=True)
+    
+    with col2:
+        if st.session_state.company_logo is not None:
+            st.markdown(
+                f"""
+                <div style="text-align: right; width: 139px; height: 40px; overflow: hidden; margin-left: auto;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
+                         style="width: 100%; height: auto; display: block;" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+    
+    # Check if OpenAI API key is available
+    if not os.environ.get("OPENAI_API_KEY"):
+        st.error("💡 **OpenAI API key is not configured.** Please add your OPENAI_API_KEY to the environment secrets to use this feature.")
+        return
+    
+    st.markdown("---")
+    
+    # Display chat messages
+    chat_container = st.container()
+    with chat_container:
+        if st.session_state.standalone_chat_messages:
+            for msg in st.session_state.standalone_chat_messages:
+                role = msg['role']
+                content = msg['content']
+                
+                if role == 'user':
+                    st.markdown(f"""
+                    <div style="background-color: #1F2937; padding: 1rem; margin: 0.5rem 0; border-radius: 0.5rem; border-left: 3px solid {primary_color};">
+                        <strong style="color: {primary_color};">You:</strong><br>
+                        <span style="color: #E5E7EB;">{content}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div style="background-color: #374151; padding: 1rem; margin: 0.5rem 0; border-radius: 0.5rem;">
+                        <strong style="color: #10B981;">ChatGPT:</strong><br>
+                        <span style="color: #E5E7EB;">{content}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("👋 Welcome! I'm your AI assistant. Ask me anything about process improvement, AI strategy, or any general questions you have.")
+    
+    # Chat input at the bottom
+    st.markdown("---")
+    
+    # Use session state to manage input value for clearing after send
+    if 'chat_input_value' not in st.session_state:
+        st.session_state.chat_input_value = ""
+    
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        user_message = st.text_input(
+            "Type your message",
+            placeholder="Ask me anything...",
+            value=st.session_state.chat_input_value,
+            key="standalone_chat_input",
+            label_visibility="collapsed"
+        )
+    with col2:
+        send_button = st.button("Send", type="primary", use_container_width=True, key="standalone_send")
+    
+    if send_button and user_message and user_message.strip():
+        # Add user message to chat
+        st.session_state.standalone_chat_messages.append({
+            'role': 'user',
+            'content': user_message
+        })
+        
+        # Get AI response
+        with st.spinner("ChatGPT is thinking..."):
+            try:
+                messages = [{'role': msg['role'], 'content': msg['content']} for msg in st.session_state.standalone_chat_messages]
+                
+                ai_response = get_chat_response(messages, assessment_context=None)
+                
+                st.session_state.standalone_chat_messages.append({
+                    'role': 'assistant',
+                    'content': ai_response
+                })
+            except Exception as e:
+                st.session_state.standalone_chat_messages.append({
+                    'role': 'assistant',
+                    'content': f"I apologize, but I encountered an error: {str(e)}"
+                })
+        
+        # Clear input field after sending
+        st.session_state.chat_input_value = ""
+        st.rerun()
+    
+    # Clear chat button
+    if st.session_state.standalone_chat_messages:
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("🗑️ Clear Chat History", type="secondary", use_container_width=True):
+                st.session_state.standalone_chat_messages = []
+                st.rerun()
+    
+    # Back to assessment button
+    st.markdown("---")
+    if st.button("← Back to Assessment", type="secondary"):
+        st.session_state.current_page = "assessment"
+        st.rerun()
+
 def main():
     """Main application function"""
     initialize_session_state()
     
     # Render branding sidebar first
     render_branding_sidebar()
+    
+    # Add navigation in sidebar
+    with st.sidebar:
+        st.markdown("### 🧭 Navigation")
+        if st.button("📊 Assessment", use_container_width=True, type="primary" if st.session_state.current_page == "assessment" else "secondary"):
+            st.session_state.current_page = "assessment"
+            st.rerun()
+        if st.button("🤖 ChatGPT Assistant", use_container_width=True, type="primary" if st.session_state.current_page == "chatgpt" else "secondary"):
+            st.session_state.current_page = "chatgpt"
+            st.rerun()
+        st.markdown("---")
+    
+    # Route to appropriate page
+    if st.session_state.current_page == "chatgpt":
+        render_chatgpt_assistant()
+        render_footer()
+        return
     
     # Only render header on assessment pages, not on results page
     if not st.session_state.assessment_complete:
