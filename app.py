@@ -146,13 +146,13 @@ def render_header():
     
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo matching title size (40px = 2.5rem)
-            # Logo is pre-resized to 40px height via PIL, CSS provides fallback constraints
+            # Calculate scale factor: original height is 119px, we want 40px, so scale = 40/119 ≈ 0.336
+            # But the image is already resized to 40px by image_to_base64, so we display at 100% and constrain container
             st.markdown(
                 f"""
-                <div style="text-align: right;">
+                <div style="text-align: right; width: 139px; height: 40px; overflow: hidden; margin-left: auto;">
                     <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
-                         style="height: 40px; width: auto; border-radius: 0; display: block; margin-left: auto;" />
+                         style="width: 100%; height: auto; display: block;" />
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -506,7 +506,25 @@ def render_results_dashboard():
     readiness_band = scores_data['readiness_band']
     
     primary_color = st.session_state.primary_color
-    st.markdown(f'<div id="assessment-results-header" class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
+    
+    # Header with logo (same layout as home page)
+    col1, col2 = st.columns([4, 1])
+    
+    with col1:
+        st.markdown(f'<div id="assessment-results-header" class="main-header" style="color: {primary_color};">Assessment Results</div>', unsafe_allow_html=True)
+    
+    with col2:
+        if st.session_state.company_logo is not None:
+            # Display logo with fixed container dimensions
+            st.markdown(
+                f"""
+                <div style="text-align: right; width: 139px; height: 40px; overflow: hidden; margin-left: auto;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
+                         style="width: 100%; height: auto; display: block;" />
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
     
     # Scroll to header AFTER it's been rendered
     if st.session_state.should_scroll_to_top:

@@ -3,12 +3,12 @@
 ## Overview
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
-## Recent Changes (October 12, 2025)
+## Recent Changes (October 13, 2025)
+-   **Logo Added to Results Page**: Added T-Logic logo to top right corner of Results page, matching home page styling
 -   **Scroll Fixes Completed**: Fixed both critical scroll issues:
     - Continue button now scrolls to Question 1 at top of page (sets should_scroll_to_top flag)
     - Results page "Assessment Results" header now visible at top using scrollIntoView() with 3-second retry mechanism
 -   **Disclaimer Added**: Added asterisk and disclaimer to Recommended Actions section: "This assessment provides a high-level representation based on subjective inputs and should not be interpreted as definitive readiness without a thorough professional evaluation."
--   **Logo Size Update**: Increased logo to match app title size (2.5rem/40px) using PIL image resizing with CSS fallback constraints for reliable sizing across all browsers
 -   **Gmail Integration**: Connected all communication touchpoints to send emails to info@tlogicconsulting.com using Gmail API with OAuth authentication:
     - User registration: Sends email when "Continue" button pressed with all contact details
     - Assistance requests: Sends email with assessment results when assistance requested
