@@ -4,6 +4,12 @@
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
 ## Recent Changes (October 13, 2025)
+-   **AI Chat Assistant Integration**: Added OpenAI-powered AI chat assistant to results page with:
+    - Auto-generated personalized insights based on assessment results using GPT-5
+    - Interactive chat interface for asking questions about results
+    - Context-aware responses that understand the user's specific scores and readiness level
+    - Graceful error handling with user-friendly messages for API key issues, quota limits, and connection problems
+    - Server-side error logging for debugging
 -   **Logo Added to Results Page**: Added T-Logic logo to top right corner of Results page, matching home page styling
 -   **Scroll Fixes Completed**: Fixed both critical scroll issues:
     - Continue button now scrolls to Question 1 at top of page (sets should_scroll_to_top flag)
@@ -53,6 +59,7 @@ The backend employs a modular Python architecture with `app.py` as the controlle
 PostgreSQL is the chosen database, managed via SQLAlchemy ORM. It stores organizations, users, and assessment results. Static dimension and question data are defined in Python dictionaries.
 
 ### Features
+-   **AI Chat Assistant**: OpenAI-powered conversational assistant on the results page that provides personalized insights and answers questions about assessment results. Uses GPT-5 with context-aware responses based on user's scores and readiness level.
 -   **Report Generation**: Exports PDF and text reports using ReportLab and PIL, including executive summaries, radar charts, detailed analyses, and company branding.
 -   **Results Display**: Presents an interactive scoring model table that visually highlights the user's readiness level.
 -   **Branding Customization**: Allows users to upload a custom logo, set a primary brand color for UI theming, and define the company name, all persistent via session state.
@@ -76,6 +83,9 @@ PostgreSQL is the chosen database, managed via SQLAlchemy ORM. It stores organiz
 ### Report Generation
 -   ReportLab: PDF creation.
 -   PIL (Pillow): Image processing.
+
+### AI Integration
+-   OpenAI: GPT-5 model for AI chat assistant and personalized insights generation.
 
 ### Utilities
 -   Base64: Encoding for file handling.
