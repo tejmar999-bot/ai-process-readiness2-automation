@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import base64
+import os
 from io import BytesIO
 from PIL import Image
 from utils.scoring import compute_scores, get_readiness_band
@@ -21,6 +22,7 @@ from db.operations import (
     get_team_readiness_distribution
 )
 from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email
+from utils.ai_chat import get_chat_response, get_assessment_insights
 
 # Page configuration
 st.set_page_config(
@@ -135,6 +137,12 @@ def initialize_session_state():
         st.session_state.should_scroll_to_top = False
     if 'feedback_submitted' not in st.session_state:
         st.session_state.feedback_submitted = False
+    if 'chat_messages' not in st.session_state:
+        st.session_state.chat_messages = []
+    if 'ai_insights_generated' not in st.session_state:
+        st.session_state.ai_insights_generated = False
+    if 'ai_insights_text' not in st.session_state:
+        st.session_state.ai_insights_text = ""
 
 def render_header():
     """Render the main header with logo and branding"""
@@ -1032,6 +1040,112 @@ Dimension Breakdown:
             )
         except Exception as e:
             st.error(f"Error generating PDF: {str(e)}")
+    
+    # AI Chat Assistant Section
+    st.markdown("---")
+    st.markdown(f'<h3 style="color: {primary_color}; text-align: center; margin-top: 2rem;">🤖 AI Assistant</h3>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #9CA3AF; margin-bottom: 1.5rem;">Get personalized insights and ask questions about your assessment results</p>', unsafe_allow_html=True)
+    
+    # Check if OpenAI API key is available
+    if os.environ.get("OPENAI_API_KEY"):
+        # Generate AI insights if not already generated
+        if not st.session_state.ai_insights_generated:
+            with st.spinner("Generating AI insights about your assessment..."):
+                try:
+                    insights = get_assessment_insights(scores_data)
+                    st.session_state.ai_insights_text = insights
+                    st.session_state.ai_insights_generated = True
+                except Exception as e:
+                    st.session_state.ai_insights_text = f"Unable to generate insights: {str(e)}"
+                    st.session_state.ai_insights_generated = True
+        
+        # Display AI insights
+        if st.session_state.ai_insights_text:
+            st.markdown(f"""
+            <div style="background-color: #374151; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem; border-left: 4px solid {primary_color};">
+                <h4 style="color: {primary_color}; margin-bottom: 1rem;">💡 AI-Generated Insights</h4>
+                <p style="color: #E5E7EB; line-height: 1.6;">{st.session_state.ai_insights_text}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Chat interface
+        st.markdown("#### Ask the AI Assistant")
+        
+        # Display chat messages
+        if st.session_state.chat_messages:
+            for msg in st.session_state.chat_messages:
+                role = msg['role']
+                content = msg['content']
+                
+                if role == 'user':
+                    st.markdown(f"""
+                    <div style="background-color: #1F2937; padding: 1rem; margin: 0.5rem 0; border-radius: 0.5rem; border-left: 3px solid {primary_color};">
+                        <strong style="color: {primary_color};">You:</strong><br>
+                        <span style="color: #E5E7EB;">{content}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div style="background-color: #374151; padding: 1rem; margin: 0.5rem 0; border-radius: 0.5rem;">
+                        <strong style="color: #10B981;">AI Assistant:</strong><br>
+                        <span style="color: #E5E7EB;">{content}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        # Chat input
+        col1, col2 = st.columns([5, 1])
+        with col1:
+            user_question = st.text_input(
+                "Ask a question about your results",
+                placeholder="e.g., What should I prioritize first?",
+                key="chat_input",
+                label_visibility="collapsed"
+            )
+        with col2:
+            send_button = st.button("Send", type="primary", use_container_width=True)
+        
+        if send_button and user_question and user_question.strip():
+            # Add user message to chat
+            st.session_state.chat_messages.append({
+                'role': 'user',
+                'content': user_question
+            })
+            
+            # Prepare assessment context
+            assessment_context = {
+                'total_score': scores_data['total'],
+                'readiness_band': scores_data['readiness_band']['label'],
+                'dimension_scores': scores_data['dimension_scores']
+            }
+            
+            # Get AI response
+            with st.spinner("AI is thinking..."):
+                try:
+                    # Convert chat messages to OpenAI format
+                    messages = [{'role': msg['role'], 'content': msg['content']} for msg in st.session_state.chat_messages]
+                    
+                    ai_response = get_chat_response(messages, assessment_context)
+                    
+                    # Add AI response to chat
+                    st.session_state.chat_messages.append({
+                        'role': 'assistant',
+                        'content': ai_response
+                    })
+                except Exception as e:
+                    st.session_state.chat_messages.append({
+                        'role': 'assistant',
+                        'content': f"I apologize, but I encountered an error: {str(e)}"
+                    })
+            
+            st.rerun()
+        
+        # Clear chat button
+        if st.session_state.chat_messages:
+            if st.button("🗑️ Clear Chat", type="secondary"):
+                st.session_state.chat_messages = []
+                st.rerun()
+    else:
+        st.info("💡 **AI Assistant is not configured.** To enable AI-powered insights and chat, please configure your OpenAI API key in the environment variables.")
     
     # Feedback Section
     st.markdown("---")
