@@ -46,11 +46,23 @@ def get_chat_response(messages, assessment_context=None):
     
     try:
         client = get_openai_client()
-        response = client.chat.completions.create(
-            model="gpt-5",
-            messages=all_messages,
-            max_tokens=1000
-        )
+        
+        # Get model from environment variable, default to gpt-5 if not set
+        model = os.environ.get("OPENAI_MODEL", "gpt-5")
+        
+        # Prepare API parameters
+        api_params = {
+            "model": model,
+            "messages": all_messages,
+            "max_tokens": 1000
+        }
+        
+        # Note: gpt-5 doesn't support temperature parameter, but other models do
+        # Only add temperature for non-gpt-5 models
+        if model != "gpt-5":
+            api_params["temperature"] = 0.7
+        
+        response = client.chat.completions.create(**api_params)
         return response.choices[0].message.content
     except ValueError as e:
         # API key not configured
