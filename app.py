@@ -77,6 +77,13 @@ st.markdown("""
     font-size: 1.1rem;
     margin: 0.25rem 0;
 }
+/* Black text on orange/primary buttons */
+button[kind="primary"] {
+    color: #000000 !important;
+}
+button[kind="primary"] p {
+    color: #000000 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
