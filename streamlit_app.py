@@ -103,27 +103,37 @@ if st.session_state.messages:
         mime="text/plain",
     )
 
-    if PDF_SUPPORTED:
-        def make_pdf_bytes(text: str) -> bytes:
-            pdf = FPDF()
-            pdf.set_auto_page_break(auto=True, margin=15)
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-            for line in text.split('\n'):
-                pdf.multi_cell(0, 7, line)
-            bio = io.BytesIO()
-            pdf.output(bio)
-            return bio.getvalue()
+import unicodedata
 
-        pdf_bytes = make_pdf_bytes(transcript_text)
-        st.download_button(
-            label="Download transcript (PDF)",
-            data=pdf_bytes,
-            file_name="ai_readiness_transcript.pdf",
-            mime="application/pdf",
-        )
-    else:
-        st.info("PDF export not available. To enable it, add 'fpdf' to requirements.txt.")
+def _sanitize_for_pdf(text: str) -> str:
+    """
+    Normalize and strip non-ASCII characters for FPDF (latin-1) compatibility.
+    We attempt to preserve readability by removing accents and unsupported symbols.
+    """
+    if not isinstance(text, str):
+        return ''
+    # Normalize accents, etc.
+    normalized = unicodedata.normalize('NFKD', text)
+    # Encode to ASCII bytes (drop unsupported chars), then decode back to str
+    ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
+    return ascii_only
+
+def make_pdf_bytes(text: str) -> bytes:
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # sanitize entire text to avoid unicode encode issues in FPDF
+    clean_text = _sanitize_for_pdf(text)
+
+    # write using multi_cell which will wrap long lines
+    for line in clean_text.split('\n'):
+        pdf.multi_cell(0, 7, line)
+
+    bio = io.BytesIO()
+    pdf.output(bio)
+    return bio.getvalue()
 
 # Optional reset button
 if st.button("Start New Assessment"):
