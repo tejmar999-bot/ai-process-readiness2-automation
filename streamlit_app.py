@@ -1,6 +1,7 @@
 import streamlit as st
 import io
 import datetime
+import os
 
 # Optional: PDF generation via fpdf
 try:
@@ -103,37 +104,88 @@ if st.session_state.messages:
         mime="text/plain",
     )
 
-import unicodedata
+    # Unicode-capable PDF export using a bundled TTF font (DejaVuSans)
+    # To enable full Unicode PDF output, add a TTF font file to your repo (recommended path: ./fonts/DejaVuSans.ttf)
+    # If the font is not found, the code falls back to ASCII-sanitized PDF generation.
 
-def _sanitize_for_pdf(text: str) -> str:
-    """
-    Normalize and strip non-ASCII characters for FPDF (latin-1) compatibility.
-    We attempt to preserve readability by removing accents and unsupported symbols.
-    """
-    if not isinstance(text, str):
-        return ''
-    # Normalize accents, etc.
-    normalized = unicodedata.normalize('NFKD', text)
-    # Encode to ASCII bytes (drop unsupported chars), then decode back to str
-    ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
-    return ascii_only
+    FONT_PATHS = [
+        os.path.join(os.getcwd(), 'fonts', 'DejaVuSans.ttf'),
+        os.path.join(os.getcwd(), 'DejaVuSans.ttf'),
+    ]
+    found_font = None
+    for p in FONT_PATHS:
+        if os.path.isfile(p):
+            found_font = p
+            break
 
-def make_pdf_bytes(text: str) -> bytes:
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    if PDF_SUPPORTED and found_font:
+        def make_pdf_bytes_unicode(text: str) -> bytes:
+            # Register and use the TTF font with FPDF for full UTF-8 support
+            pdf = FPDF()
+            try:
+                pdf.add_page()
+                # register font; family name 'DejaVu'
+                pdf.add_font('DejaVu', '', found_font, uni=True)
+                pdf.set_auto_page_break(auto=True, margin=15)
+                pdf.set_font('DejaVu', size=12)
+                for line in text.split('\n'):
+                    pdf.multi_cell(0, 7, line)
+                bio = io.BytesIO()
+                pdf.output(bio)
+                return bio.getvalue()
+            except Exception as e:
+                # if anything goes wrong, fall back to ascii-safe generator
+                st.warning(f"Unicode PDF generation failed, falling back to ASCII-safe PDF: {e}")
+                return make_pdf_bytes_ascii(text)
 
-    # sanitize entire text to avoid unicode encode issues in FPDF
-    clean_text = _sanitize_for_pdf(text)
+        def make_pdf_bytes_ascii(text: str) -> bytes:
+            # Simple ASCII sanitization
+            import unicodedata
+            normalized = unicodedata.normalize('NFKD', text)
+            ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            for line in ascii_only.split('\n'):
+                pdf.multi_cell(0, 7, line)
+            bio = io.BytesIO()
+            pdf.output(bio)
+            return bio.getvalue()
 
-    # write using multi_cell which will wrap long lines
-    for line in clean_text.split('\n'):
-        pdf.multi_cell(0, 7, line)
+        pdf_bytes = make_pdf_bytes_unicode(transcript_text)
+        st.download_button(
+            label="Download transcript (PDF)",
+            data=pdf_bytes,
+            file_name="ai_readiness_transcript.pdf",
+            mime="application/pdf",
+        )
+    elif PDF_SUPPORTED:
+        # Font not found: inform the user and offer ascii-safe PDF
+        st.info("Unicode font not found in repository. To enable full Unicode PDF export, add 'fonts/DejaVuSans.ttf' to your repo and redeploy. An ASCII-safe PDF will be generated instead.")
+        def make_pdf_bytes_ascii(text: str) -> bytes:
+            import unicodedata
+            normalized = unicodedata.normalize('NFKD', text)
+            ascii_only = normalized.encode('ascii', 'ignore').decode('ascii')
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            for line in ascii_only.split('\n'):
+                pdf.multi_cell(0, 7, line)
+            bio = io.BytesIO()
+            pdf.output(bio)
+            return bio.getvalue()
 
-    bio = io.BytesIO()
-    pdf.output(bio)
-    return bio.getvalue()
+        pdf_bytes = make_pdf_bytes_ascii(transcript_text)
+        st.download_button(
+            label="Download transcript (PDF)",
+            data=pdf_bytes,
+            file_name="ai_readiness_transcript.pdf",
+            mime="application/pdf",
+        )
+    else:
+        st.info("PDF export not available. To enable PDF export, install the 'fpdf' package (pip install fpdf).")
 
 # Optional reset button
 if st.button("Start New Assessment"):
@@ -142,7 +194,8 @@ if st.button("Start New Assessment"):
 
 st.markdown(
     """---
-    **Note:** This tool provides general guidance based on your inputs and does not replace a professional evaluation.\n
+    **Note:** This tool provides general guidance based on your inputs and does not replace a professional evaluation.
+
     © T-Logic Consulting LLP
     """
 )
