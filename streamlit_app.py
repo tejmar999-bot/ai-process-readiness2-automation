@@ -188,9 +188,21 @@ if st.session_state.messages:
         st.info("PDF export not available. To enable PDF export, install the 'fpdf' package (pip install fpdf).")
 
 # Optional reset button
+# Optional reset button (cross-version safe)
 if st.button("Start New Assessment"):
+    # clear conversation state
     st.session_state.messages = []
-    st.experimental_rerun()
+
+    # If Streamlit provides the experimental rerun helper, use it.
+    # Otherwise give a user-friendly instruction and stop execution so the page remains in a clean state.
+    rerun_fn = getattr(st, "experimental_rerun", None)
+    if callable(rerun_fn):
+        rerun_fn()
+    else:
+        st.success("Session cleared — please refresh the page to start a new assessment.")
+        # stop script here to avoid executing the rest of the file during the same run
+        st.stop()
+
 
 st.markdown(
     """---
