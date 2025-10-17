@@ -77,6 +77,13 @@ button[kind="primary"] {
 button[kind="primary"] p {
     color: #000000 !important;
 }
+/* White text for Continue button on home page only */
+button.continue-home-btn {
+    color: #FFFFFF !important;
+}
+button.continue-home-btn p {
+    color: #FFFFFF !important;
+}
 </style>
 """,
             unsafe_allow_html=True)
@@ -1485,8 +1492,26 @@ def main():
             can_continue = bool(user_name
                                 and user_name.strip()) and is_valid_email
 
+            # Apply white text styling to Continue button
+            components.html("""
+                <script>
+                    (function() {
+                        // Find all primary buttons
+                        var buttons = window.parent.document.querySelectorAll('button[kind="primary"]');
+                        
+                        // Find the Continue button by its text content
+                        buttons.forEach(function(btn) {
+                            if (btn.textContent.includes('Continue')) {
+                                btn.classList.add('continue-home-btn');
+                            }
+                        });
+                    })();
+                </script>
+                """, height=0)
+            
             if st.button("Continue", type="primary",
-                         disabled=not can_continue):
+                         disabled=not can_continue,
+                         key="continue_button_home"):
                 # Save user info to session state
                 st.session_state.user_name = user_name
                 st.session_state.user_email = user_email
