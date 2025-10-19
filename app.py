@@ -1438,7 +1438,7 @@ def main():
         # Show user info collection form if not yet collected
         if not st.session_state.user_info_collected:
             st.markdown("### 👤 Your Information")
-            st.markdown("Please enter your details to begin the assessment.")
+            st.markdown("Please enter your details to begin the assessment. (First two fields are required)")
 
             # Required fields
             col1, col2 = st.columns(2)
