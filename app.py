@@ -396,26 +396,35 @@ def render_dimension_questions(dimension_idx):
     if st.session_state.should_scroll_to_top:
         components.html("""
             <script>
-                function scrollToFirstQuestion(retries) {
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    var firstQuestion = window.parent.document.querySelector('#question-0');
+                (function() {
+                    var attempts = 0;
+                    var maxAttempts = 30;
                     
-                    if (firstQuestion && mainSection) {
-                        // Calculate position accounting for sticky header
-                        var elementPosition = firstQuestion.offsetTop;
+                    function scrollToFirstQuestion() {
+                        attempts++;
+                        var mainSection = window.parent.document.querySelector('section.main');
+                        var firstQuestion = window.parent.document.querySelector('#question-0');
                         var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
-                        var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 300;
-                        var offsetPosition = elementPosition - stickyHeight - 20;
                         
-                        mainSection.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-                    } else if (retries > 0) {
-                        setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
+                        if (firstQuestion && mainSection && stickyHeader) {
+                            // Calculate position accounting for sticky header
+                            var rect = firstQuestion.getBoundingClientRect();
+                            var currentScroll = mainSection.scrollTop;
+                            var stickyHeight = stickyHeader.offsetHeight;
+                            var targetScroll = currentScroll + rect.top - stickyHeight - 40;
+                            
+                            mainSection.scrollTo({
+                                top: targetScroll,
+                                behavior: 'smooth'
+                            });
+                        } else if (attempts < maxAttempts) {
+                            setTimeout(scrollToFirstQuestion, 200);
+                        }
                     }
-                }
-                setTimeout(function() { scrollToFirstQuestion(15); }, 200);
+                    
+                    // Start after 800ms delay
+                    setTimeout(scrollToFirstQuestion, 800);
+                })();
             </script>
             """,
                         height=0)
@@ -556,27 +565,35 @@ def render_results_dashboard():
     if st.session_state.should_scroll_to_top:
         components.html("""
             <script>
-                function scrollToResultsHeader(retries) {
-                    try {
-                        var mainSection = window.parent.document.querySelector('section.main');
-                        var header = window.parent.document.getElementById('assessment-results-header');
-                        
-                        if (header && mainSection) {
-                            // Scroll to top to ensure header is fully visible
-                            mainSection.scrollTo({
-                                top: 0,
-                                behavior: 'smooth'
-                            });
-                        } else if (retries > 0) {
-                            setTimeout(function() { scrollToResultsHeader(retries - 1); }, 100);
+                (function() {
+                    var attempts = 0;
+                    var maxAttempts = 30;
+                    
+                    function scrollToResultsHeader() {
+                        attempts++;
+                        try {
+                            var mainSection = window.parent.document.querySelector('section.main');
+                            var header = window.parent.document.getElementById('assessment-results-header');
+                            
+                            if (header && mainSection) {
+                                // Scroll to absolute top of the page
+                                mainSection.scrollTo({
+                                    top: 0,
+                                    behavior: 'smooth'
+                                });
+                            } else if (attempts < maxAttempts) {
+                                setTimeout(scrollToResultsHeader, 200);
+                            }
+                        } catch (e) {
+                            if (attempts < maxAttempts) {
+                                setTimeout(scrollToResultsHeader, 200);
+                            }
                         }
-                    } catch (e) {
-                        console.error('Scroll error:', e);
                     }
-                }
-                
-                // Start scrolling with retries
-                setTimeout(function() { scrollToResultsHeader(15); }, 200);
+                    
+                    // Start after 800ms delay
+                    setTimeout(scrollToResultsHeader, 800);
+                })();
             </script>
             """,
                         height=0)
