@@ -392,43 +392,44 @@ def render_dimension_questions(dimension_idx):
         # Clear the flag after scrolling
         st.session_state.scroll_to_question = None
 
-    # Auto-scroll to first question if flag is set (for Next button and dimension changes)
-    if st.session_state.should_scroll_to_top:
-        components.html("""
-            <script>
-                (function() {
-                    var attempts = 0;
-                    var maxAttempts = 30;
+    # Auto-scroll to first question on EVERY dimension page load
+    # Use timestamp to ensure script executes on every render
+    import time
+    scroll_timestamp = int(time.time() * 1000)
+    components.html(f"""
+        <script data-scroll-trigger="{scroll_timestamp}">
+            (function() {{
+                var attempts = 0;
+                var maxAttempts = 30;
+                
+                function scrollToFirstQuestion() {{
+                    attempts++;
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    var firstQuestion = window.parent.document.querySelector('#question-0');
+                    var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
                     
-                    function scrollToFirstQuestion() {
-                        attempts++;
-                        var mainSection = window.parent.document.querySelector('section.main');
-                        var firstQuestion = window.parent.document.querySelector('#question-0');
-                        var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                    if (firstQuestion && mainSection && stickyHeader) {{
+                        // Calculate position accounting for sticky header
+                        var rect = firstQuestion.getBoundingClientRect();
+                        var currentScroll = mainSection.scrollTop;
+                        var stickyHeight = stickyHeader.offsetHeight;
+                        var targetScroll = currentScroll + rect.top - stickyHeight - 40;
                         
-                        if (firstQuestion && mainSection && stickyHeader) {
-                            // Calculate position accounting for sticky header
-                            var rect = firstQuestion.getBoundingClientRect();
-                            var currentScroll = mainSection.scrollTop;
-                            var stickyHeight = stickyHeader.offsetHeight;
-                            var targetScroll = currentScroll + rect.top - stickyHeight - 40;
-                            
-                            mainSection.scrollTo({
-                                top: targetScroll,
-                                behavior: 'smooth'
-                            });
-                        } else if (attempts < maxAttempts) {
-                            setTimeout(scrollToFirstQuestion, 200);
-                        }
-                    }
-                    
-                    // Start after 800ms delay
-                    setTimeout(scrollToFirstQuestion, 800);
-                })();
-            </script>
-            """,
-                        height=0)
-        st.session_state.should_scroll_to_top = False
+                        mainSection.scrollTo({{
+                            top: targetScroll,
+                            behavior: 'smooth'
+                        }});
+                    }} else if (attempts < maxAttempts) {{
+                        setTimeout(scrollToFirstQuestion, 200);
+                    }}
+                }}
+                
+                // Start after 800ms delay
+                setTimeout(scrollToFirstQuestion, 800);
+            }})();
+        </script>
+        """,
+                    height=0)
 
 
 def render_navigation_buttons():
@@ -561,43 +562,43 @@ def render_results_dashboard():
                 """,
                         unsafe_allow_html=True)
 
-    # Scroll to header AFTER it's been rendered
-    if st.session_state.should_scroll_to_top:
-        components.html("""
-            <script>
-                (function() {
-                    var attempts = 0;
-                    var maxAttempts = 30;
-                    
-                    function scrollToResultsHeader() {
-                        attempts++;
-                        try {
-                            var mainSection = window.parent.document.querySelector('section.main');
-                            var header = window.parent.document.getElementById('assessment-results-header');
-                            
-                            if (header && mainSection) {
-                                // Scroll to absolute top of the page
-                                mainSection.scrollTo({
-                                    top: 0,
-                                    behavior: 'smooth'
-                                });
-                            } else if (attempts < maxAttempts) {
-                                setTimeout(scrollToResultsHeader, 200);
-                            }
-                        } catch (e) {
-                            if (attempts < maxAttempts) {
-                                setTimeout(scrollToResultsHeader, 200);
-                            }
-                        }
-                    }
-                    
-                    // Start after 800ms delay
-                    setTimeout(scrollToResultsHeader, 800);
-                })();
-            </script>
-            """,
-                        height=0)
-        st.session_state.should_scroll_to_top = False
+    # Scroll to position (0,0) on Results page load
+    # Use timestamp to ensure script executes on every render
+    import time
+    scroll_timestamp = int(time.time() * 1000)
+    components.html(f"""
+        <script data-scroll-trigger="{scroll_timestamp}">
+            (function() {{
+                var attempts = 0;
+                var maxAttempts = 30;
+                
+                function scrollToTop() {{
+                    attempts++;
+                    try {{
+                        var mainSection = window.parent.document.querySelector('section.main');
+                        
+                        if (mainSection) {{
+                            // Scroll to absolute top position (0,0)
+                            mainSection.scrollTo({{
+                                top: 0,
+                                behavior: 'smooth'
+                            }});
+                        }} else if (attempts < maxAttempts) {{
+                            setTimeout(scrollToTop, 200);
+                        }}
+                    }} catch (e) {{
+                        if (attempts < maxAttempts) {{
+                            setTimeout(scrollToTop, 200);
+                        }}
+                    }}
+                }}
+                
+                // Start after 800ms delay
+                setTimeout(scrollToTop, 800);
+            }})();
+        </script>
+        """,
+                    height=0)
 
     # Overall score cards
     col1, col2, col3 = st.columns(3)
