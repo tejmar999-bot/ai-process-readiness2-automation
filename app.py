@@ -576,41 +576,55 @@ def render_results_dashboard():
                 """,
                         unsafe_allow_html=True)
 
-    # Force scroll to position (0,0) on Results page load
-    import time
-    results_scroll_id = f"results_scroll_{int(time.time() * 1000)}"
-    components.html(f"""
-        <script id="{results_scroll_id}">
-            (function() {{
-                var maxRetries = 50;
-                var retryCount = 0;
-                
-                function forceScrollToTop() {{
-                    retryCount++;
+    # CRITICAL: Force scroll to (0,0) when Results page loads
+    # Try multiple approaches aggressively
+    st.markdown("""
+        <script>
+            // Method 1: Try all possible scroll targets immediately and repeatedly
+            function scrollEverythingToTop() {
+                try {
+                    // Try scrolling parent window
+                    if (window.parent) {
+                        window.parent.scrollTo(0, 0);
+                        window.parent.scroll(0, 0);
+                    }
                     
-                    try {{
-                        var mainSection = window.parent.document.querySelector('section.main');
-                        
-                        if (mainSection) {{
-                            // Force instant scroll to absolute top (0,0)
-                            mainSection.scrollTop = 0;
-                            mainSection.scrollLeft = 0;
-                        }} else if (retryCount < maxRetries) {{
-                            setTimeout(forceScrollToTop, 100);
-                        }}
-                    }} catch(e) {{
-                        if (retryCount < maxRetries) {{
-                            setTimeout(forceScrollToTop, 100);
-                        }}
-                    }}
-                }}
-                
-                // Start immediately
-                forceScrollToTop();
-            }})();
+                    // Try scrolling main section
+                    var mainSection = window.parent.document.querySelector('section.main');
+                    if (mainSection) {
+                        mainSection.scrollTop = 0;
+                        mainSection.scrollLeft = 0;
+                        mainSection.scrollTo(0, 0);
+                    }
+                    
+                    // Try scrolling body and html
+                    if (window.parent.document.body) {
+                        window.parent.document.body.scrollTop = 0;
+                        window.parent.document.documentElement.scrollTop = 0;
+                    }
+                    
+                    // Try scrolling the stApp container
+                    var stApp = window.parent.document.querySelector('.stApp');
+                    if (stApp) {
+                        stApp.scrollTop = 0;
+                    }
+                } catch(e) {
+                    // Ignore errors
+                }
+            }
+            
+            // Execute immediately
+            scrollEverythingToTop();
+            
+            // Execute again after short delays to catch late-loading elements
+            setTimeout(scrollEverythingToTop, 50);
+            setTimeout(scrollEverythingToTop, 150);
+            setTimeout(scrollEverythingToTop, 300);
+            setTimeout(scrollEverythingToTop, 500);
+            setTimeout(scrollEverythingToTop, 800);
+            setTimeout(scrollEverythingToTop, 1200);
         </script>
-        """,
-                    height=0)
+        """, unsafe_allow_html=True)
 
     # Overall score cards
     col1, col2, col3 = st.columns(3)
