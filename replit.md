@@ -3,7 +3,15 @@
 ## Overview
 This project is a Streamlit-based web application designed to assess an organization's readiness for AI process implementation. It guides users through a questionnaire across six key dimensions, providing visual analytics, scoring, and actionable recommendations. The tool aims to help organizations understand their AI adoption preparedness, generate comprehensive reports (including PDF exports), and offer industry benchmarking. The ultimate goal is to facilitate smoother AI integration and strategic planning.
 
-## Recent Changes (October 13, 2025)
+## Recent Changes (October 19, 2025)
+-   **Scroll Behavior Complete Rewrite**: Implemented robust scroll functionality across all pages using direct scrollTop assignment:
+    - Home page: Scrolls to position (0,0) on load and when Retake Assessment clicked
+    - Dimension pages (1-6): Scroll to top first, then position Question 1 below sticky header with proper spacing
+    - Results page: Scrolls to position (0,0) on load showing "Assessment Results" at top
+    - Technical approach: Uses instant scrollTop assignment with 50 retry attempts, unique script IDs per render, immediate execution
+    - All scroll behaviors verified with end-to-end playwright testing
+
+## Previous Changes (October 13, 2025)
 -   **AI Chat Assistant Integration**: Added OpenAI-powered AI chat assistant to results page with:
     - Auto-generated personalized insights based on assessment results using GPT-5
     - Interactive chat interface for asking questions about results

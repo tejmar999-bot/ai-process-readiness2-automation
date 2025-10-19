@@ -392,40 +392,54 @@ def render_dimension_questions(dimension_idx):
         # Clear the flag after scrolling
         st.session_state.scroll_to_question = None
 
-    # Auto-scroll to first question on EVERY dimension page load
-    # Use timestamp to ensure script executes on every render
+    # Force scroll on dimension page - use multiple retry attempts with instant scrolling
     import time
-    scroll_timestamp = int(time.time() * 1000)
+    scroll_id = f"scroll_{st.session_state.current_dimension}_{int(time.time() * 1000)}"
     components.html(f"""
-        <script data-scroll-trigger="{scroll_timestamp}">
+        <script id="{scroll_id}">
             (function() {{
-                var attempts = 0;
-                var maxAttempts = 30;
+                var maxRetries = 50;
+                var retryCount = 0;
+                var scrolled = false;
                 
-                function scrollToFirstQuestion() {{
-                    attempts++;
-                    var mainSection = window.parent.document.querySelector('section.main');
-                    var firstQuestion = window.parent.document.querySelector('#question-0');
-                    var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                function forceScroll() {{
+                    retryCount++;
                     
-                    if (firstQuestion && mainSection && stickyHeader) {{
-                        // Calculate position accounting for sticky header
-                        var rect = firstQuestion.getBoundingClientRect();
-                        var currentScroll = mainSection.scrollTop;
-                        var stickyHeight = stickyHeader.offsetHeight;
-                        var targetScroll = currentScroll + rect.top - stickyHeight - 40;
+                    try {{
+                        var mainSection = window.parent.document.querySelector('section.main');
                         
-                        mainSection.scrollTo({{
-                            top: targetScroll,
-                            behavior: 'smooth'
-                        }});
-                    }} else if (attempts < maxAttempts) {{
-                        setTimeout(scrollToFirstQuestion, 200);
+                        if (mainSection && !scrolled) {{
+                            // Force instant scroll to top first
+                            mainSection.scrollTop = 0;
+                            
+                            // Then find question and scroll to proper position
+                            setTimeout(function() {{
+                                var firstQuestion = window.parent.document.querySelector('#question-0');
+                                var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                                
+                                if (firstQuestion && stickyHeader) {{
+                                    var headerHeight = stickyHeader.offsetHeight || 300;
+                                    var questionTop = firstQuestion.offsetTop;
+                                    var targetPosition = Math.max(0, questionTop - headerHeight - 50);
+                                    
+                                    mainSection.scrollTop = targetPosition;
+                                    scrolled = true;
+                                }}
+                            }}, 100);
+                        }}
+                        
+                        if (!scrolled && retryCount < maxRetries) {{
+                            setTimeout(forceScroll, 100);
+                        }}
+                    }} catch(e) {{
+                        if (retryCount < maxRetries) {{
+                            setTimeout(forceScroll, 100);
+                        }}
                     }}
                 }}
                 
-                // Start after 800ms delay
-                setTimeout(scrollToFirstQuestion, 800);
+                // Start immediately
+                forceScroll();
             }})();
         </script>
         """,
@@ -562,39 +576,37 @@ def render_results_dashboard():
                 """,
                         unsafe_allow_html=True)
 
-    # Scroll to position (0,0) on Results page load
-    # Use timestamp to ensure script executes on every render
+    # Force scroll to position (0,0) on Results page load
     import time
-    scroll_timestamp = int(time.time() * 1000)
+    results_scroll_id = f"results_scroll_{int(time.time() * 1000)}"
     components.html(f"""
-        <script data-scroll-trigger="{scroll_timestamp}">
+        <script id="{results_scroll_id}">
             (function() {{
-                var attempts = 0;
-                var maxAttempts = 30;
+                var maxRetries = 50;
+                var retryCount = 0;
                 
-                function scrollToTop() {{
-                    attempts++;
+                function forceScrollToTop() {{
+                    retryCount++;
+                    
                     try {{
                         var mainSection = window.parent.document.querySelector('section.main');
                         
                         if (mainSection) {{
-                            // Scroll to absolute top position (0,0)
-                            mainSection.scrollTo({{
-                                top: 0,
-                                behavior: 'smooth'
-                            }});
-                        }} else if (attempts < maxAttempts) {{
-                            setTimeout(scrollToTop, 200);
+                            // Force instant scroll to absolute top (0,0)
+                            mainSection.scrollTop = 0;
+                            mainSection.scrollLeft = 0;
+                        }} else if (retryCount < maxRetries) {{
+                            setTimeout(forceScrollToTop, 100);
                         }}
-                    }} catch (e) {{
-                        if (attempts < maxAttempts) {{
-                            setTimeout(scrollToTop, 200);
+                    }} catch(e) {{
+                        if (retryCount < maxRetries) {{
+                            setTimeout(forceScrollToTop, 100);
                         }}
                     }}
                 }}
                 
-                // Start after 800ms delay
-                setTimeout(scrollToTop, 800);
+                // Start immediately
+                forceScrollToTop();
             }})();
         </script>
         """,
@@ -1458,6 +1470,42 @@ def main():
     if not st.session_state.assessment_complete:
         # Show user info collection form if not yet collected
         if not st.session_state.user_info_collected:
+            # Force scroll to (0,0) on home page load
+            import time
+            home_scroll_id = f"home_scroll_{int(time.time() * 1000)}"
+            components.html(f"""
+                <script id="{home_scroll_id}">
+                    (function() {{
+                        var maxRetries = 50;
+                        var retryCount = 0;
+                        
+                        function forceScrollToTop() {{
+                            retryCount++;
+                            
+                            try {{
+                                var mainSection = window.parent.document.querySelector('section.main');
+                                
+                                if (mainSection) {{
+                                    // Force instant scroll to absolute top (0,0)
+                                    mainSection.scrollTop = 0;
+                                    mainSection.scrollLeft = 0;
+                                }} else if (retryCount < maxRetries) {{
+                                    setTimeout(forceScrollToTop, 100);
+                                }}
+                            }} catch(e) {{
+                                if (retryCount < maxRetries) {{
+                                    setTimeout(forceScrollToTop, 100);
+                                }}
+                            }}
+                        }}
+                        
+                        // Start immediately
+                        forceScrollToTop();
+                    }})();
+                </script>
+                """,
+                            height=0)
+            
             st.markdown("### 👤 Your Information")
             st.markdown(f'<p><strong style="color: #FFFFFF;">Please enter your details to begin the assessment</strong> <span style="color: #FFFFFF;">(First two fields with * are required)</span></p>', unsafe_allow_html=True)
 
