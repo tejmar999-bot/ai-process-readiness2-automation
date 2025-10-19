@@ -1507,9 +1507,11 @@ def main():
                         });
                     })();
                 </script>
-                """, height=0)
-            
-            if st.button("Continue", type="primary",
+                """,
+                            height=0)
+
+            if st.button("Continue",
+                         type="primary",
                          disabled=not can_continue,
                          key="continue_button_home"):
                 # Save user info to session state
