@@ -397,13 +397,19 @@ def render_dimension_questions(dimension_idx):
         components.html("""
             <script>
                 function scrollToFirstQuestion(retries) {
+                    var mainSection = window.parent.document.querySelector('section.main');
                     var firstQuestion = window.parent.document.querySelector('#question-0');
                     
-                    if (firstQuestion) {
-                        // Use scrollIntoView with CSS scroll-padding handling sticky header
-                        firstQuestion.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
+                    if (firstQuestion && mainSection) {
+                        // Calculate position accounting for sticky header
+                        var elementPosition = firstQuestion.offsetTop;
+                        var stickyHeader = window.parent.document.querySelector('.sticky-header-container');
+                        var stickyHeight = stickyHeader ? stickyHeader.offsetHeight : 300;
+                        var offsetPosition = elementPosition - stickyHeight - 20;
+                        
+                        mainSection.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
                         });
                     } else if (retries > 0) {
                         setTimeout(function() { scrollToFirstQuestion(retries - 1); }, 100);
