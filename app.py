@@ -1438,7 +1438,7 @@ def main():
         # Show user info collection form if not yet collected
         if not st.session_state.user_info_collected:
             st.markdown("### 👤 Your Information")
-            st.markdown(f'<p style="color: {st.session_state.primary_color};"><strong>Please enter your details to begin the assessment <span style="color: #FFFFFF;">(First two fields with * are required)</span></strong></p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {st.session_state.primary_color};"><strong>Please enter your details to begin the assessment</strong> <span style="color: #FFFFFF;">(First two fields with * are required)</span></p>', unsafe_allow_html=True)
 
             # Required fields
             col1, col2 = st.columns(2)
