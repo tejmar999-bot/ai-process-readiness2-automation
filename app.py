@@ -556,30 +556,27 @@ def render_results_dashboard():
     if st.session_state.should_scroll_to_top:
         components.html("""
             <script>
-                function scrollToResultsHeader() {
+                function scrollToResultsHeader(retries) {
                     try {
-                        // Find the Assessment Results header by ID
+                        var mainSection = window.parent.document.querySelector('section.main');
                         var header = window.parent.document.getElementById('assessment-results-header');
                         
-                        if (header) {
-                            // Simply scroll the header into view at the top
-                            header.scrollIntoView({behavior: 'instant', block: 'start'});
+                        if (header && mainSection) {
+                            // Scroll to top to ensure header is fully visible
+                            mainSection.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        } else if (retries > 0) {
+                            setTimeout(function() { scrollToResultsHeader(retries - 1); }, 100);
                         }
                     } catch (e) {
                         console.error('Scroll error:', e);
                     }
                 }
                 
-                // Try immediately and keep retrying for 3 seconds
-                setTimeout(scrollToResultsHeader, 100);
-                setTimeout(scrollToResultsHeader, 300);
-                setTimeout(scrollToResultsHeader, 500);
-                setTimeout(scrollToResultsHeader, 800);
-                setTimeout(scrollToResultsHeader, 1200);
-                setTimeout(scrollToResultsHeader, 1600);
-                setTimeout(scrollToResultsHeader, 2000);
-                setTimeout(scrollToResultsHeader, 2500);
-                setTimeout(scrollToResultsHeader, 3000);
+                // Start scrolling with retries
+                setTimeout(function() { scrollToResultsHeader(15); }, 200);
             </script>
             """,
                         height=0)
