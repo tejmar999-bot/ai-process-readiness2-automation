@@ -3,3 +3,4 @@ streamlit>=1.24.0
 plotly>=5.15.0
 fpdf>=1.7.2
 pandas>=2.0.0
+Pillow
