@@ -15,7 +15,7 @@ def _ensure_text(s: Any) -> str:
 def generate_pdf_report(results: Dict[str, Any], font_path: str = None) -> bytes:
     """
     Generate a compact PDF report for AI-Enabled Process Readiness.
-    Returns bytes usable by Streamlit's download_button.
+    Returns bytes usable by Streamlit's download_button or tests.
     """
     try:
         pdf = FPDF(format="A4")
@@ -111,3 +111,4 @@ def generate_pdf_report(results: Dict[str, Any], font_path: str = None) -> bytes
             return bytes(out)
         except Exception:
             return b"%PDF-1.4\n%PDF-fallback\n"
+
