@@ -5,12 +5,14 @@ import datetime
 import os
 from typing import Any, Dict
 
+
 def _ensure_text(s: Any) -> str:
     if s is None:
         return ""
     if isinstance(s, (list, tuple)):
         return "\n".join(str(x) for x in s)
     return str(s)
+
 
 def generate_pdf_report(results: Dict[str, Any], font_path: str = None) -> bytes:
     """
@@ -111,4 +113,3 @@ def generate_pdf_report(results: Dict[str, Any], font_path: str = None) -> bytes
             return bytes(out)
         except Exception:
             return b"%PDF-1.4\n%PDF-fallback\n"
-
