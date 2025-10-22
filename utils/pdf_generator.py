@@ -112,4 +112,4 @@ def generate_pdf_report(results: Dict[str, Any], font_path: str = None) -> bytes
                 return out.encode("latin-1", errors="ignore")
             return bytes(out)
         except Exception:
-            return b"%PDF-1.4\n%PDF-fallback\n"
+            return b"%PDF-1.4\n%PDF-fallback\n'
