@@ -10,7 +10,7 @@ def compute_scores(answers):
                  where first number is dimension, second is question
     
     Returns:
-        Dictionary with dimension_scores (list) and total score
+        Dictionary with dimension_scores (list), total score, percentage, and readiness_band
     """
     dimension_scores = []
     
@@ -35,11 +35,17 @@ def compute_scores(answers):
     
     # Total score is sum of all dimension scores
     total_score = sum(dimension_scores)
+    total_score_rounded = round(total_score, 1)
+    percentage = round((total_score / 30) * 100)  # 30 is max (6 dimensions * 5)
+    
+    # Get readiness band
+    readiness_band = get_readiness_band(total_score_rounded)
     
     return {
         'dimension_scores': dimension_scores,
-        'total': round(total_score, 1),
-        'percentage': round((total_score / 30) * 100)  # 30 is max (6 dimensions * 5)
+        'total': total_score_rounded,
+        'percentage': percentage,
+        'readiness_band': readiness_band
     }
 
 
