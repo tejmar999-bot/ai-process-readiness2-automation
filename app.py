@@ -550,10 +550,20 @@ def render_results_dashboard():
     """Render the results dashboard"""
     # Calculate scores
     scores_data = compute_scores(st.session_state.answers)
-    dimension_scores = scores_data['dimension_scores']
+    dimension_scores_raw = scores_data['dimension_scores']
     total_score = scores_data['total']
     percentage = scores_data['percentage']
     readiness_band = scores_data['readiness_band']
+    
+    # Format dimension scores for display (combine with dimension info)
+    dimension_scores = []
+    for i, score in enumerate(dimension_scores_raw):
+        dimension_scores.append({
+            'title': DIMENSIONS[i]['title'],
+            'score': score,
+            'color': DIMENSIONS[i]['color'],
+            'description': DIMENSIONS[i]['description']
+        })
 
     primary_color = st.session_state.primary_color
 
