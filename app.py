@@ -565,6 +565,9 @@ def render_results_dashboard():
             'color': DIMENSIONS[i]['color'],
             'description': DIMENSIONS[i]['description']
         })
+    
+    # Update scores_data with formatted dimension scores for benchmark comparison
+    scores_data['dimension_scores'] = dimension_scores
 
     primary_color = st.session_state.primary_color
 
