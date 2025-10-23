@@ -173,12 +173,11 @@ def render_header():
 
     with col2:
         if st.session_state.company_logo is not None:
-            # Calculate scale factor: original height is 119px, we want 40px, so scale = 40/119 ≈ 0.336
-            # But the image is already resized to 40px by image_to_base64, so we display at 100% and constrain container
+            # Logo sized proportionally to headline text (2.5rem ≈ 40px, so logo at 70px for visual balance)
             st.markdown(f"""
-                <div style="text-align: right; width: 139px; height: 40px; overflow: hidden; margin-left: auto;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
-                         style="width: 100%; height: auto; display: block;" />
+                <div style="text-align: right; height: 70px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=70)}" 
+                         style="height: 70px; width: auto; display: block;" />
                 </div>
                 """,
                         unsafe_allow_html=True)
@@ -581,11 +580,11 @@ def render_results_dashboard():
 
     with col2:
         if st.session_state.company_logo is not None:
-            # Display logo with fixed container dimensions
+            # Logo sized proportionally to headline text (2.5rem ≈ 40px, so logo at 70px for visual balance)
             st.markdown(f"""
-                <div style="text-align: right; width: 139px; height: 40px; overflow: hidden; margin-left: auto;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=40)}" 
-                         style="width: 100%; height: auto; display: block;" />
+                <div style="text-align: right; height: 70px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=70)}" 
+                         style="height: 70px; width: auto; display: block;" />
                 </div>
                 """,
                         unsafe_allow_html=True)
