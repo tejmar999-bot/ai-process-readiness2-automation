@@ -173,11 +173,11 @@ def render_header():
 
     with col2:
         if st.session_state.company_logo is not None:
-            # Logo sized proportionally to headline text (2.5rem ≈ 40px, so logo at 70px for visual balance)
+            # Logo sized at 105px (50% larger than previous 70px)
             st.markdown(f"""
-                <div style="text-align: right; height: 70px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=70)}" 
-                         style="height: 70px; width: auto; display: block;" />
+                <div style="text-align: right; height: 105px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=105)}" 
+                         style="height: 105px; width: auto; display: block; border: none; background: transparent;" />
                 </div>
                 """,
                         unsafe_allow_html=True)
@@ -580,11 +580,11 @@ def render_results_dashboard():
 
     with col2:
         if st.session_state.company_logo is not None:
-            # Logo sized proportionally to headline text (2.5rem ≈ 40px, so logo at 70px for visual balance)
+            # Logo sized at 105px (50% larger than previous 70px)
             st.markdown(f"""
-                <div style="text-align: right; height: 70px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
-                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=70)}" 
-                         style="height: 70px; width: auto; display: block;" />
+                <div style="text-align: right; height: 105px; overflow: visible; margin-left: auto; display: flex; align-items: center; justify-content: flex-end;">
+                    <img src="data:image/png;base64,{image_to_base64(st.session_state.company_logo, max_height=105)}" 
+                         style="height: 105px; width: auto; display: block; border: none; background: transparent;" />
                 </div>
                 """,
                         unsafe_allow_html=True)
