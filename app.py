@@ -559,6 +559,7 @@ def render_results_dashboard():
     dimension_scores = []
     for i, score in enumerate(dimension_scores_raw):
         dimension_scores.append({
+            'id': DIMENSIONS[i]['id'],
             'title': DIMENSIONS[i]['title'],
             'score': score,
             'color': DIMENSIONS[i]['color'],

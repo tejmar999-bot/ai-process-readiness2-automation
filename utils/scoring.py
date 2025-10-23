@@ -1,28 +1,30 @@
 """Scoring utilities for the AI Process Readiness Assessment"""
 
+from data.dimensions import DIMENSIONS
+
 
 def compute_scores(answers):
     """
     Compute scores for each dimension and total score.
     
     Args:
-        answers: Dictionary with keys like '0-0', '0-1', etc.
-                 where first number is dimension, second is question
+        answers: Dictionary with question IDs as keys (e.g., 'proc_doc', 'data_quality')
+                 and scores (1-5) as values
     
     Returns:
         Dictionary with dimension_scores (list), total score, percentage, and readiness_band
     """
     dimension_scores = []
     
-    # There are 6 dimensions, each with 5 questions
-    for dim in range(6):
+    # Calculate score for each dimension based on its questions
+    for dimension in DIMENSIONS:
         dim_total = 0
         question_count = 0
         
-        for q in range(5):
-            key = f"{dim}-{q}"
-            if key in answers:
-                dim_total += answers[key]
+        for question in dimension['questions']:
+            question_id = question['id']
+            if question_id in answers:
+                dim_total += answers[question_id]
                 question_count += 1
         
         # Calculate average for this dimension (out of 5)
