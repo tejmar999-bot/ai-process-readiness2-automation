@@ -1,3 +1,25 @@
+# --- BEGIN: robust startup wrapper (auto-insert) ---
+# This wrapper catches import-time exceptions and prints a full traceback
+# so Streamlit Cloud logs contain the real error (useful for debugging).
+import sys, traceback, os
+
+def _write_startup_log(exc_info):
+    try:
+        with open("startup_error.log", "w", encoding="utf-8") as fh:
+            fh.write("=== Startup exception traceback ===\n")
+            traceback.print_exception(*exc_info, file=fh)
+    except Exception:
+        pass
+
+try:
+    # We don't run the rest of the app here; the real app content will be appended below.
+    pass
+except Exception:
+    traceback.print_exc()
+    _write_startup_log(sys.exc_info())
+    raise
+
+# When the file below (original app) runs, any exception at import time will be visible in logs.
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
