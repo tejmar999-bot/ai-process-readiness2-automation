@@ -5,3 +5,4 @@ fpdf>=1.7.2
 pandas>=2.0.0
 Pillow
 sqlalchemy==2.0.43
+SQLAlchemy>=2.0.0
