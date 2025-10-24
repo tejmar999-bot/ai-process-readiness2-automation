@@ -1,4 +1,3 @@
-cat > run_app.py <<'PY'
 #!/usr/bin/env python3
 """
 run_app.py — Start Streamlit on the first available port (8501..8510).
@@ -123,6 +122,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-PY
 
-chmod +x run_app.py
+
