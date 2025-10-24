@@ -4,6 +4,3 @@ port = 8501
 enableCORS = false
 enableXsrfProtection = false
 runOnSave = true
-
-# ✅ Automatically find a free port if 8501 is already used
-autoSelectPort = true
