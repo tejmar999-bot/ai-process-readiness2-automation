@@ -4,3 +4,4 @@ plotly>=5.15.0
 fpdf>=1.7.2
 pandas>=2.0.0
 Pillow
+sqlalchemy==2.0.43
