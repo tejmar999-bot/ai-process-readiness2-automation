@@ -1,6 +1,6 @@
 # utils/pdf_generator.py
 
-from fpdf2 import FPDF
+from fpdf import FPDF
 import datetime
 import os
 from typing import Any, Dict
