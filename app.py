@@ -673,8 +673,16 @@ def create_dimension_breakdown_chart(dimension_scores):
     percentages = [(score['score'] / 5) * 100 for score in dimension_scores]
     colors = [score['color'] for score in dimension_scores]
 
-    # Create text labels with score and percentage
+    # Create text labels with score and percentage, positioned inside bars when possible
     text_labels = [f"{val:.1f}/5 ({pct:.0f}%)" for val, pct in zip(values, percentages)]
+    text_positions = []
+    
+    # Position text inside bar if there's enough space, otherwise outside
+    for val in values:
+        if val > 2.5:
+            text_positions.append('inside')
+        else:
+            text_positions.append('outside')
 
     fig = go.Figure()
 
@@ -685,7 +693,8 @@ def create_dimension_breakdown_chart(dimension_scores):
             orientation='h',
             marker=dict(color=colors),
             text=text_labels,
-            textposition='outside',
+            textposition=text_positions,
+            textfont=dict(size=12, color=['#000000' if pos == 'inside' else '#E5E7EB' for pos in text_positions]),
             hovertemplate='<b>%{y}</b><br>Score: %{x:.1f}/5<extra></extra>',
             showlegend=False
         )
@@ -696,7 +705,8 @@ def create_dimension_breakdown_chart(dimension_scores):
             range=[0, 5],
             tickfont=dict(color='#9CA3AF', size=11),
             gridcolor='rgba(255,255,255,0.1)',
-            showgrid=True
+            showgrid=True,
+            title='Score'
         ),
         yaxis=dict(
             tickfont=dict(color='#E5E7EB', size=12),
@@ -705,8 +715,8 @@ def create_dimension_breakdown_chart(dimension_scores):
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#E5E7EB'),
-        height=350,
-        margin=dict(l=200, r=150, t=20, b=20)
+        height=450,
+        margin=dict(l=200, r=150, t=40, b=40)
     )
 
     return fig
@@ -1012,53 +1022,6 @@ def render_results_dashboard():
     st.markdown("### Dimension Breakdown")
     fig = create_dimension_breakdown_chart(dimension_scores)
     st.plotly_chart(fig, use_container_width=True)
-
-    # Dimension scores breakdown
-    st.markdown("### Detailed Scores by Dimension")
-
-    for i, score_data in enumerate(dimension_scores):
-        dimension = DIMENSIONS[i]
-        col1, col2 = st.columns([3, 1])
-
-        with col1:
-            st.markdown(f"""
-            <div style="padding: 1rem; background-color: #374151; border-radius: 0.5rem; margin: 0.5rem 0;">
-                <h4 style="color: {dimension['color']}; margin-bottom: 0.5rem;">{score_data['title']}</h4>
-                <p style="color: #9CA3AF; font-size: 0.9rem;">{dimension['description']}</p>
-            </div>
-            """,
-                        unsafe_allow_html=True)
-
-        with col2:
-            # Map scores to labels
-            score_labels = {
-                1: "Weak",
-                2: "Needs Work",
-                3: "Average",
-                4: "Good",
-                5: "Excellent"
-            }
-            score = score_data['score']
-            label = score_labels.get(score, "Average")
-            percentage = (score / 5) * 100
-
-            # Adjust font size based on label length to fit in oval
-            font_size = "0.7rem" if len(label) > 8 else "0.8rem"
-
-            st.markdown(f"""
-            <div style="text-align: center; padding: 1rem;">
-                <div style="font-size: 1.5rem; font-weight: bold; color: {dimension['color']};">
-                    {score_data['score']}/5
-                </div>
-                <div style="color: #9CA3AF; font-size: 0.9rem; margin-top: 0.25rem;">
-                    ({percentage:.0f}%)
-                </div>
-                <div style="margin-top: 0.5rem;">
-                    <span style="display: inline-block; background-color: #D4C5B9; color: #000000; padding: 0.4rem 1rem; border-radius: 50px; min-width: 100px; font-size: {font_size}; font-weight: 600;">{label}</span>
-                </div>
-            </div>
-            """,
-                        unsafe_allow_html=True)
 
     # Benchmark Comparison Section
     st.markdown("---")
