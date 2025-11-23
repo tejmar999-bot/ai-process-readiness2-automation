@@ -165,30 +165,30 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
             idx, score, name = scored_dims[i]
             if score < 3.0:
                 if name == "Process Maturity":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Develop and document standardized processes. Implement performance metrics and tracking systems.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Develop and document standardized processes. Implement performance metrics and tracking systems.")
                 elif name == "Technology Infrastructure":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Modernize technology stack and ensure systems are reliable. Invest in automation capabilities.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Modernize technology stack and ensure systems are reliable. Invest in automation capabilities.")
                 elif name == "Data Readiness":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Improve data accessibility and standardization. Ensure data quality across systems.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Improve data accessibility and standardization. Ensure data quality across systems.")
                 elif name == "People & Culture":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Invest in training and change management. Foster a culture of experimentation and continuous learning.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Invest in training and change management. Foster a culture of experimentation and continuous learning.")
                 elif name == "Leadership & Alignment":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Secure leadership commitment and clearly communicate strategic priorities. Allocate sufficient resources for transformation.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Secure leadership commitment and clearly communicate strategic priorities. Allocate sufficient resources for transformation.")
                 elif name == "Governance & Risk":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Define clear roles and responsibilities. Establish risk management and compliance processes.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Define clear roles and responsibilities. Establish risk management and compliance processes.")
             else:
                 if name == "Process Maturity":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Maintain process discipline. Continuously improve through measurement and optimization.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Maintain process discipline. Continuously improve through measurement and optimization.")
                 elif name == "Technology Infrastructure":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Continue modernizing systems. Expand automation and integrate new tools.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Continue modernizing systems. Expand automation and integrate new tools.")
                 elif name == "Data Readiness":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Advance data governance. Implement advanced analytics capabilities.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Advance data governance. Implement advanced analytics capabilities.")
                 elif name == "People & Culture":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Deepen AI literacy. Build centers of excellence and expand innovation programs.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Deepen AI literacy. Build centers of excellence and expand innovation programs.")
                 elif name == "Leadership & Alignment":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Reinforce strategic vision. Scale successful initiatives across the organization.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Reinforce strategic vision. Scale successful initiatives across the organization.")
                 elif name == "Governance & Risk":
-                    recommendations.append(f"• {name} ({score:.1f}/5): Strengthen governance frameworks. Expand compliance and risk monitoring.")
+                    recommendations.append(f"- {name} ({score:.1f}/5): Strengthen governance frameworks. Expand compliance and risk monitoring.")
         
         for rec in recommendations:
             pdf.multi_cell(0, 5, rec)
@@ -208,9 +208,12 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
         out = pdf.output(dest="S")
         if isinstance(out, str):
             try:
-                return out.encode("latin-1")
+                return out.encode("utf-8")
             except Exception:
-                return out.encode("utf-8", errors="ignore")
+                try:
+                    return out.encode("latin-1", errors="ignore")
+                except Exception:
+                    return out.encode("utf-8", errors="ignore")
         else:
             return bytes(out)
 
