@@ -1291,32 +1291,92 @@ def render_results_dashboard():
         if st.button("📧 Request Assistance from T-Logic",
                      type="primary",
                      use_container_width=True):
-            # Send assistance request email
-            success, message = send_assistance_request_email(
-                user_name=st.session_state.user_name or "Anonymous",
-                user_email=st.session_state.user_email or "No email provided",
-                user_company=st.session_state.user_company or "Not specified",
-                assessment_results=scores_data)
+            st.session_state.show_assistance_dialog = True
+    
+    # Assistance Request Dialog
+    if st.session_state.get("show_assistance_dialog", False):
+        st.markdown("---")
+        st.markdown(
+            f'<h4 style="color: {primary_color}; text-align: center;">📧 Request Assistance</h4>',
+            unsafe_allow_html=True)
+        
+        # Initialize form fields in session state if not present
+        if 'assistance_name' not in st.session_state:
+            st.session_state.assistance_name = st.session_state.user_name or ""
+        if 'assistance_email' not in st.session_state:
+            st.session_state.assistance_email = st.session_state.user_email or ""
+        if 'assistance_query' not in st.session_state:
+            st.session_state.assistance_query = ""
+        
+        # Form fields
+        st.session_state.assistance_name = st.text_input(
+            "Your Name",
+            value=st.session_state.assistance_name,
+            key="assistance_name_input"
+        )
+        
+        st.session_state.assistance_email = st.text_input(
+            "Your Email Address",
+            value=st.session_state.assistance_email,
+            key="assistance_email_input"
+        )
+        
+        st.session_state.assistance_query = st.text_area(
+            "Your Query or Question",
+            value=st.session_state.assistance_query,
+            placeholder="Tell us what you'd like help with...",
+            height=120,
+            key="assistance_query_input"
+        )
+        
+        # Action buttons
+        col_submit, col_cancel = st.columns(2)
+        
+        with col_submit:
+            if st.button("Submit", type="primary", use_container_width=True):
+                # Validate fields
+                if not st.session_state.assistance_name.strip():
+                    st.error("Please enter your name.")
+                elif not st.session_state.assistance_email.strip():
+                    st.error("Please enter your email address.")
+                elif not st.session_state.assistance_query.strip():
+                    st.error("Please enter your query or question.")
+                else:
+                    # Send assistance request email
+                    success, message = send_assistance_request_email(
+                        user_name=st.session_state.assistance_name,
+                        user_email=st.session_state.assistance_email,
+                        query=st.session_state.assistance_query,
+                        assessment_results=scores_data)
 
-            if success:
-                st.success("""
-                ✅ **Request sent successfully!**
-                
-                We've received your assistance request and will contact you at:
-                📧 """ + st.session_state.user_email + """
-                
-                Our team will reach out within 24 hours to discuss how we can help with your AI process implementation.
-                """)
-            else:
-                st.error(f"""
-                ❌ **Unable to send request automatically.**
-                
-                Please email us directly at: info@tlogicconsulting.com
-                
-                Include your assessment results and contact information.
-                
-                Error: {message}
-                """)
+                    if success:
+                        st.success("""
+                        ✅ **Request sent successfully!**
+                        
+                        We've received your assistance request and will contact you at:
+                        📧 """ + st.session_state.assistance_email + """
+                        
+                        Our team will reach out within 24 hours to discuss how we can help with your AI process implementation.
+                        """)
+                        # Clear dialog
+                        st.session_state.show_assistance_dialog = False
+                        st.session_state.assistance_name = ""
+                        st.session_state.assistance_email = ""
+                        st.session_state.assistance_query = ""
+                        st.rerun()
+                    else:
+                        st.error(f"""
+                        ❌ **Unable to send request automatically.**
+                        
+                        Please email us directly at: tej@tlogic.consulting
+                        
+                        Error: {message}
+                        """)
+        
+        with col_cancel:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state.show_assistance_dialog = False
+                st.rerun()
 
     # Action buttons
     st.markdown("---")

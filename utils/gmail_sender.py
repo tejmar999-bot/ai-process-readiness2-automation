@@ -185,12 +185,12 @@ Sent from AI Process Readiness Assessment Tool
     
     return send_email('info@tlogicconsulting.com', subject, body_text, body_html)
 
-def send_assistance_request_email(user_name, user_email, user_company, assessment_results):
+def send_assistance_request_email(user_name, user_email, query=None, assessment_results=None):
     """Send assistance request email to T-Logic"""
-    subject = f"Assistance Request from {user_name} - {user_company}"
+    subject = f"Assistance Request from {user_name}"
     
-    total_score = assessment_results.get('total', 'N/A')
-    readiness_level = assessment_results.get('readiness_band', {}).get('label', 'N/A')
+    total_score = assessment_results.get('total', 'N/A') if assessment_results else 'N/A'
+    readiness_level = assessment_results.get('readiness_band', {}).get('label', 'N/A') if assessment_results else 'N/A'
     
     body_text = f"""
 New Assistance Request from AI Process Readiness Assessment
@@ -198,13 +198,13 @@ New Assistance Request from AI Process Readiness Assessment
 Contact Information:
 - Name: {user_name}
 - Email: {user_email}
-- Company: {user_company}
+
+Query:
+{query if query else 'No specific query provided'}
 
 Assessment Results:
 - Total Score: {total_score}/30
 - Readiness Level: {readiness_level}
-
-The user has requested assistance with implementing AI process improvements.
 
 ---
 Sent from AI Process Readiness Assessment Tool
@@ -219,8 +219,12 @@ Sent from AI Process Readiness Assessment Tool
     <ul>
         <li><strong>Name:</strong> {user_name}</li>
         <li><strong>Email:</strong> {user_email}</li>
-        <li><strong>Company:</strong> {user_company}</li>
     </ul>
+    
+    <h3>Query:</h3>
+    <p style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+        {query.replace(chr(10), '<br>') if query else 'No specific query provided'}
+    </p>
     
     <h3>Assessment Results:</h3>
     <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;">
@@ -228,12 +232,10 @@ Sent from AI Process Readiness Assessment Tool
         <p><strong>Readiness Level:</strong> {readiness_level}</p>
     </div>
     
-    <p style="margin-top: 20px;">The user has requested assistance with implementing AI process improvements.</p>
-    
     <hr style="margin-top: 30px;">
     <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>
 </body>
 </html>
 """
     
-    return send_email('info@tlogicconsulting.com', subject, body_text, body_html)
+    return send_email('tej@tlogic.consulting', subject, body_text, body_html)
