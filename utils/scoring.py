@@ -61,21 +61,19 @@ def get_readiness_band(total_score):
     Returns:
         Dictionary with label, color, and description
     """
-    percentage = (total_score / 30) * 100
-    
-    if percentage < 40:
+    if total_score < 11:
         return {
             'label': 'Foundational',
-            'color': '#FFC107',
+            'color': '#DC2626',
             'description': 'First critical steps being laid.'
         }
-    elif percentage < 60:
+    elif total_score < 18:
         return {
             'label': 'Emerging',
-            'color': '#FF8A65',
+            'color': '#EAB308',
             'description': 'Progress being made.'
         }
-    elif percentage < 80:
+    elif total_score < 25:
         return {
             'label': 'Reliable',
             'color': '#42A5F5',
@@ -84,6 +82,6 @@ def get_readiness_band(total_score):
     else:
         return {
             'label': 'Exceptional',
-            'color': '#4CAF50',
+            'color': '#16A34A',
             'description': 'Best-in-class process performance.'
         }

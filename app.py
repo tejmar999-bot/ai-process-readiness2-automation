@@ -940,28 +940,28 @@ def render_results_dashboard():
     # Define scoring model data
     scoring_model = [{
         "range": "0-10",
-        "level": "🟥 Not Ready",
-        "meaning": "Foundational work needed before AI introduction",
+        "level": "🟥 Foundational",
+        "meaning": "First critical steps being laid",
         "min": 0,
         "max": 10
     }, {
         "range": "11-17",
-        "level": "🟧 Emerging",
-        "meaning": "Some digital and process maturity; pilot-level readiness",
+        "level": "🟨 Emerging",
+        "meaning": "Progress being made",
         "min": 11,
         "max": 17
     }, {
         "range": "18-24",
-        "level": "🟨 Ready",
+        "level": "🟦 Reliable",
         "meaning":
-        "Data, processes, and leadership alignment in place for scaled AI use",
+        "Consistent and dependable",
         "min": 18,
         "max": 24
     }, {
         "range": "25-30",
-        "level": "🟩 Advanced",
+        "level": "🟩 Exceptional",
         "meaning":
-        "AI-ready culture and infrastructure for sustainable transformation",
+        "Best-in-class process performance",
         "min": 25,
         "max": 30
     }]
@@ -969,10 +969,10 @@ def render_results_dashboard():
     # Create table with clean, properly aligned cells
     # Map emoji colors to their hex equivalents for CSS squares
     color_map = {
-        "🟥 Not Ready": ("#DC2626", "Not Ready"),
-        "🟧 Emerging": ("#F97316", "Emerging"),
-        "🟨 Ready": ("#EAB308", "Ready"),
-        "🟩 Advanced": ("#16A34A", "Advanced")
+        "🟥 Foundational": ("#DC2626", "Foundational"),
+        "🟨 Emerging": ("#EAB308", "Emerging"),
+        "🟦 Reliable": ("#42A5F5", "Reliable"),
+        "🟩 Exceptional": ("#16A34A", "Exceptional")
     }
 
     # Build table rows
