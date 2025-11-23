@@ -204,9 +204,11 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
         )
         pdf.multi_cell(0, 4, disclaimer)
 
-        # Produce PDF as string then convert to bytes (safe for different fpdf builds)
-        out = pdf.output(dest="S")
-        if isinstance(out, str):
+        # Produce PDF and ensure we return bytes
+        out = pdf.output()
+        if isinstance(out, bytes):
+            return out
+        elif isinstance(out, str):
             try:
                 return out.encode("utf-8")
             except Exception:
@@ -215,7 +217,8 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
                 except Exception:
                     return out.encode("utf-8", errors="ignore")
         else:
-            return bytes(out)
+            # Last resort: call output with specific parameters
+            return pdf.output(dest="S").encode("utf-8")
 
     except Exception as e:
         # If something goes wrong, return a small PDF with the error message so you can download and inspect it
