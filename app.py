@@ -294,7 +294,7 @@ def render_header():
             f'<div class="main-header" style="color: {st.session_state.primary_color};">AI-Enabled Process Readiness</div>',
             unsafe_allow_html=True)
         st.markdown(
-            '<div class="sub-header">Quick self-assessment for process improvement leaders (6 dimensions, ~ 5 minutes)</div>',
+            '<div class="sub-header">Quick self-assessment for process improvement leaders (6 dimensions, ~ 10 minutes)</div>',
             unsafe_allow_html=True)
 
     with col2:
