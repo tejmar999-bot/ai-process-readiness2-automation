@@ -38,36 +38,36 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'proc_doc',
-                'text': 'Are your processes documented and standardized?',
+                'id': 'proc_defined',
+                'text': 'How well-defined and repeatable are your core processes?',
                 'answer_choices': {
-                    1: 'No documentation',
-                    2: 'Basic documentation',
-                    3: 'Documented',
-                    4: 'Standardized',
-                    5: 'Fully standardized & optimized'
+                    1: 'Ad hoc processes',
+                    2: 'Partially defined',
+                    3: 'Well-defined',
+                    4: 'Highly standardized',
+                    5: 'Fully optimized & repeatable'
                 }
             },
             {
-                'id': 'proc_metrics',
-                'text': 'Are performance metrics tracked regularly?',
+                'id': 'proc_compliance',
+                'text': 'How consistently do teams follow documented procedures?',
                 'answer_choices': {
-                    1: 'No tracking',
-                    2: 'Occasional tracking',
-                    3: 'Regular tracking',
-                    4: 'Automated tracking',
-                    5: 'Real-time monitoring'
+                    1: 'Rarely follow',
+                    2: 'Sometimes follow',
+                    3: 'Generally follow',
+                    4: 'Consistently follow',
+                    5: 'Always follow'
                 }
             },
             {
-                'id': 'proc_variation',
-                'text': 'Is process variation understood?',
+                'id': 'proc_efficiency',
+                'text': 'How efficiently are tasks completed with minimal delays?',
                 'answer_choices': {
-                    1: 'Unknown',
-                    2: 'Observed',
-                    3: 'Analyzed',
-                    4: 'Controlled',
-                    5: 'Optimized'
+                    1: 'Significant delays',
+                    2: 'Occasional delays',
+                    3: 'Mostly timely',
+                    4: 'Very timely',
+                    5: 'Highly efficient'
                 }
             }
         ]
@@ -87,36 +87,36 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'data_digitized',
-                'text': 'Is process data digitized?',
+                'id': 'tech_modern',
+                'text': 'How modern and scalable is your tech stack?',
                 'answer_choices': {
-                    1: 'Mostly manual',
-                    2: 'Partially digital',
-                    3: 'Mostly digital',
-                    4: 'Fully digital',
-                    5: 'Automated capture'
+                    1: 'Legacy systems',
+                    2: 'Outdated',
+                    3: 'Somewhat modern',
+                    4: 'Modern',
+                    5: 'Cutting-edge & scalable'
                 }
             },
             {
-                'id': 'data_quality',
-                'text': 'Is data cleaned and integrated?',
+                'id': 'tech_reliability',
+                'text': 'How well-maintained and reliable are your core systems?',
                 'answer_choices': {
-                    1: 'Uncleaned/siloed',
-                    2: 'Basic cleaning',
-                    3: 'Cleaned in silos',
-                    4: 'Integrated',
-                    5: 'Automated cleaning & integration'
+                    1: 'Frequently unstable',
+                    2: 'Periodically unstable',
+                    3: 'Generally reliable',
+                    4: 'Very reliable',
+                    5: 'Highly reliable & stable'
                 }
             },
             {
-                'id': 'data_access',
-                'text': 'Do you have access to historical data for model training?',
+                'id': 'tech_automation',
+                'text': 'How effectively do your tools support automation?',
                 'answer_choices': {
-                    1: 'No access',
-                    2: 'Limited access',
-                    3: 'Moderate access',
-                    4: 'Good access',
-                    5: 'Comprehensive historical data'
+                    1: 'Manual processes only',
+                    2: 'Limited automation',
+                    3: 'Some automation',
+                    4: 'Strong automation',
+                    5: 'Fully automated'
                 }
             }
         ]
@@ -136,36 +136,36 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'tech_stack',
-                'text': 'Does your tech stack support APIs, analytics, and automation?',
+                'id': 'data_accessible',
+                'text': 'How accessible is relevant data to teams who need it?',
                 'answer_choices': {
-                    1: 'Minimal support',
-                    2: 'Basic APIs',
-                    3: 'Analytics capable',
-                    4: 'Automation ready',
-                    5: 'Fully integrated'
+                    1: 'Not accessible',
+                    2: 'Difficult to access',
+                    3: 'Moderately accessible',
+                    4: 'Easily accessible',
+                    5: 'Readily accessible'
                 }
             },
             {
-                'id': 'tech_secure',
-                'text': 'Do you have secure cloud or on-prem data systems?',
+                'id': 'data_quality',
+                'text': 'How complete and accurate is your operational data?',
                 'answer_choices': {
-                    1: 'No secure systems',
-                    2: 'Basic security',
-                    3: 'Secure on-prem',
-                    4: 'Secure cloud',
-                    5: 'Enterprise-grade security'
+                    1: 'Incomplete & inaccurate',
+                    2: 'Often incomplete',
+                    3: 'Mostly complete',
+                    4: 'Complete & accurate',
+                    5: 'Comprehensive & verified'
                 }
             },
             {
-                'id': 'tech_ml',
-                'text': 'Is there access to AI experimentation environments (e.g., ML tools)?',
+                'id': 'data_standardized',
+                'text': 'How standardized are data formats across systems?',
                 'answer_choices': {
-                    1: 'No access',
-                    2: 'Limited access',
-                    3: 'Basic ML tools',
-                    4: 'Advanced ML tools',
-                    5: 'Full AI platform'
+                    1: 'No standardization',
+                    2: 'Minimal standardization',
+                    3: 'Partial standardization',
+                    4: 'Well standardized',
+                    5: 'Fully standardized'
                 }
             }
         ]
@@ -185,36 +185,36 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'people_understand',
-                'text': 'Do teams understand AI fundamentals?',
+                'id': 'people_adoption',
+                'text': 'How comfortable are staff with adopting new tools?',
                 'answer_choices': {
-                    1: 'No understanding',
-                    2: 'Minimal awareness',
-                    3: 'Basic understanding',
-                    4: 'Good understanding',
-                    5: 'Expert knowledge'
+                    1: 'Very uncomfortable',
+                    2: 'Somewhat uncomfortable',
+                    3: 'Neutral',
+                    4: 'Comfortable',
+                    5: 'Very comfortable'
                 }
             },
             {
-                'id': 'people_training',
-                'text': 'Are employees trained in data-driven decision-making?',
+                'id': 'people_experiment',
+                'text': 'How willing are teams to experiment with new technology?',
                 'answer_choices': {
-                    1: 'No training',
-                    2: 'Ad-hoc training',
-                    3: 'Some training',
-                    4: 'Regular training',
-                    5: 'Comprehensive programs'
+                    1: 'Resistant',
+                    2: 'Reluctant',
+                    3: 'Somewhat willing',
+                    4: 'Willing',
+                    5: 'Highly willing & proactive'
                 }
             },
             {
-                'id': 'people_champions',
-                'text': 'Are there AI champions or data translators?',
+                'id': 'people_collaboration',
+                'text': 'How effectively do teams collaborate across functions?',
                 'answer_choices': {
-                    1: 'None',
-                    2: 'Few individuals',
-                    3: 'Some champions',
-                    4: 'Dedicated roles',
-                    5: 'Center of excellence'
+                    1: 'Siloed',
+                    2: 'Limited collaboration',
+                    3: 'Regular collaboration',
+                    4: 'Strong collaboration',
+                    5: 'Excellent cross-functional collaboration'
                 }
             }
         ]
@@ -234,42 +234,42 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'leadership_strategy',
-                'text': 'Is AI part of your organizational strategy?',
-                'answer_choices': {
-                    1: 'Not mentioned',
-                    2: 'Under discussion',
-                    3: 'In planning',
-                    4: 'Documented strategy',
-                    5: 'Core strategic pillar'
-                }
-            },
-            {
-                'id': 'leadership_funding',
-                'text': 'Is leadership committed to funding pilots?',
+                'id': 'leadership_commitment',
+                'text': 'How committed are leaders to operational improvement?',
                 'answer_choices': {
                     1: 'No commitment',
-                    2: 'Exploring',
-                    3: 'Some budget',
-                    4: 'Committed funding',
-                    5: 'Strategic investment'
+                    2: 'Minimal commitment',
+                    3: 'Some commitment',
+                    4: 'Committed',
+                    5: 'Highly committed & invested'
                 }
             },
             {
-                'id': 'leadership_goals',
-                'text': 'Are goals aligned with business impact?',
+                'id': 'leadership_communication',
+                'text': 'How consistently leadership communicates priorities?',
                 'answer_choices': {
-                    1: 'No alignment',
-                    2: 'Vague goals',
-                    3: 'Some alignment',
-                    4: 'Well aligned',
-                    5: 'Fully integrated metrics'
+                    1: 'Inconsistent & unclear',
+                    2: 'Sometimes clear',
+                    3: 'Mostly consistent',
+                    4: 'Consistent',
+                    5: 'Very clear & consistent'
+                }
+            },
+            {
+                'id': 'leadership_resources',
+                'text': 'How well are resources allocated toward transformation?',
+                'answer_choices': {
+                    1: 'No resources',
+                    2: 'Minimal resources',
+                    3: 'Adequate resources',
+                    4: 'Well allocated',
+                    5: 'Strategically invested'
                 }
             }
         ]
     },
     {
-        'id': 'change',
+        'id': 'governance',
         'title': 'Governance & Risk',
         'what_it_measures': "Organizational culture's adaptability to change and innovation.",
         'description': "Organization's openness to experimentation and cross-functional work.",
@@ -283,36 +283,36 @@ DIMENSIONS = [
         },
         'questions': [
             {
-                'id': 'change_experiment',
-                'text': 'How open is your culture to experimenting and learning from failure?',
+                'id': 'governance_roles',
+                'text': 'How clearly defined are roles and responsibilities?',
                 'answer_choices': {
-                    1: 'Resistant',
-                    2: 'Risk-averse',
-                    3: 'Cautiously open',
-                    4: 'Encouraging',
-                    5: 'Innovation-driven'
+                    1: 'Unclear',
+                    2: 'Somewhat defined',
+                    3: 'Defined',
+                    4: 'Well-defined',
+                    5: 'Crystal clear & documented'
                 }
             },
             {
-                'id': 'change_collab',
-                'text': 'Are cross-functional collaborations encouraged?',
+                'id': 'governance_risk',
+                'text': 'How effectively are risks identified and mitigated?',
                 'answer_choices': {
-                    1: 'Siloed',
-                    2: 'Occasional',
-                    3: 'Encouraged',
-                    4: 'Standard practice',
-                    5: 'Embedded culture'
+                    1: 'No risk management',
+                    2: 'Ad-hoc approach',
+                    3: 'Some processes',
+                    4: 'Structured processes',
+                    5: 'Comprehensive risk management'
                 }
             },
             {
-                'id': 'change_scale',
-                'text': 'Is there a framework for scaling successful pilots?',
+                'id': 'governance_compliance',
+                'text': 'How well do compliance and processes stay aligned?',
                 'answer_choices': {
-                    1: 'No framework',
-                    2: 'Ad-hoc',
-                    3: 'Basic framework',
-                    4: 'Structured process',
-                    5: 'Mature scaling system'
+                    1: 'Frequently misaligned',
+                    2: 'Often misaligned',
+                    3: 'Partially aligned',
+                    4: 'Generally aligned',
+                    5: 'Fully aligned & monitored'
                 }
             }
         ]
