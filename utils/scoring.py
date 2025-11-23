@@ -65,25 +65,25 @@ def get_readiness_band(total_score):
     
     if percentage < 40:
         return {
-            'label': 'Not Ready',
-            'color': '#EF4444',  # Red
-            'description': 'Significant gaps exist in AI readiness. Focus on foundational improvements.'
+            'label': 'Foundational',
+            'color': '#FFC107',
+            'description': 'First critical steps being laid.'
         }
     elif percentage < 60:
         return {
             'label': 'Emerging',
-            'color': '#F59E0B',  # Orange
-            'description': 'Basic foundations in place, but substantial work needed for AI implementation.'
+            'color': '#FF8A65',
+            'description': 'Progress being made.'
         }
     elif percentage < 80:
         return {
-            'label': 'Ready',
-            'color': '#3B82F6',  # Blue
-            'description': 'Strong foundation for AI adoption. Address remaining gaps for optimal results.'
+            'label': 'Reliable',
+            'color': '#42A5F5',
+            'description': 'Consistent and dependable.'
         }
     else:
         return {
-            'label': 'Advanced',
-            'color': '#10B981',  # Green
-            'description': 'Excellent readiness for AI implementation. Well-positioned for success.'
+            'label': 'Exceptional',
+            'color': '#4CAF50',
+            'description': 'Best-in-class process performance.'
         }
