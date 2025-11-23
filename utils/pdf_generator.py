@@ -94,7 +94,16 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
         dimension_scores = results.get("dimension_scores", [])
         from data.dimensions import DIMENSIONS
         
-        lowest_dims = sorted([(i, s) for i, s in enumerate(dimension_scores)], key=lambda x: x[1])[:2]
+        # Handle both numeric and dict formats for dimension_scores
+        lowest_dims = []
+        for i, score_data in enumerate(dimension_scores):
+            if isinstance(score_data, dict):
+                score_value = score_data.get('score', 0)
+            else:
+                score_value = score_data
+            lowest_dims.append((i, score_value))
+        
+        lowest_dims = sorted(lowest_dims, key=lambda x: x[1])[:2]
         lowest_names = [DIMENSIONS[i]['title'] for i, _ in lowest_dims]
         
         if percentage < 40:
@@ -119,7 +128,11 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
             if i < len(DIMENSIONS):
                 dim = DIMENSIONS[i]
                 dim_name = dim['title']
-                dim_score = score_data
+                # Handle both numeric and dict formats for dimension_scores
+                if isinstance(score_data, dict):
+                    dim_score = score_data.get('score', 0)
+                else:
+                    dim_score = score_data
                 percentage_score = (dim_score / 5) * 100
                 
                 # Dimension name and score
@@ -135,7 +148,13 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
         set_font_b(size=9, bold=False)
         
         # Get 3-4 lowest scoring dimensions for recommendations
-        scored_dims = [(i, score, DIMENSIONS[i]['title']) for i, score in enumerate(dimension_scores)]
+        scored_dims = []
+        for i, score_data in enumerate(dimension_scores):
+            if isinstance(score_data, dict):
+                score_value = score_data.get('score', 0)
+            else:
+                score_value = score_data
+            scored_dims.append((i, score_value, DIMENSIONS[i]['title']))
         scored_dims.sort(key=lambda x: x[1])
         lowest_count = min(4, len(scored_dims))
         
