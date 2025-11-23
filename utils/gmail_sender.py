@@ -2,6 +2,8 @@ import os
 import base64
 import json
 import requests
+import random
+import string
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from google.oauth2.credentials import Credentials
@@ -231,6 +233,89 @@ Sent from AI Process Readiness Assessment Tool
         <p><strong>Total Score:</strong> {total_score}/30</p>
         <p><strong>Readiness Level:</strong> {readiness_level}</p>
     </div>
+    
+    <hr style="margin-top: 30px;">
+    <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>
+</body>
+</html>
+"""
+    
+    return send_email('tej@tlogic.consulting', subject, body_text, body_html)
+
+def generate_verification_code():
+    """Generate a 6-digit verification code"""
+    return ''.join(random.choices(string.digits, k=6))
+
+def send_verification_code_email(user_email, verification_code):
+    """Send verification code to user's email"""
+    subject = "Your AI Readiness Assessment Report Verification Code"
+    
+    body_text = f"""
+Verification Code: {verification_code}
+
+This code is valid for 10 minutes. Please enter this code to download your AI Process Readiness Assessment Report.
+
+If you did not request this code, please ignore this email.
+
+---
+Sent from AI Process Readiness Assessment Tool
+"""
+    
+    body_html = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2 style="color: #BF6A16;">Verify Your Email</h2>
+    
+    <p>Your verification code is:</p>
+    <h1 style="text-align: center; color: #BF6A16; letter-spacing: 2px; font-size: 2rem;">{verification_code}</h1>
+    
+    <p>This code is valid for 10 minutes. Please enter this code in the dialog to download your AI Process Readiness Assessment Report.</p>
+    
+    <p style="color: #999; font-size: 0.9em; margin-top: 30px;">If you did not request this code, please ignore this email.</p>
+    
+    <hr style="margin-top: 30px;">
+    <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>
+</body>
+</html>
+"""
+    
+    return send_email(user_email, subject, body_text, body_html)
+
+def send_pdf_download_notification(user_email, assessment_results=None):
+    """Send notification that PDF was downloaded"""
+    subject = f"Assessment Report Downloaded"
+    
+    total_score = assessment_results.get('total', 'N/A') if assessment_results else 'N/A'
+    readiness_level = assessment_results.get('readiness_band', {}).get('label', 'N/A') if assessment_results else 'N/A'
+    
+    body_text = f"""
+AI Process Readiness Assessment Report Downloaded
+
+User Email: {user_email}
+Total Score: {total_score}/30
+Readiness Level: {readiness_level}
+
+A user has downloaded their assessment report after completing the AI Process Readiness Assessment.
+
+---
+Sent from AI Process Readiness Assessment Tool
+"""
+    
+    body_html = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2 style="color: #BF6A16;">📊 Assessment Report Downloaded</h2>
+    
+    <h3>User Information:</h3>
+    <p><strong>Email:</strong> {user_email}</p>
+    
+    <h3>Assessment Results:</h3>
+    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px;">
+        <p><strong>Total Score:</strong> {total_score}/30</p>
+        <p><strong>Readiness Level:</strong> {readiness_level}</p>
+    </div>
+    
+    <p style="margin-top: 20px;">A user has successfully downloaded their assessment report.</p>
     
     <hr style="margin-top: 30px;">
     <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>

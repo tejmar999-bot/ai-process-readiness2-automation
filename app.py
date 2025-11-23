@@ -11,7 +11,7 @@ from data.dimensions import DIMENSIONS, BRIGHT_PALETTE, get_all_questions
 from utils.pdf_generator import generate_pdf_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
 from db.operations import (ensure_tables_exist, save_assessment)
-from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email
+from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code
 from utils.ai_chat import get_chat_response, get_assessment_insights
 
 def scroll_to_top():
@@ -1396,23 +1396,132 @@ def render_results_dashboard():
         st.empty()
 
     with col3:
-        # Generate PDF report
-        try:
-            pdf_buffer = generate_pdf_report(
-                scores_data,
-                company_name=st.session_state.company_name,
-                primary_color=st.session_state.primary_color,
-                logo_image=st.session_state.company_logo)
-
-            st.download_button(
-                label="📊 Download PDF Report",
-                data=pdf_buffer,
-                file_name=
-                f"{st.session_state.company_name}_AI_Readiness_Report.pdf",
-                mime="application/pdf",
-                type="primary")
-        except Exception as e:
-            st.error(f"Error generating PDF: {str(e)}")
+        if st.button("📊 Download PDF Report", type="primary", use_container_width=True):
+            st.session_state.show_email_verification = True
+    
+    # Email Verification Dialog for PDF Download
+    if st.session_state.get("show_email_verification", False):
+        st.markdown("---")
+        st.markdown(
+            f'<h4 style="color: {primary_color}; text-align: center;">📧 Verify Your Email</h4>',
+            unsafe_allow_html=True)
+        st.markdown(
+            '<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">We need to verify your email before downloading the report.</p>',
+            unsafe_allow_html=True)
+        
+        # Initialize verification fields if not present
+        if 'verification_email' not in st.session_state:
+            st.session_state.verification_email = st.session_state.user_email or ""
+        if 'verification_code_sent' not in st.session_state:
+            st.session_state.verification_code_sent = False
+        if 'verification_code_expected' not in st.session_state:
+            st.session_state.verification_code_expected = ""
+        if 'verification_step' not in st.session_state:
+            st.session_state.verification_step = "email"  # email or code
+        
+        # Step 1: Enter email
+        if st.session_state.verification_step == "email":
+            st.session_state.verification_email = st.text_input(
+                "Enter Your Email Address",
+                value=st.session_state.verification_email,
+                key="verification_email_input"
+            )
+            
+            col_send, col_cancel = st.columns(2)
+            with col_send:
+                if st.button("Send Verification Code", type="primary", use_container_width=True):
+                    if not st.session_state.verification_email.strip():
+                        st.error("Please enter your email address.")
+                    else:
+                        # Generate and send verification code
+                        verification_code = generate_verification_code()
+                        success, message = send_verification_code_email(
+                            st.session_state.verification_email,
+                            verification_code
+                        )
+                        
+                        if success:
+                            st.session_state.verification_code_expected = verification_code
+                            st.session_state.verification_step = "code"
+                            st.success(f"✅ Verification code sent to {st.session_state.verification_email}")
+                            st.rerun()
+                        else:
+                            st.error(f"Failed to send verification code: {message}")
+            
+            with col_cancel:
+                if st.button("Cancel", use_container_width=True):
+                    st.session_state.show_email_verification = False
+                    st.rerun()
+        
+        # Step 2: Enter verification code
+        elif st.session_state.verification_step == "code":
+            st.info(f"📧 Verification code sent to: {st.session_state.verification_email}")
+            
+            verification_code_entered = st.text_input(
+                "Enter the 6-digit verification code",
+                placeholder="000000",
+                key="verification_code_input",
+                max_chars=6
+            )
+            
+            col_verify, col_resend, col_cancel = st.columns(3)
+            
+            with col_verify:
+                if st.button("Verify & Download", type="primary", use_container_width=True):
+                    if not verification_code_entered:
+                        st.error("Please enter the verification code.")
+                    elif verification_code_entered != st.session_state.verification_code_expected:
+                        st.error("Invalid verification code. Please try again.")
+                    else:
+                        # Code is correct - generate PDF and notify
+                        try:
+                            pdf_buffer = generate_pdf_report(
+                                scores_data,
+                                company_name=st.session_state.company_name,
+                                primary_color=st.session_state.primary_color,
+                                logo_image=st.session_state.company_logo)
+                            
+                            # Send notification to T-Logic
+                            send_pdf_download_notification(
+                                st.session_state.verification_email,
+                                assessment_results=scores_data
+                            )
+                            
+                            # Show success and download button
+                            st.success("✅ Email verified! Your report is ready to download.")
+                            st.download_button(
+                                label="📊 Download PDF Report",
+                                data=pdf_buffer,
+                                file_name=f"{st.session_state.company_name}_AI_Readiness_Report.pdf",
+                                mime="application/pdf",
+                                type="primary",
+                                use_container_width=True
+                            )
+                            
+                            # Reset state after download
+                            st.session_state.show_email_verification = False
+                            st.session_state.verification_step = "email"
+                        except Exception as e:
+                            st.error(f"Error generating PDF: {str(e)}")
+            
+            with col_resend:
+                if st.button("Resend Code", use_container_width=True):
+                    verification_code = generate_verification_code()
+                    success, message = send_verification_code_email(
+                        st.session_state.verification_email,
+                        verification_code
+                    )
+                    if success:
+                        st.session_state.verification_code_expected = verification_code
+                        st.info("✅ New verification code sent!")
+                    else:
+                        st.error(f"Failed to resend code: {message}")
+            
+            with col_cancel:
+                if st.button("Cancel", use_container_width=True):
+                    st.session_state.show_email_verification = False
+                    st.session_state.verification_step = "email"
+                    st.rerun()
 
     # Feedback Section
     st.markdown("---")
