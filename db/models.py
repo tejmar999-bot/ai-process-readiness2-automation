@@ -9,6 +9,9 @@ import os
 
 Base = declarative_base()
 
+# Default industry baseline for moving average benchmark
+DEFAULT_BASELINE = [3.2, 3.4, 3.1, 3.8, 3.7, 3.3]
+
 class Organization(Base):
     """Organization/Company table"""
     __tablename__ = 'organizations'
@@ -58,6 +61,19 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
     role = Column(String(50), default='user')  # user, admin, etc.
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Benchmark(Base):
+    """Moving average benchmark tracker for industry baseline"""
+    __tablename__ = 'benchmarks'
+    
+    id = Column(Integer, primary_key=True)
+    # Store dimension scores as JSON array [process, tech, data, people, leadership, governance]
+    dimension_scores = Column(JSON, nullable=False, default=lambda: DEFAULT_BASELINE.copy())
+    # Count of valid (non-outlier) assessments used to calculate this benchmark
+    assessment_count = Column(Integer, default=0)
+    # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

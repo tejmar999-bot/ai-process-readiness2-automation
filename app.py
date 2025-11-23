@@ -1068,7 +1068,7 @@ def render_results_dashboard():
     with col1:
         all_benchmarks = get_all_benchmarks()
         default_idx = all_benchmarks.index(
-            'Industry Average') if 'Industry Average' in all_benchmarks else 0
+            'Moving Average Benchmark') if 'Moving Average Benchmark' in all_benchmarks else 0
         benchmark_name = st.selectbox("Compare against:",
                                       options=all_benchmarks,
                                       index=default_idx)

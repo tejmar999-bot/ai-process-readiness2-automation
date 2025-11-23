@@ -1,7 +1,7 @@
 """
 Database operations for AI Process Readiness Assessment
 """
-from db.models import Organization, Assessment, User, get_db_session, init_db
+from db.models import Organization, Assessment, User, Benchmark, get_db_session, init_db, DEFAULT_BASELINE
 from datetime import datetime
 from sqlalchemy import desc, func
 from typing import List, Dict, Optional
@@ -97,6 +97,20 @@ def save_assessment(
         session.add(assessment)
         session.commit()
         session.refresh(assessment)
+        
+        # Update the moving average benchmark if this is not an outlier
+        # Extract raw dimension scores from the dimension_scores list
+        raw_dimension_scores = []
+        for dim_score in scores_data['dimension_scores']:
+            if isinstance(dim_score, dict):
+                raw_dimension_scores.append(dim_score.get('score', 3.0))
+            else:
+                raw_dimension_scores.append(float(dim_score))
+        
+        # Only update benchmark if not an outlier
+        if not is_outlier_assessment(raw_dimension_scores):
+            update_benchmark(raw_dimension_scores)
+        
         return assessment
     except Exception as e:
         session.rollback()
@@ -367,5 +381,92 @@ def get_team_readiness_distribution(company_name: str) -> Dict:
             distribution[band] += 1
         
         return distribution
+    finally:
+        session.close()
+
+def is_outlier_assessment(dimension_scores: List[float]) -> bool:
+    """
+    Check if an assessment is an outlier (all 1s or all 5s across all dimensions).
+    
+    Args:
+        dimension_scores: List of dimension scores (raw float values, not rounded)
+        
+    Returns:
+        True if assessment is an outlier, False otherwise
+    """
+    if not dimension_scores:
+        return False
+    
+    all_ones = all(score == 1 for score in dimension_scores)
+    all_fives = all(score == 5 for score in dimension_scores)
+    
+    return all_ones or all_fives
+
+def get_current_benchmark() -> List[float]:
+    """
+    Get the current moving average benchmark.
+    Returns the default baseline if no benchmark exists yet.
+    
+    Returns:
+        List of 6 dimension scores representing the current benchmark
+    """
+    session = get_db_session()
+    try:
+        benchmark = session.query(Benchmark).order_by(desc(Benchmark.updated_at)).first()
+        
+        if benchmark:
+            return benchmark.dimension_scores
+        else:
+            return DEFAULT_BASELINE.copy()
+    finally:
+        session.close()
+
+def update_benchmark(new_dimension_scores: List[float]) -> Benchmark:
+    """
+    Update the moving average benchmark with new dimension scores.
+    Calculates the new benchmark as a moving average.
+    
+    Args:
+        new_dimension_scores: List of 6 dimension scores from the latest assessment
+        
+    Returns:
+        Updated Benchmark object
+    """
+    session = get_db_session()
+    try:
+        # Get the current benchmark
+        benchmark = session.query(Benchmark).order_by(desc(Benchmark.updated_at)).first()
+        
+        if not benchmark:
+            # Create new benchmark with the default baseline
+            benchmark = Benchmark(
+                dimension_scores=DEFAULT_BASELINE.copy(),
+                assessment_count=0
+            )
+            session.add(benchmark)
+            session.commit()
+            session.refresh(benchmark)
+        
+        # Calculate moving average
+        current_scores = benchmark.dimension_scores
+        current_count = benchmark.assessment_count
+        
+        # New moving average = (old_average * count + new_score) / (count + 1)
+        updated_scores = []
+        for i, new_score in enumerate(new_dimension_scores):
+            old_avg = current_scores[i] if i < len(current_scores) else 3.0
+            new_avg = (old_avg * current_count + new_score) / (current_count + 1)
+            updated_scores.append(round(new_avg, 2))
+        
+        benchmark.dimension_scores = updated_scores
+        benchmark.assessment_count = current_count + 1
+        benchmark.updated_at = datetime.utcnow()
+        
+        session.commit()
+        session.refresh(benchmark)
+        return benchmark
+    except Exception as e:
+        session.rollback()
+        raise e
     finally:
         session.close()
