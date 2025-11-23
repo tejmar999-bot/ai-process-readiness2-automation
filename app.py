@@ -666,46 +666,48 @@ def render_navigation_buttons():
                 st.rerun()
 
 
-def create_radar_chart(dimension_scores):
-    """Create radar chart for dimension scores"""
+def create_dimension_breakdown_chart(dimension_scores):
+    """Create horizontal bar chart for dimension scores with percentages"""
     categories = [score['title'] for score in dimension_scores]
     values = [score['score'] for score in dimension_scores]
-    colors = [DIMENSIONS[i]['color'] for i in range(len(dimension_scores))]
+    percentages = [(score['score'] / 5) * 100 for score in dimension_scores]
+    colors = [score['color'] for score in dimension_scores]
 
-    # Close the radar chart by adding the first value at the end
-    categories_closed = categories + [categories[0]]
-    values_closed = values + [values[0]]
-
-    # Convert hex color to rgba for fill
-    primary_color = st.session_state.primary_color
-    hex_color = primary_color.lstrip('#')
-    rgb = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
-    fillcolor = f'rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, 0.2)'
+    # Create text labels with score and percentage
+    text_labels = [f"{val:.1f}/5 ({pct:.0f}%)" for val, pct in zip(values, percentages)]
 
     fig = go.Figure()
 
     fig.add_trace(
-        go.Scatterpolar(r=values_closed,
-                        theta=categories_closed,
-                        fill='toself',
-                        fillcolor=fillcolor,
-                        line=dict(color=primary_color, width=2),
-                        marker=dict(color=primary_color, size=8),
-                        name='Your Scores'))
+        go.Bar(
+            y=categories,
+            x=values,
+            orientation='h',
+            marker=dict(color=colors),
+            text=text_labels,
+            textposition='outside',
+            hovertemplate='<b>%{y}</b><br>Score: %{x:.1f}/5<extra></extra>',
+            showlegend=False
+        )
+    )
 
-    fig.update_layout(polar=dict(
-        radialaxis=dict(visible=True,
-                        range=[0, 5],
-                        tickfont=dict(color='white'),
-                        gridcolor='rgba(255,255,255,0.2)'),
-        angularaxis=dict(tickfont=dict(color='white', size=12),
-                         gridcolor='rgba(255,255,255,0.2)'),
-        bgcolor='rgba(0,0,0,0)'),
-                      showlegend=False,
-                      paper_bgcolor='rgba(0,0,0,0)',
-                      plot_bgcolor='rgba(0,0,0,0)',
-                      font=dict(color='white'),
-                      height=500)
+    fig.update_layout(
+        xaxis=dict(
+            range=[0, 5],
+            tickfont=dict(color='#9CA3AF', size=11),
+            gridcolor='rgba(255,255,255,0.1)',
+            showgrid=True
+        ),
+        yaxis=dict(
+            tickfont=dict(color='#E5E7EB', size=12),
+            categoryorder='total ascending'
+        ),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#E5E7EB'),
+        height=350,
+        margin=dict(l=200, r=150, t=20, b=20)
+    )
 
     return fig
 
@@ -1006,9 +1008,9 @@ def render_results_dashboard():
         """,
                     unsafe_allow_html=True)
 
-    # Radar chart
+    # Dimension Breakdown Chart
     st.markdown("### Dimension Breakdown")
-    fig = create_radar_chart(dimension_scores)
+    fig = create_dimension_breakdown_chart(dimension_scores)
     st.plotly_chart(fig, use_container_width=True)
 
     # Dimension scores breakdown
