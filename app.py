@@ -272,7 +272,7 @@ def render_header():
             f'<div class="main-header" style="color: {st.session_state.primary_color};">AI-Enabled Process Readiness</div>',
             unsafe_allow_html=True)
         st.markdown(
-            '<div class="sub-header">Quick self-assessment for process improvement leaders (6 dimensions, ~3 minutes)</div>',
+            '<div class="sub-header">Quick self-assessment for process improvement leaders (6 dimensions, ~ 5 minutes)</div>',
             unsafe_allow_html=True)
 
     with col2:
@@ -1794,7 +1794,7 @@ def main():
                 }
                 
                 .sub-header {
-                    font-size: 0.85rem !important;
+                    font-size: 1.05rem !important;
                     margin-bottom: 0.3rem !important;
                     line-height: 1.2 !important;
                 }
@@ -1857,11 +1857,13 @@ def main():
                                           placeholder="e.g., John Smith",
                                           key="user_name_input")
             with col2:
+                st.markdown('<label style="font-size: 0.9rem; margin-bottom: 0.2rem;">Email <span style="color: red;">*</span></label>', unsafe_allow_html=True)
                 user_email = st.text_input(
-                    "Email",
+                    "",
                     value=st.session_state.user_email,
                     placeholder="e.g., john@company.com",
-                    key="user_email_input")
+                    key="user_email_input",
+                    label_visibility="collapsed")
                 st.markdown('<p style="margin-top: -0.8rem; margin-bottom: 0.3rem; font-size: 0.8rem; color: #FF0000;">*Required only if downloading PDF output report</p>', unsafe_allow_html=True)
 
             # Optional fields
