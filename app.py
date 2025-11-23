@@ -1,348 +1,304 @@
-# app.py — wizard flow (landing -> 6 dimension pages -> summary -> PDF)
+# app.py
+"""
+Production-ready Streamlit app that preserves your original flow:
+- Landing page (company + logo + user info note)
+- One screen per dimension (3 questions each) with Back / Next navigation
+- Results page that uses your compute_scores(...) from utils.scoring (unchanged)
+- Generate PDF button wired to utils.pdf_generator.generate_pdf_report(...)
+"""
+
 import os
-from typing import Dict, List
+from io import BytesIO
+from typing import Dict, Any
 
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
+from PIL import Image
 
-from utils.pdf_generator import generate_pdf_report  # must exist in utils/
+# Use your existing scoring, dimensions and pdf generator
+from utils.scoring import compute_scores  # uses your existing logic; unchanged. :contentReference[oaicite:3]{index=3}
+from data.dimensions import DIMENSIONS  # dimension/question definitions (titles, ids, colors). :contentReference[oaicite:4]{index=4}
+from utils.pdf_generator import generate_pdf_report  # new production-ready PDF generator. :contentReference[oaicite:5]{index=5}
 
-# -------------------------
-# Config / constants
-# -------------------------
-DIMENSIONS = {
-    "Process Maturity": [
-        "Are core processes documented and repeatable?",
-        "Is there a regular review / improvement cycle for priority processes?",
-        "Are process metrics tracked and used for decisions?",
-    ],
-    "Technology Infrastructure": [
-        "Is the technology stack modern and well-supported?",
-        "Are systems integrated to allow data flow where needed?",
-        "Is security and access control consistently applied?",
-    ],
-    "Data Readiness": [
-        "Is necessary data available and discoverable?",
-        "Is data quality measured and improving?",
-        "Are pipelines/ETL for core data reliable?",
-    ],
-    "People & Culture": [
-        "Do staff have baseline data/AI skills for their roles?",
-        "Is the organization open to data-driven change?",
-        "Are training and upskilling programs in place?",
-    ],
-    "Leadership & Alignment": [
-        "Does leadership sponsor AI/process improvement initiatives?",
-        "Are objectives for AI tied to measurable business outcomes?",
-        "Is there dedicated budget or allocated resources?",
-    ],
-    "Governance & Risk": [
-        "Are policies in place to govern AI and data use?",
-        "Is change management applied when processes change?",
-        "Are compliance/privacy risks identified and monitored?",
-    ],
-}
+# Optional: DB save function if present (safe import)
+try:
+    from db.operations import save_assessment, ensure_tables_exist
+    DB_AVAILABLE = True
+except Exception:
+    DB_AVAILABLE = False
 
-PASTEL_COLORS = {
-    "Process Maturity": "#F4B4B4",
-    "Technology Infrastructure": "#FCD0A4",
-    "Data Readiness": "#FFF4B9",
-    "People & Culture": "#B9F0C9",
-    "Leadership & Alignment": "#B3E5FC",
-    "Governance & Risk": "#D7BDE2",
-}
+# -----------------------
+# App configuration
+# -----------------------
+st.set_page_config(page_title="AI Process Readiness — T-Logic",
+                   layout="wide",
+                   initial_sidebar_state="collapsed")
 
-READINESS_ORDERED = [
-    ("Foundational", "First critical steps being laid."),
-    ("Emerging", "Progress being made."),
-    ("Reliable", "Consistent and dependable."),
-    ("Exceptional", "Best-in-class process performance."),
-]
-
-
-# -------------------------
-# Helpers
-# -------------------------
-def safe_avg(values: List[float]) -> float:
-    return float(sum(values)) / len(values) if values else 0.0
-
-
-def compute_dim_scores(responses: Dict[str, List[float]]) -> Dict[str, float]:
-    return {d: round(safe_avg(vals), 2) for d, vals in responses.items()}
-
-
-def overall_score_from_dims(dim_scores: Dict[str, float]) -> float:
-    return round(safe_avg(list(dim_scores.values())), 2) if dim_scores else 0.0
-
-
-def readiness_from_score(score: float) -> Dict[str, str]:
-    if score < 2.5:
-        return {"label": "Foundational", "desc": READINESS_ORDERED[0][1]}
-    if score < 3.5:
-        return {"label": "Emerging", "desc": READINESS_ORDERED[1][1]}
-    if score < 4.2:
-        return {"label": "Reliable", "desc": READINESS_ORDERED[2][1]}
-    return {"label": "Exceptional", "desc": READINESS_ORDERED[3][1]}
-
-
-def radar_image(dim_scores: Dict[str, float], size=4.2):
-    # returns matplotlib figure (png) object in memory (we'll display in Streamlit)
-    labels = list(dim_scores.keys())
-    values = [float(dim_scores[k]) for k in labels]
-    values += values[:1]
-    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    angles += angles[:1]
-
-    fig = plt.figure(figsize=(size, size))
-    ax = fig.add_subplot(111, polar=True)
-    ax.set_theta_offset(np.pi / 2)
-    ax.set_theta_direction(-1)
-
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(labels, fontsize=9)
-    ax.set_ylim(0, 5)
-    ax.set_yticks([1, 2, 3, 4, 5])
-    ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=8)
-
-    ax.plot(angles, values, linewidth=2, color="#333333")
-    ax.fill(angles, values, color="#6EC6FF", alpha=0.25)
-
-    fig.tight_layout()
-    return fig
-
-
-# -------------------------
-# Streamlit UI (wizard)
-# -------------------------
-st.set_page_config(page_title="AI Readiness — T-Logic", layout="wide")
-st.title("AI-Enabled Process Readiness")
-
-if "step" not in st.session_state:
-    st.session_state.step = 0  # 0=landing, 1..n = dimension pages, last=summary
-if "responses" not in st.session_state:
-    # prepopulate with neutral 3.0 answers
-    st.session_state.responses = {
-        d: [3.0] * len(qs)
-        for d, qs in DIMENSIONS.items()
-    }
-if "company" not in st.session_state:
-    st.session_state.company = ""
+# Initialize session state
+if "current_dimension" not in st.session_state:
+    st.session_state.current_dimension = 0  # 0..5
+if "answers" not in st.session_state:
+    st.session_state.answers = {}  # question_id -> integer 1..5
+if "company_name" not in st.session_state:
+    st.session_state.company_name = ""
 if "tagline" not in st.session_state:
-    st.session_state.tagline = "AI-Enabled Readiness Assessment"
+    st.session_state.tagline = "AI-Enabled Process Readiness"
 if "logo_path" not in st.session_state:
     st.session_state.logo_path = None
-if "exec_summary" not in st.session_state:
-    st.session_state.exec_summary = ""
 if "latest_pdf" not in st.session_state:
     st.session_state.latest_pdf = None
+if "assessment_saved_id" not in st.session_state:
+    st.session_state.assessment_saved_id = None
 
+# Helper: save uploaded logo to attached_assets
+def save_uploaded_logo(uploaded) -> str:
+    folder = "attached_assets"
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, "user_logo.png")
+    with open(path, "wb") as f:
+        f.write(uploaded.getbuffer())
+    return path
 
-def go_next():
-    st.session_state.step += 1
-
-
-def go_back():
-    if st.session_state.step > 0:
-        st.session_state.step -= 1
-
-
-# Landing page
-if st.session_state.step == 0:
-    colL, colR = st.columns([2, 1])
-    with colL:
-        st.header("Welcome")
-        st.write(
-            "Complete a quick 3-question-per-dimension assessment. "
-            "At the end you'll see a summary, recommendations, and can generate a branded PDF report."
-        )
-        st.session_state.company = st.text_input(
-            "Company name", value=st.session_state.company)
-        st.session_state.tagline = st.text_input(
-            "Tagline (optional)", value=st.session_state.tagline)
-        st.write(
-            "Note: email is required only to download the PDF (not for the assessment)."
-        )
-        st.checkbox("Use mock data (fast test)",
-                    key="use_mock",
-                    help="Populate with example scores for a quick preview.")
-
-        uploaded = st.file_uploader("Upload a logo (optional). PNG / JPG",
-                                    type=["png", "jpg", "jpeg"])
-        if uploaded:
-            os.makedirs("attached_assets", exist_ok=True)
-            path = os.path.join("attached_assets", "user_logo.png")
-            with open(path, "wb") as f:
-                f.write(uploaded.getbuffer())
-            st.session_state.logo_path = path
-            st.success(
-                "Logo uploaded and saved to attached_assets/user_logo.png")
+# -----------------------
+# Layout: Header
+# -----------------------
+def render_header():
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.markdown(f"<h1 style='color:#BF6A16;margin:0;'>AI-Enabled Process Readiness</h1>", unsafe_allow_html=True)
+        st.markdown("<div style='color:#9CA3AF;margin-top:6px;'>Quick 3-question-per-dimension self-assessment — printable PDF report available.</div>", unsafe_allow_html=True)
+    with col2:
+        logo = None
+        if st.session_state.logo_path and os.path.exists(st.session_state.logo_path):
+            try:
+                logo = Image.open(st.session_state.logo_path)
+            except Exception:
+                logo = None
         else:
-            # fallback check static or attached_assets
-            if os.path.exists("attached_assets/TLogic_Logo6.png"):
-                st.session_state.logo_path = "attached_assets/TLogic_Logo6.png"
-            elif os.path.exists("static/TLogic_Logo4.png"):
-                st.session_state.logo_path = "static/TLogic_Logo4.png"
+            # fallback static
+            if os.path.exists("static/TLogic_Logo4.png"):
+                try:
+                    logo = Image.open("static/TLogic_Logo4.png")
+                except Exception:
+                    logo = None
+        if logo:
+            st.image(logo, width=120)
 
-    with colR:
-        st.subheader("Pastel dimension colors")
-        for k, v in PASTEL_COLORS.items():
-            st.markdown(f"<span style='color:{v}'>■</span> {k}",
-                        unsafe_allow_html=True)
+render_header()
+st.markdown("---")
 
-    if st.button("Start assessment"):
-        # if mock requested, set some example data
-        if st.session_state.get("use_mock", False):
-            st.session_state.responses = {
-                "Process Maturity": [3.0, 3.0, 3.0],
-                "Technology Infrastructure": [3.5, 3.0, 3.0],
-                "Data Readiness": [3.0, 3.0, 2.5],
-                "People & Culture": [3.5, 3.0, 3.0],
-                "Leadership & Alignment": [3.0, 3.0, 2.5],
-                "Governance & Risk": [2.5, 3.0, 3.0],
-            }
-        st.session_state.step = 1
+# -----------------------
+# Landing / Info Page
+# -----------------------
+if st.session_state.current_dimension == -1:
+    # reserved (not used) — but kept for parity
+    st.session_state.current_dimension = 0
+
+if st.session_state.current_dimension == 0:
+    st.header("Start assessment")
+    st.session_state.company_name = st.text_input("Company name", value=st.session_state.company_name)
+    st.session_state.tagline = st.text_input("Tagline (optional)", value=st.session_state.tagline)
+    uploaded_logo = st.file_uploader("Upload a logo (optional). It will appear on the PDF header/footer.", type=["png", "jpg", "jpeg"])
+    if uploaded_logo:
+        st.session_state.logo_path = save_uploaded_logo(uploaded_logo)
+        st.success("Logo uploaded.")
+    st.markdown("Email is required only if you want to download the PDF report. You can complete the assessment without providing an email.")
+    st.markdown("---")
+    st.write("Click **Start** to go to the first dimension.")
+    cols = st.columns([1, 1, 1])
+    if cols[2].button("Start"):
+        st.session_state.current_dimension = 1
         st.experimental_rerun()
 
-# Dimension pages
-elif 1 <= st.session_state.step <= len(DIMENSIONS):
-    idx = st.session_state.step - 1
-    dimension = list(DIMENSIONS.keys())[idx]
-    st.header(f"{dimension} — ({idx+1} of {len(DIMENSIONS)})")
-    st.write("Please rate each question (1 = low / 5 = high).")
+# -----------------------
+# Dimension pages (1..N)
+# -----------------------
+num_dimensions = len(DIMENSIONS)
+if 1 <= st.session_state.current_dimension <= num_dimensions:
+    idx = st.session_state.current_dimension - 1
+    dim = DIMENSIONS[idx]
+    # compact header for the dimension
+    st.markdown(f"### {dim['title']}  —  {dim.get('what_it_measures', '')}")
+    st.write(dim.get("description", ""))
 
+    # Render questions (3 per dimension)
+    questions = dim["questions"]
     cols = st.columns(3)
-    questions = DIMENSIONS[dimension]
     for i, q in enumerate(questions):
-        key = f"{dimension}_{i}"
-        default = st.session_state.responses.get(dimension,
-                                                 [3.0] * len(questions))[i]
-        # Ensure step increments don't collide with other keys; keys are unique per question
-        val = cols[i].slider(q,
-                             min_value=1.0,
-                             max_value=5.0,
-                             value=float(default),
-                             step=0.5,
-                             key=key)
-        # Save back to session state
-        if dimension not in st.session_state.responses:
-            st.session_state.responses[dimension] = [3.0] * len(questions)
-        st.session_state.responses[dimension][i] = float(val)
+        qid = q["id"]
+        key = f"q_{qid}"
+        # default to previously chosen or 3
+        default = st.session_state.answers.get(qid, 3)
+        with cols[i]:
+            st.write(f"**{i+1}. {q['text']}**")
+            val = st.radio("", options=[1,2,3,4,5], index=int(default)-1, horizontal=True, key=key)
+            st.session_state.answers[qid] = int(val)
 
-    nav_col1, nav_col2, nav_col3 = st.columns([1, 1, 2])
+    # Navigation
+    nav_col1, nav_col2, nav_col3 = st.columns([1,1,1])
     with nav_col1:
-        if st.button("Back"):
-            go_back()
-            st.experimental_rerun()
+        if st.session_state.current_dimension > 1:
+            if st.button("← Previous"):
+                st.session_state.current_dimension -= 1
+                st.experimental_rerun()
     with nav_col2:
-        if st.button("Next"):
-            go_next()
+        if st.button("Reset"):
+            st.session_state.answers = {}
+            st.session_state.current_dimension = 0
+            st.session_state.latest_pdf = None
             st.experimental_rerun()
     with nav_col3:
-        st.write("")  # spacer
-        st.info(
-            "You can navigate with Back / Next. Your answers are stored in this session."
-        )
+        if st.session_state.current_dimension < num_dimensions:
+            if st.button("Next →"):
+                st.session_state.current_dimension += 1
+                st.experimental_rerun()
+        else:
+            if st.button("Complete Assessment"):
+                st.session_state.current_dimension = num_dimensions + 1
+                st.experimental_rerun()
 
-# Summary page
-else:
-    st.header("Summary & Recommendations")
-    dim_scores = compute_dim_scores(st.session_state.responses)
-    overall = overall_score_from_dims(dim_scores)
-    band = readiness_from_score(overall)
+# -----------------------
+# Results page
+# -----------------------
+if st.session_state.current_dimension == num_dimensions + 1:
+    st.header("Results")
+    # Use your existing compute_scores to ensure identical calculation. :contentReference[oaicite:6]{index=6}
+    scores_data = compute_scores(st.session_state.answers)
+    # scores_data expected: { 'dimension_scores': [...], 'total': x.x, 'percentage': y, 'readiness_band': {...} }
+    dimension_scores_list = scores_data.get("dimension_scores", [])
+    total = scores_data.get("total", 0.0)
+    percentage = scores_data.get("percentage", 0)
+    readiness = scores_data.get("readiness_band", {})
 
-    st.subheader(f"Overall score: {overall:.2f} / 5 — {band['label']}")
-    st.write(band["desc"])
+    # Display summary cards
+    avg_score = round((total / max(1, num_dimensions)), 1)
+    colA, colB, colC = st.columns(3)
+    with colA:
+        st.metric("Total score (out of 30)", f"{total}")
+    with colB:
+        st.metric("Average (per dimension)", f"{avg_score} / 5")
+    with colC:
+        band_label = readiness.get("label", "N/A")
+        st.markdown(f"**Readiness level:** <span style='color:{readiness.get('color','#000')}; font-weight:700'>{band_label}</span>", unsafe_allow_html=True)
+        st.caption(readiness.get("description",""))
 
-    # Radar chart
-    st.markdown("### Radar chart")
-    fig = radar_image(dim_scores)
-    st.pyplot(fig)
+    st.markdown("---")
 
-    st.markdown("### Dimension scores")
-    for d, v in dim_scores.items():
-        pct = max(0.0, min(v / 5.0, 1.0))
-        st.write(f"**{d}** — {v:.1f} / 5")
-        st.progress(pct)
+    # Detailed per-dimension breakdown matching your DIMENSIONS structure (order preserved)
+    st.subheader("Dimension scores")
+    for i, score in enumerate(dimension_scores_list):
+        d = DIMENSIONS[i]
+        title = d["title"]
+        color = d.get("color", "#BBBBBB")
+        desc = d.get("description", "")
+        # display with progress bar and 1-decimal score
+        col_left, col_right = st.columns([4,1])
+        with col_left:
+            st.markdown(f"**{title}** — {desc}")
+            pct = max(0.0, min(1.0, float(score) / 5.0))
+            st.progress(pct)
+        with col_right:
+            st.markdown(f"**{score:.1f}/5**" if isinstance(score, (int, float)) else f"**{score}/5**")
 
-    st.markdown("### Executive summary (editable)")
-    st.session_state.exec_summary = st.text_area(
-        "Write a short executive summary (optional)",
-        value=st.session_state.exec_summary,
-        height=120)
+    st.markdown("---")
 
-    # Generate recommendations (simple dynamic rules)
-    st.markdown("### Recommendations (sample)")
+    # Executive summary editable
+    st.subheader("Executive Summary (optional)")
+    exec_summary = st.text_area("Edit the executive summary for the PDF", height=120, key="exec_summary")
+
+    # Recommendations: simple auto-generated (you can customize later)
+    st.subheader("Suggested next steps")
     recs = []
-    if overall < 2.5:
+    if avg_score < 2.5:
         recs = [
-            "Prioritize foundational process documentation and quick wins.",
-            "Establish a small cross-functional pilot to prove value.",
-            "Create a short-term roadmap and assign ownership."
+            "Focus on foundational process documentation and quick wins.",
+            "Set ownership for core processes and capture baseline metrics.",
+            "Run 1-2 focused pilot projects."
         ]
-    elif overall < 3.5:
+    elif avg_score < 3.5:
         recs = [
-            "Scale successful pilots and improve data quality pipelines.",
-            "Invest in training for priority teams.",
-            "Define measurable business outcomes for next initiatives."
+            "Improve data pipelines and increase data quality monitoring.",
+            "Upskill one cross-functional team to build repeatable success.",
+            "Prioritize automation for manual repetitive tasks."
         ]
-    elif overall < 4.2:
+    elif avg_score < 4.2:
         recs = [
-            "Standardize best practices across business units.",
-            "Strengthen governance and monitoring frameworks.",
-            "Prepare to scale models and embed into operations."
+            "Standardize model deployment and strengthen governance.",
+            "Scale successful pilots into production with monitoring.",
+            "Invest in lifecycle tooling and observability."
         ]
     else:
         recs = [
-            "Share best practices externally; consider productizing capabilities.",
-            "Invest in continuous improvement and advanced use cases.",
-            "Consider thought leadership and advanced compliance frameworks."
+            "Publish internal best-practices and expand AI capabilities.",
+            "Invest in advanced AI operations and continuous improvement.",
+            "Consider a Centre of Excellence for AI."
         ]
 
     for r in recs:
         st.write("• " + r)
 
-    # PDF generation
+    # -----------------------
+    # PDF generation (wired to your new generator). :contentReference[oaicite:7]{index=7}
+    # Build payload expected by utils.pdf_generator.generate_pdf_report
+    # -----------------------
     st.markdown("---")
-    st.subheader("Generate branded PDF report")
-    company_name = st.session_state.company.strip() or "[Your Company]"
-    tagline = st.session_state.tagline.strip(
-    ) or "AI-Enabled Readiness Assessment"
+    st.subheader("Generate PDF Report")
+    company_name = st.session_state.company_name.strip() or "[Your Company]"
+    tagline = st.session_state.tagline.strip() or "AI-Enabled Process Readiness"
+
+    # Build dimension_scores dict (map DIMENSIONS order -> score)
+    dimension_scores_dict = {}
+    for i, d in enumerate(DIMENSIONS):
+        name = d["title"]
+        val = dimension_scores_list[i] if i < len(dimension_scores_list) else 0.0
+        dimension_scores_dict[name] = float(val)
+
+    payload = {
+        "overall_score": avg_score,  # 0..5
+        "readiness_band": readiness,
+        "dimension_scores": dimension_scores_dict,
+        "dimension_notes": {},  # leave empty for now
+        "recommendations": recs,
+        "industry_average": None,
+        "subtitle": f"AI-Enabled Process Readiness for {company_name}",
+        "notes": exec_summary or ""
+    }
 
     if st.button("Generate PDF"):
-        payload = {
-            "overall_score": overall,
-            "readiness_band": {
-                "label": band["label"],
-                "description": band["desc"]
-            },
-            "dimension_scores": dim_scores,
-            "notes": st.session_state.exec_summary,
-            "subtitle": f"AI-Enabled Process Readiness for {company_name}",
-        }
-        pdf_bytes = generate_pdf_report(
-            results=payload,
-            company_name=company_name,
-            tagline=tagline,
-            logo_path=st.session_state.logo_path,
-        )
-        if isinstance(pdf_bytes, (bytes, bytearray)):
+        pdf_bytes = generate_pdf_report(results=payload, company_name=company_name, tagline=tagline, logo_path=st.session_state.logo_path)
+        if pdf_bytes:
             st.session_state.latest_pdf = pdf_bytes
-            st.success("PDF generated. Use the download button to save it.")
+            st.success("PDF generated — use the Download button below.")
+            # optionally save to DB
+            if DB_AVAILABLE:
+                try:
+                    rec = save_assessment(company_name=company_name, scores_data=scores_data, answers=st.session_state.answers)
+                    st.session_state.assessment_saved_id = getattr(rec, "id", None)
+                except Exception as e:
+                    st.warning(f"Saving assessment to DB failed: {e}")
         else:
-            st.error(
-                "PDF generation returned no content; check server logs and utils/pdf_generator.py"
-            )
+            st.error("PDF generation failed. Check logs.")
 
     if st.session_state.latest_pdf:
-        st.download_button(
-            label="Download PDF",
-            data=st.session_state.latest_pdf,
-            file_name=f"{company_name.replace(' ', '_')}_readiness_report.pdf",
-            mime="application/pdf",
-        )
+        st.download_button("Download latest PDF", data=st.session_state.latest_pdf, file_name=f"{company_name.replace(' ','_')}_readiness_report.pdf", mime="application/pdf")
 
     st.markdown("---")
     if st.button("Restart assessment"):
-        st.session_state.step = 0
+        st.session_state.answers = {}
+        st.session_state.current_dimension = 0
+        st.session_state.latest_pdf = None
         st.experimental_rerun()
+
+# -----------------------
+# Side navigation: allow jumping between dimensions
+# -----------------------
+with st.sidebar:
+    st.markdown("### Navigation")
+    for i, d in enumerate(DIMENSIONS):
+        if st.button(f"{i+1}. {d['title']}"):
+            st.session_state.current_dimension = i + 1
+            st.experimental_rerun()
+
+# Render footer
+st.markdown("<br><br>")
+st.markdown(f"<div style='text-align:center;color:#9CA3AF;'>T-Logic Consulting Pvt. Ltd. • www.tlogic.consulting</div>", unsafe_allow_html=True)
+
