@@ -4,22 +4,22 @@ Dimension and question definitions for AI Process Readiness Assessment
 
 # Pastel color palette for dimensions - Distinct pastel colors
 PALETTE = [
-    '#FFB6C1',  # sec1 - Process Maturity (Light Pink Pastel)
-    '#ADD8E6',  # sec2 - Data Readiness (Light Blue Pastel)
-    '#90EE90',  # sec3 - Technology Infrastructure (Light Grass Green Pastel)
-    '#FFB347',  # sec4 - People & Skills (Pastel Orange)
-    '#FFE5A0',  # sec5 - Leadership & Strategy (Pastel Yellow)
-    '#DDA0DD'   # sec6 - Change Management (Pastel Plum)
+    '#F84B4B',  # sec1 - Process Maturity
+    '#FCD0A4',  # sec2 - Technology Infrastructure
+    '#FFFB4B',  # sec3 - Data Readiness
+    '#B9F0C9',  # sec4 - People & Culture
+    '#B3E5FC',  # sec5 - Leadership & Alignment
+    '#D7BDE2'   # sec6 - Governance & Risk
 ]
 
-# Same colors used for titles (pastel colors work on dark backgrounds)
+# Same colors used for titles
 BRIGHT_PALETTE = [
-    '#FFB6C1',  # Light Pink Pastel (Process Maturity)
-    '#ADD8E6',  # Light Blue Pastel (Data Readiness)
-    '#90EE90',  # Light Grass Green Pastel (Technology Infrastructure)
-    '#FFB347',  # Pastel Orange (People & Skills)
-    '#FFE5A0',  # Pastel Yellow (Leadership & Strategy)
-    '#DDA0DD'   # Pastel Plum (Change Management)
+    '#F84B4B',  # Process Maturity
+    '#FCD0A4',  # Technology Infrastructure
+    '#FFFB4B',  # Data Readiness
+    '#B9F0C9',  # People & Culture
+    '#B3E5FC',  # Leadership & Alignment
+    '#D7BDE2'   # Governance & Risk
 ]
 
 DIMENSIONS = [
@@ -73,10 +73,10 @@ DIMENSIONS = [
         ]
     },
     {
-        'id': 'data',
-        'title': 'Data Readiness',
-        'what_it_measures': 'Quality, accessibility, and structure of process data available for AI analysis.',
-        'description': 'Quality, accessibility and structure of your data.',
+        'id': 'tech',
+        'title': 'Technology Infrastructure',
+        'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
+        'description': 'Tools and platforms available for analytics and automation.',
         'color': PALETTE[1],
         'scoring_labels': {
             1: 'Mostly manual',
@@ -122,8 +122,8 @@ DIMENSIONS = [
         ]
     },
     {
-        'id': 'tech',
-        'title': 'Technology Infrastructure',
+        'id': 'data',
+        'title': 'Data Readiness',
         'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
         'description': 'Tools and platforms available for analytics and automation.',
         'color': PALETTE[2],
@@ -172,7 +172,7 @@ DIMENSIONS = [
     },
     {
         'id': 'people',
-        'title': 'People & Skills',
+        'title': 'People & Culture',
         'what_it_measures': 'Workforce awareness, capability, and openness toward AI and digital transformation.',
         'description': 'Workforce capability and understanding of AI and data-driven methods.',
         'color': PALETTE[3],
@@ -221,7 +221,7 @@ DIMENSIONS = [
     },
     {
         'id': 'leadership',
-        'title': 'Leadership & Strategy Alignment',
+        'title': 'Leadership & Alignment',
         'what_it_measures': 'Executive commitment and strategic clarity for AI adoption.',
         'description': 'Executive commitment and strategic alignment for AI.',
         'color': PALETTE[4],
@@ -270,7 +270,7 @@ DIMENSIONS = [
     },
     {
         'id': 'change',
-        'title': 'Change Management & Culture',
+        'title': 'Governance & Risk',
         'what_it_measures': "Organizational culture's adaptability to change and innovation.",
         'description': "Organization's openness to experimentation and cross-functional work.",
         'color': PALETTE[5],
