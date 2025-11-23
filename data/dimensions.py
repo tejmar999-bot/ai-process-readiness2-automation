@@ -4,7 +4,7 @@ Dimension and question definitions for AI Process Readiness Assessment
 
 # Pastel color palette for dimensions - Distinct pastel colors
 PALETTE = [
-    '#F84B4B',  # sec1 - Process Maturity
+    '#F4B4B4',  # sec1 - Process Maturity
     '#FCD0A4',  # sec2 - Technology Infrastructure
     '#FFFB4B',  # sec3 - Data Readiness
     '#B9F0C9',  # sec4 - People & Culture
@@ -14,7 +14,7 @@ PALETTE = [
 
 # Same colors used for titles
 BRIGHT_PALETTE = [
-    '#F84B4B',  # Process Maturity
+    '#F4B4B4',  # Process Maturity
     '#FCD0A4',  # Technology Infrastructure
     '#FFFB4B',  # Data Readiness
     '#B9F0C9',  # People & Culture
