@@ -536,7 +536,7 @@ def render_dimension_questions(dimension_idx):
 
         # Create unique anchor for each question
         st.markdown(
-            f'<div id="question-{i}" class="question-text">{i+1}. {question["text"]}</div>',
+            f'<div id="question-{i}" class="question-text" style="color: {dimension["color"]};">{i+1}. {question["text"]}</div>',
             unsafe_allow_html=True)
 
         # Get current answer or default
