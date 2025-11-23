@@ -188,6 +188,28 @@ button.continue-home-btn {
 button.continue-home-btn p {
     color: #FFFFFF !important;
 }
+/* Softer orange buttons for Results page */
+.softer-orange-btn {
+    display: inline-block;
+    background-color: #F59E0B;
+    color: #000000;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+.softer-orange-btn:hover {
+    background-color: #F97316;
+}
+.softer-orange-btn:active {
+    background-color: #EA580C;
+}
 </style>
 """,
             unsafe_allow_html=True)
@@ -1380,10 +1402,35 @@ def render_results_dashboard():
 
     # Action buttons
     st.markdown("---")
+    
+    # Inject JavaScript to style buttons with softer orange
+    st.markdown("""
+    <script>
+    setTimeout(function() {
+        // Get all buttons on the page
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            // Check if this is a primary button on the results page
+            const text = button.textContent || button.innerText;
+            if (text.includes('Retake Assessment') || 
+                text.includes('Download PDF') || 
+                text.includes('Send Verification') ||
+                text.includes('Verify & Download') ||
+                text.includes('Resend Code') ||
+                text.includes('Submit Feedback')) {
+                // Apply softer orange styling
+                button.style.backgroundColor = '#F59E0B';
+                button.style.color = '#000000';
+            }
+        });
+    }, 100);
+    </script>
+    """, unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("Retake Assessment", type="primary"):
+        if st.button("Retake Assessment", type="primary", use_container_width=True):
             st.session_state.answers = {}
             st.session_state.current_dimension = 0
             st.session_state.assessment_complete = False
@@ -1557,13 +1604,19 @@ def render_results_dashboard():
                     if success:
                         st.session_state.feedback_text = feedback_text
                         st.session_state.feedback_submitted = True
+                        # Show thank you popup
+                        st.success("✅ Thank you for your feedback!")
+                        st.balloons()
+                        # Auto-close feedback section after short delay
+                        import time
+                        time.sleep(1.5)
                         st.rerun()
                     else:
                         st.error(
                             f"Unable to send feedback automatically. Error: {message}"
                         )
                         st.info(
-                            "Please email your feedback to: info@tlogicconsulting.com"
+                            "Please email your feedback to: info@tlogic.consulting"
                         )
                 else:
                     st.warning("Please enter your feedback before submitting.")

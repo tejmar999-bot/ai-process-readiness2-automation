@@ -139,7 +139,7 @@ Sent from AI Process Readiness Assessment Tool
 </html>
 """
     
-    return send_email('info@tlogicconsulting.com', subject, body_text, body_html)
+    return send_email('info@tlogic.consulting', subject, body_text, body_html)
 
 def send_user_registration_email(user_name, user_email, user_title=None, user_company=None, user_phone=None, user_location=None):
     """Send user registration notification email to T-Logic"""
@@ -185,7 +185,7 @@ Sent from AI Process Readiness Assessment Tool
 </html>
 """
     
-    return send_email('info@tlogicconsulting.com', subject, body_text, body_html)
+    return send_email('info@tlogic.consulting', subject, body_text, body_html)
 
 def send_assistance_request_email(user_name, user_email, query=None, assessment_results=None):
     """Send assistance request email to T-Logic"""
