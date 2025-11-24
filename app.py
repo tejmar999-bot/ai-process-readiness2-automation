@@ -724,13 +724,16 @@ def render_navigation_buttons():
 
 def create_dimension_breakdown_chart(dimension_scores):
     """Create horizontal bar chart for dimension scores with percentages"""
-    categories = [score['title'] for score in dimension_scores]
-    values = [score['score'] for score in dimension_scores]
-    percentages = [(score['score'] / 5) * 100 for score in dimension_scores]
-    colors = [score['color'] for score in dimension_scores]
+    # Reverse the order so Process Maturity is at top and Governance & Risk is at bottom
+    dimension_scores_reversed = list(reversed(dimension_scores))
+    
+    categories = [score['title'] for score in dimension_scores_reversed]
+    values = [score['score'] for score in dimension_scores_reversed]
+    percentages = [(score['score'] / 5) * 100 for score in dimension_scores_reversed]
+    colors = [score['color'] for score in dimension_scores_reversed]
 
-    # Create text labels with score and percentage, positioned inside bars when possible
-    text_labels = [f"{val:.1f}/5 ({pct:.0f}%)" for val, pct in zip(values, percentages)]
+    # Create text labels with score and percentage in bold, positioned inside bars when possible
+    text_labels = [f"<b>{val:.1f}/5 ({pct:.0f}%)</b>" for val, pct in zip(values, percentages)]
     text_positions = []
     
     # Position text inside bar if there's enough space, otherwise outside
@@ -765,8 +768,9 @@ def create_dimension_breakdown_chart(dimension_scores):
             title='Score'
         ),
         yaxis=dict(
-            tickfont=dict(color='#E5E7EB', size=12),
-            categoryorder='total ascending'
+            tickfont=dict(color='#E5E7EB', size=14),
+            categoryorder='array',
+            categoryarray=categories
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
