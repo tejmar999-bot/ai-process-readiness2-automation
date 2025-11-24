@@ -589,10 +589,11 @@ def render_dimension_questions(dimension_idx):
     for i, question in enumerate(dimension['questions']):
         question_id = f"q_{question['id']}"
 
-        # Create unique anchor for each question
-        st.markdown(
-            f'<div id="question-{i}" class="question-text" style="color: {dimension["color"]};">{i+1}. {question["text"]}</div>',
-            unsafe_allow_html=True)
+        # Use container with negative margin to compress spacing
+        with st.container():
+            st.markdown(
+                f"""<div id="question-{i}" style="color: {dimension["color"]}; margin: -0.8rem 0 -0.3rem 0; font-weight: 600; font-size: 0.95rem; line-height: 1.25;">{i+1}. {question["text"]}</div>""",
+                unsafe_allow_html=True)
 
         # Get current answer or default
         current_answer = st.session_state.answers.get(question['id'], 3)
@@ -610,17 +611,22 @@ def render_dimension_questions(dimension_idx):
 
         # Create rating scale with question-specific labels with on_change callback
         rating = st.radio(
-            "Rating",
+            label="",
             options=[1, 2, 3, 4, 5],
             format_func=lambda x: f"{x} - {answer_choices[x]}",
             key=question_id,
             index=current_answer - 1,  # Convert to 0-indexed
             horizontal=True,
             on_change=on_answer_change,
-            args=(question['id'], i))
+            args=(question['id'], i),
+            label_visibility="collapsed")
 
         st.session_state.answers[question['id']] = rating
-        st.markdown("---")
+        
+        # Replace divider with compact HTML line
+        st.markdown(
+            '<div style="margin: -0.6rem 0 -0.5rem 0;"><hr style="margin: 0.2rem 0; border: none; height: 1px; background-color: rgba(255,255,255,0.15);"></div>',
+            unsafe_allow_html=True)
 
     # Execute auto-scroll script only if scroll is triggered for a specific question
     if st.session_state.scroll_to_question is not None:
