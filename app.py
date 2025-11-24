@@ -546,28 +546,32 @@ def render_dimension_questions(dimension_idx):
     # Inject CSS to compress spacing between questions
     components.html("""
     <style>
-    /* Aggressive compression for question containers */
+    /* Ultra-aggressive compression for question containers */
     div[data-testid="column"] > div:has(.question-text) {
-        margin: -0.5rem 0 -0.6rem 0 !important;
+        margin: -0.75rem 0 -0.85rem 0 !important;
         padding: 0 !important;
     }
     .question-text {
-        margin: 0 0 0.1rem 0 !important;
+        margin: 0 0 0 0 !important;
         padding: 0 !important;
-        line-height: 1.3 !important;
+        line-height: 1.2 !important;
     }
     /* Compress radio button spacing */
     div[data-testid="column"] > div:has([role="radiogroup"]) {
-        margin: -0.5rem 0 -0.4rem 0 !important;
+        margin: -0.7rem 0 -0.6rem 0 !important;
+        padding: 0 !important;
     }
     /* Compress dividers */
     hr {
-        margin: 0.15rem 0 !important;
+        margin: 0.08rem 0 !important;
         padding: 0 !important;
+        height: 1px !important;
     }
     /* Remove extra padding from Streamlit containers */
     div[data-testid="column"] > div {
         gap: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     </style>
     """, height=0)
