@@ -543,6 +543,29 @@ def render_dimension_questions(dimension_idx):
 </script>
 """, height=8)
 
+    # Inject CSS to reduce spacing between questions by ~1/4"
+    components.html("""
+    <style>
+    /* Reduce spacing between questions */
+    div[data-testid="column"] > div > div:has(.question-text) {
+        margin-bottom: -0.4rem !important;
+    }
+    .question-text {
+        margin-bottom: 0.3rem !important;
+    }
+    /* Reduce spacing for radio button elements */
+    div[data-testid="column"] > div:has([role="radiogroup"]) {
+        margin-top: -0.3rem !important;
+        margin-bottom: -0.2rem !important;
+    }
+    /* Reduce divider spacing */
+    hr {
+        margin-top: 0.25rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    </style>
+    """, height=0)
+
     # Initialize scroll trigger if not exists
     if 'scroll_to_question' not in st.session_state:
         st.session_state.scroll_to_question = None
