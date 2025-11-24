@@ -67,7 +67,7 @@ def get_readiness_band(total_score):
             'color': '#DC2626',
             'description': 'First critical steps being laid.'
         }
-    elif total_score < 18:
+    elif total_score < 20:
         return {
             'label': 'Emerging',
             'color': '#EAB308',
