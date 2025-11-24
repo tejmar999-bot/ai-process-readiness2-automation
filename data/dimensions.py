@@ -6,7 +6,7 @@ Dimension and question definitions for AI Process Readiness Assessment
 PALETTE = [
     '#DFA5A0',  # sec1 - Process Maturity
     '#FDD9B8',  # sec2 - Technology Infrastructure
-    '#FFF4B9',  # sec3 - Data Readiness
+    '#FFFB4B',  # sec3 - Data Readiness
     '#B9F0C9',  # sec4 - People & Culture
     '#B3E5FC',  # sec5 - Leadership & Alignment
     '#D7BDE2'   # sec6 - Governance & Risk
@@ -16,7 +16,7 @@ PALETTE = [
 BRIGHT_PALETTE = [
     '#DFA5A0',  # Process Maturity
     '#FDD9B8',  # Technology Infrastructure
-    '#FFF4B9',  # Data Readiness
+    '#FFFB4B',  # Data Readiness
     '#B9F0C9',  # People & Culture
     '#B3E5FC',  # Leadership & Alignment
     '#D7BDE2'   # Governance & Risk
