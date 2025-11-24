@@ -1534,20 +1534,33 @@ def render_results_dashboard():
                                 assessment_results=scores_data
                             )
                             
-                            # Show success and download button
-                            st.success("✅ Email verified! Your report is ready to download.")
-                            st.download_button(
-                                label="📊 Download PDF Report",
-                                data=pdf_buffer,
-                                file_name=f"{st.session_state.company_name}_AI_Readiness_Report.pdf",
-                                mime="application/pdf",
-                                type="primary",
-                                use_container_width=True
-                            )
+                            # Show success and trigger automatic download using JavaScript
+                            st.success("✅ Email verified! Downloading your report...")
+                            
+                            # Encode PDF to base64 for JavaScript download
+                            import base64
+                            pdf_b64 = base64.b64encode(pdf_buffer).decode()
+                            filename = f"{st.session_state.company_name}_AI_Readiness_Report.pdf"
+                            
+                            # Use JavaScript to trigger download
+                            download_script = f"""
+                            <script>
+                            (function() {{
+                                const link = document.createElement('a');
+                                link.href = 'data:application/pdf;base64,{pdf_b64}';
+                                link.download = '{filename}';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }})();
+                            </script>
+                            """
+                            st.components.v1.html(download_script, height=0)
                             
                             # Reset state after download
                             st.session_state.show_email_verification = False
                             st.session_state.verification_step = "email"
+                            st.rerun()
                         except Exception as e:
                             st.error(f"Error generating PDF: {str(e)}")
             
