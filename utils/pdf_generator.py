@@ -205,7 +205,8 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
         pdf.multi_cell(0, 4, disclaimer)
 
         # Produce PDF and ensure we return bytes
-        out = pdf.output()
+        # Use dest='S' to get string output
+        out = pdf.output(dest="S")
         if isinstance(out, bytes):
             return out
         elif isinstance(out, str):
@@ -217,8 +218,8 @@ def generate_pdf_report(results: Dict[str, Any], company_name: str = None, prima
                 except Exception:
                     return out.encode("utf-8", errors="ignore")
         else:
-            # Last resort: call output with specific parameters
-            return pdf.output(dest="S").encode("utf-8")
+            # Should not reach here, but if we do, return error PDF
+            return b"%PDF-1.4\n"
 
     except Exception as e:
         # If something goes wrong, return a small PDF with the error message so you can download and inspect it
