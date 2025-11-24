@@ -1139,26 +1139,30 @@ def render_results_dashboard():
 
     fig_comparison = go.Figure()
 
-    # Add your scores
+    # Add your scores with text labels
     fig_comparison.add_trace(
         go.Bar(name='Your Scores',
                x=dimension_names,
                y=your_scores_list,
-               marker_color=primary_color))
+               marker_color=primary_color,
+               text=[f'{score:.1f}' for score in your_scores_list],
+               textposition='outside'))
 
-    # Add benchmark scores
+    # Add benchmark scores with text labels
     fig_comparison.add_trace(
-        go.Bar(name=f'{benchmark_name}',
+        go.Bar(name='Average of All Submissions',
                x=dimension_names,
                y=benchmark_scores_list,
-               marker_color='#6B7280'))
+               marker_color='#6B7280',
+               text=[f'{score:.1f}' for score in benchmark_scores_list],
+               textposition='outside'))
 
     fig_comparison.update_layout(barmode='group',
                                  plot_bgcolor='rgba(0,0,0,0)',
                                  paper_bgcolor='rgba(0,0,0,0)',
                                  font=dict(color='white'),
                                  yaxis=dict(title='Score',
-                                            range=[0, 5],
+                                            range=[0, 5.5],
                                             gridcolor='rgba(255,255,255,0.2)'),
                                  xaxis=dict(gridcolor='rgba(255,255,255,0.2)'),
                                  legend=dict(orientation="h",
