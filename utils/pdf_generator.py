@@ -307,14 +307,14 @@ def generate_pdf_report(
         c.setFillColor(colors.white)
         c.rect(box_x, summary_y, box_w, box_h, fill=1, stroke=1)
         c.setFont("Helvetica", 10)
-        text = c.beginText(box_x + 8, summary_y + box_h - 18)
+        text = c.beginText(box_x + 8, int(summary_y + box_h - 18))
         for line in executive_summary.splitlines() or ["(No executive summary provided)"]:
             text.textLine(line)
         c.drawText(text)
 
         # Top boxes: Overall readiness, Readiness %, Readiness label
         # compute readiness %
- (overall_pct := (overall_score / 30.0) * 100.0)
+        overall_pct = (overall_score / 30.0) * 100.0
         # small numeric boxes
         box_h2 = 56
         bx_left = width - 36 - 340

@@ -1564,11 +1564,7 @@ def render_results_dashboard():
                     else:
                         # Code is correct - generate PDF and notify
                         try:
-                            pdf_buffer = generate_pdf_report(
-                                scores_data,
-                                company_name=st.session_state.company_name,
-                                primary_color=st.session_state.primary_color,
-                                logo_image=st.session_state.company_logo)
+                            pdf_buffer = generate_pdf_report(scores_data)
                             
                             # Send notification to T-Logic
                             send_pdf_download_notification(
