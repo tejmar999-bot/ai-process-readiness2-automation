@@ -43,9 +43,9 @@ DIMENSIONS = [
                 'answer_choices': {
                     1: 'Ad hoc processes',
                     2: 'Partially defined',
-                    3: 'Well-defined',
-                    4: 'Highly standardized',
-                    5: 'Fully optimized & repeatable'
+                    3: 'Well-documented with consistent application',
+                    4: 'Standardized across teams with governance',
+                    5: 'Fully optimized & continuously refined'
                 }
             },
             {
@@ -55,8 +55,8 @@ DIMENSIONS = [
                     1: 'Rarely follow',
                     2: 'Sometimes follow',
                     3: 'Generally follow',
-                    4: 'Consistently follow',
-                    5: 'Always follow'
+                    4: 'Consistently follow with periodic monitoring',
+                    5: 'Flawless adherence with continuous auditing'
                 }
             },
             {
