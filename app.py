@@ -466,7 +466,7 @@ def render_progress_bar():
                     <span style="color: #D1D5DB; font-size: 1.05rem; font-style: italic;"> - {dimension["what_it_measures"]}</span>
                 </div>
                 <div class="dimension-label">
-                    <span style="color: #9CA3AF; font-size: 1.1rem; font-weight: 600;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</span>
+                    <span style="color: {dimension_color}; font-size: 1.1rem; font-weight: 600;">Dimension {current_dim + 1} of {len(DIMENSIONS)}</span>
                 </div>
             </div>
         </div>
