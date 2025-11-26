@@ -90,22 +90,22 @@ DIMENSIONS = [
                 'id': 'tech_modern',
                 'text': 'How modern and scalable is your tech stack?',
                 'answer_choices': {
-                    1: 'Legacy systems',
-                    2: 'Outdated',
-                    3: 'Somewhat modern',
-                    4: 'Modern',
-                    5: 'Cutting-edge & scalable'
+                    1: 'Legacy systems - significant modernization needed',
+                    2: 'Outdated with limited scalability',
+                    3: 'Partially modern with some scalability constraints',
+                    4: 'Modern infrastructure with cloud-native capabilities',
+                    5: 'Cutting-edge & highly scalable architecture'
                 }
             },
             {
                 'id': 'tech_reliability',
                 'text': 'How well-maintained and reliable are your core systems?',
                 'answer_choices': {
-                    1: 'Frequently unstable',
-                    2: 'Periodically unstable',
-                    3: 'Generally reliable',
-                    4: 'Very reliable',
-                    5: 'Highly reliable & stable'
+                    1: 'Frequently unstable with regular outages',
+                    2: 'Periodically unstable with occasional failures',
+                    3: 'Generally reliable with minor issues',
+                    4: 'Very reliable with documented maintenance plans',
+                    5: 'Highly reliable with proactive monitoring & SLAs'
                 }
             },
             {
