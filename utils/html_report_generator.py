@@ -24,15 +24,33 @@ def generate_html_report(
         HTML string that can be downloaded
     """
     
-    # Extract data
-    overall_score = results.get('total', 0)
-    percentage = results.get('percentage', 0)
+    # Extract data with safe type conversion
+    try:
+        overall_score = float(results.get('total', 0) or 0)
+    except:
+        overall_score = 0.0
+    
+    try:
+        percentage = int(results.get('percentage', 0) or 0)
+    except:
+        percentage = 0
+    
     readiness_band = results.get('readiness_band', {})
     readiness_label = readiness_band.get('label', 'Foundational')
     readiness_color = readiness_band.get('color', '#999999')
     
-    # Dimension scores as list
-    dimension_scores_list = results.get('dimension_scores', [])
+    # Dimension scores as list - convert all to floats
+    raw_scores = results.get('dimension_scores', [])
+    dimension_scores_list = []
+    for score in raw_scores:
+        try:
+            if isinstance(score, dict):
+                dimension_scores_list.append(float(score.get('score', 0) or 0))
+            else:
+                dimension_scores_list.append(float(score) if score else 0.0)
+        except (TypeError, ValueError):
+            dimension_scores_list.append(0.0)
+    
     dimension_names = [
         "Process Maturity",
         "Technology Infrastructure",
@@ -62,6 +80,7 @@ def generate_html_report(
     dimension_items_html = ""
     for name, score in zip(dimension_names, dimension_scores_list):
         color = dimension_colors.get(name, '#999')
+        score = float(score) if score else 0.0
         percentage_val = int((score / 5.0) * 100)
         dimension_items_html += '''
             <div class="dimension-item" style="border-color: {0};">
@@ -80,6 +99,7 @@ def generate_html_report(
     dimension_table_rows = ""
     for name, score in zip(dimension_names, dimension_scores_list):
         color = dimension_colors.get(name, '#999')
+        score = float(score) if score else 0.0
         status = "✅ Strong" if score >= 4 else "✓ Good" if score >= 3 else "⚠ Needs Work"
         dimension_table_rows += '''
                     <tr>
