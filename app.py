@@ -1590,24 +1590,19 @@ def render_results_dashboard():
                                 primary_color=st.session_state.primary_color
                             )
                             
-                            # Create download link for HTML
+                            # Create download button for HTML
                             filename = f"{st.session_state.company_name}_AI_Readiness_Report.html"
-                            html_b64 = base64.b64encode(html_content.encode()).decode()
                             
-                            download_script = f"""
-                            <script>
-                            (function() {{
-                                const link = document.createElement('a');
-                                link.href = 'data:text/html;base64,{html_b64}';
-                                link.download = '{filename}';
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            }})();
-                            </script>
-                            """
-                            st.success("✅ Email verified! Downloading your report...")
-                            st.components.v1.html(download_script, height=0)
+                            st.success("✅ Email verified! Your report is ready.")
+                            
+                            # Use Streamlit's native download button
+                            st.download_button(
+                                label="📥 Download Report Now",
+                                data=html_content,
+                                file_name=filename,
+                                mime="text/html",
+                                use_container_width=True
+                            )
                             
                             # Send notification to T-Logic
                             send_pdf_download_notification(
@@ -1615,10 +1610,9 @@ def render_results_dashboard():
                                 assessment_results=scores_data
                             )
                             
-                            # Reset state after download
+                            # Reset state after successful generation
                             st.session_state.show_email_verification = False
                             st.session_state.verification_step = "email"
-                            st.rerun()
                         except Exception as e:
                             st.error(f"Error generating report: {str(e)}")
             
