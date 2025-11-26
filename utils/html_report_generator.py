@@ -396,39 +396,6 @@ def generate_html_report(
                 six critical dimensions including process maturity, technology infrastructure, data readiness, people and culture, leadership alignment, and governance. 
                 The insights provided highlight your current capabilities and identify priority areas for advancement.</p>
             </div>
-            
-            <h2>Scoring Scale</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Score Range</th>
-                        <th>Readiness Level</th>
-                        <th>AI Adoption & Rollout Readiness</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>0 - 10</td>
-                        <td>Foundational</td>
-                        <td>Foundation building phase - core AI readiness initiatives beginning with basic infrastructure and organizational awareness</td>
-                    </tr>
-                    <tr>
-                        <td>11 - 17</td>
-                        <td>Emerging</td>
-                        <td>Initial implementation phase - pilot projects underway with growing organizational support and foundational AI capabilities established</td>
-                    </tr>
-                    <tr>
-                        <td>18 - 24</td>
-                        <td>Dependable</td>
-                        <td>Scaled deployment phase - proven AI processes operational across multiple areas with strong supporting infrastructure and governance</td>
-                    </tr>
-                    <tr>
-                        <td>25 - 30</td>
-                        <td>Exceptional</td>
-                        <td>Enterprise AI platform - comprehensive AI rollout with mature governance, scaled operations, and continuous optimization capabilities</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
         
         <div class="page-footer">
