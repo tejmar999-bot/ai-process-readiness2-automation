@@ -275,10 +275,28 @@ def generate_pdf_report(
     dims_expected = list(BASELINE_DIMENSION_AVG.keys())
     dim_scores = results.get("dimension_scores", {})
     # If missing dims, fill with 0.0
-    dimension_scores = {d: float(dim_scores.get(d, 0.0)) for d in dims_expected}
+    dimension_scores = {}
+    for d in dims_expected:
+        val = dim_scores.get(d, 0.0)
+        # Ensure it's a float
+        if isinstance(val, (int, float)):
+            dimension_scores[d] = float(val)
+        else:
+            dimension_scores[d] = 0.0
 
-    overall_score = float(results.get("overall_score", sum(dimension_scores.values())))
-    readiness_label = results.get("readiness_band", {}).get("label", "Foundational")
+    # Get overall score and ensure it's a float
+    overall_score_val = results.get("overall_score", sum(dimension_scores.values()))
+    if isinstance(overall_score_val, (int, float)):
+        overall_score = float(overall_score_val)
+    else:
+        overall_score = float(sum(dimension_scores.values()))
+    
+    readiness_band_data = results.get("readiness_band", {})
+    if isinstance(readiness_band_data, dict):
+        readiness_label = readiness_band_data.get("label", "Foundational")
+    else:
+        readiness_label = "Foundational"
+    
     executive_summary = str(results.get("summary", "") or "")
     recommendations = results.get("recommendations", {}) or {}
 
