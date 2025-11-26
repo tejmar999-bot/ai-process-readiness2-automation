@@ -124,8 +124,8 @@ DIMENSIONS = [
     {
         'id': 'data',
         'title': 'Data Readiness',
-        'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
-        'description': 'Tools and platforms available for analytics and automation.',
+        'what_it_measures': 'Availability, accessibility, and accuracy of operational data for decision-making and AI.',
+        'description': 'Availability, accessibility and accuracy of operational data.',
         'color': PALETTE[2],
         'scoring_labels': {
             1: 'Minimal',
@@ -271,8 +271,8 @@ DIMENSIONS = [
     {
         'id': 'governance',
         'title': 'Governance & Risk',
-        'what_it_measures': "Organizational culture's adaptability to change and innovation.",
-        'description': "Organization's openness to experimentation and cross-functional work.",
+        'what_it_measures': 'Clear roles, risk management, guardrails, and compliance frameworks for AI and process management.',
+        'description': 'Roles, risk management, guardrails, and compliance frameworks.',
         'color': PALETTE[5],
         'scoring_labels': {
             1: 'Resistant',
@@ -306,13 +306,13 @@ DIMENSIONS = [
             },
             {
                 'id': 'governance_compliance',
-                'text': 'How well do compliance and processes stay aligned?',
+                'text': 'How effectively are compliance requirements and appropriate guardrails built into processes?',
                 'answer_choices': {
-                    1: 'Frequently misaligned',
-                    2: 'Often misaligned',
-                    3: 'Partially aligned',
-                    4: 'Generally aligned',
-                    5: 'Fully aligned & monitored'
+                    1: 'No guardrails in place',
+                    2: 'Minimal guardrails',
+                    3: 'Basic guardrails defined',
+                    4: 'Strong guardrails & compliance integrated',
+                    5: 'Comprehensive guardrails, fully compliant & monitored'
                 }
             }
         ]
