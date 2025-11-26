@@ -1515,11 +1515,15 @@ def render_results_dashboard():
         
         # Step 1: Enter email
         if st.session_state.verification_step == "email":
-            st.session_state.verification_email = st.text_input(
+            # Allow user to modify the email
+            verification_email_input = st.text_input(
                 "Enter Your Email Address",
                 value=st.session_state.verification_email,
                 key="verification_email_input"
             )
+            # Update session state with the current input value
+            if verification_email_input:
+                st.session_state.verification_email = verification_email_input
             
             col_send, col_cancel = st.columns(2)
             with col_send:
