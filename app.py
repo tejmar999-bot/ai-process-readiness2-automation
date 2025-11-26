@@ -1014,27 +1014,27 @@ def render_results_dashboard():
     scoring_model = [{
         "range": "0-10",
         "level": "🟥 Foundational",
-        "meaning": "First critical steps being laid",
+        "meaning": "Critical gaps across dimensions—significant foundational work required before AI deployment",
         "min": 0,
         "max": 10
     }, {
         "range": "11-17",
         "level": "🟨 Emerging",
-        "meaning": "Meaningful progress being made",
+        "meaning": "Basic readiness established—small-scale AI pilots possible, substantial progress needed in processes, data, and governance",
         "min": 11,
         "max": 17
     }, {
         "range": "18-24",
         "level": "🟦 Dependable",
         "meaning":
-        "Mostly consistent and reliable processes",
+        "Strong foundation present—ready to scale AI across multiple business units with focused efforts on governance",
         "min": 18,
         "max": 24
     }, {
         "range": "25-30",
         "level": "🟩 Exceptional",
         "meaning":
-        "Best-in-class process performance",
+        "Mature AI capabilities—organization ready for enterprise-wide AI deployment with optimized processes and governance",
         "min": 25,
         "max": 30
     }]
