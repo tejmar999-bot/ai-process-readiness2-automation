@@ -1043,7 +1043,7 @@ def render_results_dashboard():
     color_map = {
         "🟥 Foundational": ("#DC2626", "Foundational"),
         "🟨 Emerging": ("#EAB308", "Emerging"),
-        "🟦 Reliable": ("#42A5F5", "Dependable"),
+        "🟦 Dependable": ("#42A5F5", "Dependable"),
         "🟩 Exceptional": ("#16A34A", "Exceptional")
     }
 
