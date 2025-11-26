@@ -237,33 +237,33 @@ DIMENSIONS = [
                 'id': 'leadership_commitment',
                 'text': 'How committed are leaders to operational improvement?',
                 'answer_choices': {
-                    1: 'No commitment',
-                    2: 'Minimal commitment',
-                    3: 'Some commitment',
-                    4: 'Committed',
-                    5: 'Highly committed & invested'
+                    1: 'No commitment - viewed as distraction',
+                    2: 'Minimal commitment - passive participation only',
+                    3: 'Active support with limited budget allocation',
+                    4: 'Strong commitment with dedicated resources & oversight',
+                    5: 'Strategic priority with executive sponsorship & investment'
                 }
             },
             {
                 'id': 'leadership_communication',
                 'text': 'How consistently leadership communicates priorities?',
                 'answer_choices': {
-                    1: 'Inconsistent & unclear',
-                    2: 'Sometimes clear',
-                    3: 'Mostly consistent',
-                    4: 'Consistent',
-                    5: 'Very clear & consistent'
+                    1: 'Inconsistent & unclear - frequently contradictory',
+                    2: 'Sporadic communication - mostly reactive responses',
+                    3: 'Regular cadence with general alignment',
+                    4: 'Consistent messaging with documented roadmap',
+                    5: 'Crystal clear with ongoing reinforcement & alignment mechanisms'
                 }
             },
             {
                 'id': 'leadership_resources',
                 'text': 'How well are resources allocated toward transformation?',
                 'answer_choices': {
-                    1: 'No resources',
-                    2: 'Minimal resources',
-                    3: 'Adequate resources',
-                    4: 'Well allocated',
-                    5: 'Strategically invested'
+                    1: 'No dedicated resources',
+                    2: 'Minimal resources - ad-hoc funding',
+                    3: 'Adequate resources for pilots only',
+                    4: 'Substantial budget with multi-year commitment',
+                    5: 'Strategic investment with contingency for scaling'
                 }
             }
         ]
