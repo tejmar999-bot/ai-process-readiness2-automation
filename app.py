@@ -1973,7 +1973,7 @@ def main():
             with col2:
                 st.markdown('<label style="font-size: 0.9rem; margin-bottom: 0.2rem; margin-top: -0.8rem; display: block;">Email <span style="color: red;">*</span></label>', unsafe_allow_html=True)
                 user_email = st.text_input(
-                    "",
+                    "Email",
                     value=st.session_state.user_email,
                     placeholder="e.g., john@company.com",
                     key="user_email_input",

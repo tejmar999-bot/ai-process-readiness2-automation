@@ -65,23 +65,23 @@ def get_readiness_band(total_score):
         return {
             'label': 'Foundational',
             'color': '#DC2626',
-            'description': 'Foundation building phase - core AI readiness initiatives beginning with basic infrastructure and organizational awareness.'
+            'description': 'Critical gaps across multiple dimensions—significant foundational work required before AI can be successfully deployed.'
         }
     elif total_score < 18:
         return {
             'label': 'Emerging',
             'color': '#EAB308',
-            'description': 'Initial implementation phase - pilot projects underway with growing organizational support and foundational AI capabilities established.'
+            'description': 'Basic readiness established—small-scale AI pilots possible, but substantial progress needed in processes, data, and governance for scaled deployment.'
         }
     elif total_score < 25:
         return {
             'label': 'Dependable',
             'color': '#42A5F5',
-            'description': 'Scaled deployment phase - proven AI processes operational across multiple areas with strong supporting infrastructure and governance.'
+            'description': 'Strong foundation present—ready to scale AI across multiple business units with focused efforts on governance and organizational change management.'
         }
     else:
         return {
             'label': 'Exceptional',
             'color': '#16A34A',
-            'description': 'Enterprise AI platform - comprehensive AI rollout with mature governance, scaled operations, and continuous optimization capabilities.'
+            'description': 'Mature AI capabilities established—organization ready for enterprise-wide AI deployment with optimized processes, robust governance, and continuous advancement.'
         }
