@@ -1,236 +1,310 @@
 # utils/pdf_generator.py
 
-from fpdf import FPDF
-import datetime
+import io
 import os
-from typing import Any, Dict
+import numpy as np
+import matplotlib.pyplot as plt
+from typing import Dict, Any
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.utils import ImageReader
+import tempfile
+
+# ----------------------------------------------------------
+# BRAND COLORS
+# ----------------------------------------------------------
+HEADER_COLOR = "#003B73"  # Dark blue header from your mock-up
+
+# Updated pastel colors
+PASTEL_COLORS = {
+    "Process Maturity": "#DFA5A0",
+    "Technology Infrastructure": "#FDD9B8",
+    "Data Readiness": "#FFFB4B",
+    "People & Culture": "#B9F0C9",
+    "Leadership & Alignment": "#B3E5FC",
+    "Governance & Risk": "#D7BDE2",
+}
+
+# Readiness levels (0–30 scoring)
+READINESS_LEVELS = [
+    {
+        "min": 0,
+        "max": 10,
+        "label": "Foundational",
+        "color": "#DC2626",
+        "description": "First critical steps being laid."
+    },
+    {
+        "min": 11,
+        "max": 17,
+        "label": "Emerging",
+        "color": "#EAB308",
+        "description": "Meaningful progress being made."
+    },
+    {
+        "min": 18,
+        "max": 24,
+        "label": "Dependable",
+        "color": "#42A5F5",
+        "description": "Consistent & dependable performance."
+    },
+    {
+        "min": 25,
+        "max": 30,
+        "label": "Exceptional",
+        "color": "#16A34A",
+        "description": "Best-in-class process performance."
+    },
+]
+
+# Industry baseline for your 20-participant sample
+BASELINE_AVG = {
+    "Process Maturity": 3.2,
+    "Technology Infrastructure": 3.4,
+    "Data Readiness": 3.1,
+    "People & Culture": 3.6,
+    "Leadership & Alignment": 3.8,
+    "Governance & Risk": 3.2,
+}
+
+# ----------------------------------------------------------
+# RADAR CHART GENERATOR — light theme, no black background
+# ----------------------------------------------------------
+def generate_radar_chart(user_scores: Dict[str, float]) -> str:
+    categories = list(user_scores.keys())
+    values = list(user_scores.values())
+    values.append(values[0])
+
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+    angles.append(angles[0])
+
+    fig = plt.figure(figsize=(5, 5), facecolor="white")
+    ax = fig.add_subplot(111, polar=True)
+    ax.set_facecolor("white")
+
+    ax.set_theta_offset(float(np.pi / 2))
+    ax.set_theta_direction(-1.0)
+
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, fontsize=9)
+
+    ax.set_yticks([1, 2, 3, 4, 5])
+    ax.set_ylim(0, 5)
+    ax.grid(color="#CCCCCC")
+
+    # plot
+    ax.plot(angles, values, linewidth=2, color="#003B73")
+    ax.fill(angles, values, color="#6699CC", alpha=0.35)
+
+    temp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+    fig.savefig(temp.name, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+    return temp.name
+
+# ----------------------------------------------------------
+# PAGE HEADER / FOOTER
+# ----------------------------------------------------------
+def draw_header_footer(c: canvas.Canvas, title: str, page: int, logo_path: str):
+    width, height = A4
+
+    # Header
+    c.setFillColor(colors.HexColor(HEADER_COLOR))
+    c.rect(0, height - 70, width, 70, fill=1, stroke=0)
+
+    # Title
+    c.setFillColor(colors.white)
+    c.setFont("Helvetica-Bold", 15)
+    c.drawString(30, height - 45, title)
+
+    # Logo
+    if os.path.isfile(logo_path):
+        try:
+            img = ImageReader(logo_path)
+            c.drawImage(img, width - 110, height - 65, width=70, preserveAspectRatio=True)
+        except Exception:
+            pass
+
+    # Footer
+    c.setFillColor(colors.HexColor("#555555"))
+    c.setFont("Helvetica", 9)
+    c.drawString(30, 25, "www.tlogic.consulting")
+    c.drawCentredString(width / 2, 25, "T-Logic Consulting Pvt. Ltd.")
+    c.drawRightString(width - 30, 25, str(page))
 
 
-def _ensure_text(s: Any) -> str:
-    if s is None:
-        return ""
-    if isinstance(s, (list, tuple)):
-        return "\n".join(str(x) for x in s)
-    return str(s)
+# ----------------------------------------------------------
+# COLOR FOR DIMENSIONS
+# ----------------------------------------------------------
+def dim_color(name: str) -> str:
+    return PASTEL_COLORS.get(name, "#DDDDDD")
 
 
-def generate_pdf_report(results: Dict[str, Any], company_name: str = None, primary_color: str = None, logo_image = None, font_path: str = None) -> bytes:
-    """
-    Generate a comprehensive PDF report for AI-Enabled Process Readiness.
-    Returns bytes usable by Streamlit's download_button or tests.
-    
-    Args:
-        results: Dictionary containing assessment scores and data
-        company_name: Name of the company (optional)
-        primary_color: Primary color for branding (optional)
-        logo_image: Company logo image (optional)
-        font_path: Path to custom font file (optional)
-    """
+# ----------------------------------------------------------
+# READINESS LOOKUP
+# ----------------------------------------------------------
+def lookup_readiness(total: float):
+    for r in READINESS_LEVELS:
+        if r["min"] <= total <= r["max"]:
+            return r
+    return READINESS_LEVELS[0]
+
+
+# ----------------------------------------------------------
+# MAIN PDF GENERATOR
+# ----------------------------------------------------------
+def generate_pdf_report(results: Dict[str, Any], logo_path: str = "/static/TLogic_Logo4.png") -> bytes:
     try:
-        pdf = FPDF(format="A4")
-        left_margin = 15
-        right_margin = 15
-        top_margin = 15
-        pdf.set_left_margin(left_margin)
-        pdf.set_right_margin(right_margin)
-        pdf.set_top_margin(top_margin)
-        pdf.set_auto_page_break(auto=True, margin=12)
-        pdf.add_page()
+        # Unpack user scores
+        overall = results["overall_score"]
+        dim_scores = results["dimension_scores"]  # dict of 6 dims, each 1–5
+        exec_summary = results.get("summary", "Your current processes are showing good traction...")
+        recs = results.get("recommendations", {})
 
-        # Register DejaVu font if provided (unicode-capable)
-        use_dejavu = False
-        if font_path and os.path.isfile(font_path):
-            try:
-                pdf.add_font("DejaVu", "", font_path, uni=True)
-                pdf.add_font("DejaVu", "B", font_path, uni=True)
-                use_dejavu = True
-            except Exception:
-                use_dejavu = False
+        readiness = lookup_readiness(overall)
 
-        def set_font_b(size=12, bold=False):
-            family = "DejaVu" if use_dejavu else "Arial"
-            style = "B" if bold else ""
-            pdf.set_font(family, style, size)
+        # radar chart
+        radar_path = generate_radar_chart(dim_scores)
 
-        # Header
-        set_font_b(size=16, bold=True)
-        title_text = "AI Process Readiness Assessment"
-        if company_name:
-            title_text = f"{company_name}\n{title_text}"
-        pdf.multi_cell(0, 8, title_text, align="C")
-        pdf.ln(4)
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
 
-        # Meta
-        set_font_b(size=9, bold=False)
-        timestamp = datetime.datetime.utcnow().strftime("%B %d, %Y at %H:%M UTC")
-        pdf.cell(0, 6, f"Report Generated: {timestamp}", ln=True, align="L")
-        pdf.ln(3)
+        # -----------------------------------------------------
+        # PAGE 1
+        # -----------------------------------------------------
+        draw_header_footer(c, "AI-Enabled Readiness Assessment", 1, logo_path)
 
-        # Overall score section
-        total_score = results.get("total", 0.0)
-        percentage = results.get("percentage", 0)
-        readiness_band = results.get("readiness_band", {})
-        
-        set_font_b(size=11, bold=True)
-        pdf.cell(0, 7, f"Overall Score: {total_score:.1f} / 30 ({percentage}%)", ln=True)
-        
-        # Readiness level with color indication
-        band_label = readiness_band.get("label", "N/A")
-        band_desc = readiness_band.get("description", "")
-        set_font_b(size=10, bold=True)
-        pdf.cell(0, 6, f"Readiness Level: {band_label}", ln=True)
-        if band_desc:
-            set_font_b(size=9, bold=False)
-            pdf.multi_cell(0, 5, band_desc)
-        pdf.ln(3)
+        # Overall readiness box row (mock-up)
+        c.setFont("Helvetica", 10)
 
-        # Executive Summary
-        set_font_b(size=11, bold=True)
-        pdf.cell(0, 6, "Executive Summary", ln=True)
-        pdf.ln(1)
-        set_font_b(size=9, bold=False)
-        
-        # Generate dynamic executive summary based on scores
-        dimension_scores = results.get("dimension_scores", [])
-        from data.dimensions import DIMENSIONS
-        
-        # Handle both numeric and dict formats for dimension_scores
-        lowest_dims = []
-        for i, score_data in enumerate(dimension_scores):
-            if isinstance(score_data, dict):
-                score_value = score_data.get('score', 0)
-            else:
-                score_value = score_data
-            lowest_dims.append((i, score_value))
-        
-        lowest_dims = sorted(lowest_dims, key=lambda x: x[1])[:2]
-        lowest_names = [DIMENSIONS[i]['title'] for i, _ in lowest_dims]
-        
-        if percentage < 40:
-            summary = f"This organization is in the foundational stage of AI readiness. Current score of {total_score:.1f}/30 indicates significant work is needed to establish core capabilities. Key focus areas include {lowest_names[0]} and {lowest_names[1]}. Building strong foundational processes and infrastructure is essential before advanced AI initiatives can be successfully implemented. Recommend starting with pilot projects to build organizational confidence and capability."
-        elif percentage < 60:
-            summary = f"This organization shows emerging AI readiness with a score of {total_score:.1f}/30. While progress has been made, important gaps remain in {lowest_names[0]} and {lowest_names[1]}. Establishing clear governance, building technical infrastructure, and developing team capabilities should be prioritized. A structured roadmap with phased implementation will help accelerate progress toward operational AI integration."
-        elif percentage < 80:
-            summary = f"This organization demonstrates reliable AI readiness with a score of {total_score:.1f}/30. Most foundational elements are in place for successful AI initiatives. Fine-tuning capabilities in {lowest_names[0]} and {lowest_names[1]} will unlock greater operational value. Focus should shift toward scaling successful pilots and establishing centers of excellence for broader organizational adoption."
-        else:
-            summary = f"This organization demonstrates exceptional AI readiness with a score of {total_score:.1f}/30. Strong foundational capabilities across processes, technology, data, people, leadership, and governance enable advanced AI implementation. Continue optimizing and scaling current initiatives while exploring innovative use cases. Consider sharing best practices and thought leadership with the industry."
-        
-        pdf.multi_cell(0, 5, summary)
-        pdf.ln(2)
+        # Left box
+        c.rect(30, height - 180, 150, 70)
+        c.drawCentredString(105, height - 150, f"Overall Readiness")
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(105, height - 170, f"{overall:.1f}/30")
 
-        # Dimension Breakdown
-        set_font_b(size=11, bold=True)
-        pdf.cell(0, 6, "Dimension Breakdown", ln=True)
-        pdf.ln(2)
-        
-        # Create dimension breakdown chart data in text format
-        for i, score_data in enumerate(dimension_scores):
-            if i < len(DIMENSIONS):
-                dim = DIMENSIONS[i]
-                dim_name = dim['title']
-                # Handle both numeric and dict formats for dimension_scores
-                if isinstance(score_data, dict):
-                    dim_score = score_data.get('score', 0)
-                else:
-                    dim_score = score_data
-                percentage_score = (dim_score / 5) * 100
-                
-                # Dimension name and score
-                set_font_b(size=10, bold=True)
-                pdf.cell(0, 6, f"{i+1}. {dim_name}: {dim_score:.1f}/5 ({percentage_score:.0f}%)", ln=True)
-        
-        pdf.ln(2)
+        # Middle
+        c.setFont("Helvetica", 10)
+        c.rect(190, height - 180, 150, 70)
+        c.drawCentredString(265, height - 150, "Readiness %")
+        c.setFont("Helvetica-Bold", 16)
+        pct = (overall / 30) * 100
+        c.drawCentredString(265, height - 170, f"{pct:.0f}%")
 
-        # Recommendations based on lowest scoring dimensions
-        set_font_b(size=11, bold=True)
-        pdf.cell(0, 6, "Key Recommendations", ln=True)
-        pdf.ln(1)
-        set_font_b(size=9, bold=False)
-        
-        # Get 3-4 lowest scoring dimensions for recommendations
-        scored_dims = []
-        for i, score_data in enumerate(dimension_scores):
-            if isinstance(score_data, dict):
-                score_value = score_data.get('score', 0)
-            else:
-                score_value = score_data
-            scored_dims.append((i, score_value, DIMENSIONS[i]['title']))
-        scored_dims.sort(key=lambda x: x[1])
-        lowest_count = min(4, len(scored_dims))
-        
-        recommendations = []
-        
-        # Add dimension-specific recommendations
-        for i in range(lowest_count):
-            idx, score, name = scored_dims[i]
-            if score < 3.0:
-                if name == "Process Maturity":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Develop and document standardized processes. Implement performance metrics and tracking systems.")
-                elif name == "Technology Infrastructure":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Modernize technology stack and ensure systems are reliable. Invest in automation capabilities.")
-                elif name == "Data Readiness":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Improve data accessibility and standardization. Ensure data quality across systems.")
-                elif name == "People & Culture":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Invest in training and change management. Foster a culture of experimentation and continuous learning.")
-                elif name == "Leadership & Alignment":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Secure leadership commitment and clearly communicate strategic priorities. Allocate sufficient resources for transformation.")
-                elif name == "Governance & Risk":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Define clear roles and responsibilities. Establish risk management and compliance processes.")
-            else:
-                if name == "Process Maturity":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Maintain process discipline. Continuously improve through measurement and optimization.")
-                elif name == "Technology Infrastructure":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Continue modernizing systems. Expand automation and integrate new tools.")
-                elif name == "Data Readiness":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Advance data governance. Implement advanced analytics capabilities.")
-                elif name == "People & Culture":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Deepen AI literacy. Build centers of excellence and expand innovation programs.")
-                elif name == "Leadership & Alignment":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Reinforce strategic vision. Scale successful initiatives across the organization.")
-                elif name == "Governance & Risk":
-                    recommendations.append(f"- {name} ({score:.1f}/5): Strengthen governance frameworks. Expand compliance and risk monitoring.")
-        
-        for rec in recommendations:
-            pdf.multi_cell(0, 5, rec)
-        
-        pdf.ln(2)
+        # Right
+        c.setFont("Helvetica", 10)
+        c.rect(350, height - 180, 200, 70)
+        c.drawCentredString(450, height - 150, "Indicates:")
+        c.setFillColor(colors.HexColor(readiness["color"]))
+        c.setFont("Helvetica-Bold", 12)
+        c.drawCentredString(450, height - 170, readiness["label"])
+        c.setFillColor(colors.black)
 
-        # Footer / disclaimer
-        set_font_b(size=8, bold=False)
-        disclaimer = (
-            "This report provides a high-level readiness overview based on subjective inputs. "
-            "It should not be interpreted as a comprehensive professional evaluation. "
-            "For detailed implementation guidance, consult with qualified AI transformation experts."
-        )
-        pdf.multi_cell(0, 4, disclaimer)
+        # Executive Summary box
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(30, height - 210, "Executive Summary:")
+        c.setFont("Helvetica", 10)
+        c.rect(30, height - 420, width - 60, 190)
+        text = c.beginText(40, height - 240)
+        text.setFont("Helvetica", 10)
+        for line in exec_summary.split("\n"):
+            text.textLine(line)
+        c.drawText(text)
 
-        # Produce PDF and ensure we return bytes
-        # Use dest='S' to get string output
-        out = pdf.output(dest="S")
-        if isinstance(out, bytes):
-            return out
-        elif isinstance(out, str):
-            try:
-                return out.encode("utf-8")
-            except Exception:
-                try:
-                    return out.encode("latin-1", errors="ignore")
-                except Exception:
-                    return out.encode("utf-8", errors="ignore")
-        else:
-            # Should not reach here, but if we do, return error PDF
-            return b"%PDF-1.4\n"
+        # Scoring Model heading
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(30, height - 440, "Scoring Model")
+
+        # Radar Chart
+        c.drawImage(radar_path, 30, height - 780, width=250, preserveAspectRatio=True)
+
+        c.showPage()
+
+        # -----------------------------------------------------
+        # PAGE 2
+        # -----------------------------------------------------
+        draw_header_footer(c, "AI-Enabled Readiness Assessment", 2, logo_path)
+
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(30, height - 110, "Dimension Breakdown")
+
+        y = height - 150
+
+        # For each dimension, add bar
+        for dim, score in dim_scores.items():
+            pct = score / 5
+            bar_width = (width - 200) * pct
+
+            c.setFont("Helvetica", 10)
+            c.drawString(30, y + 5, f"{dim} — {score:.1f}/5")
+
+            # background
+            c.setFillColor(colors.HexColor("#EEEEEE"))
+            c.rect(200, y, width - 250, 18, fill=1, stroke=0)
+
+            # colored bar
+            c.setFillColor(colors.HexColor(dim_color(dim)))
+            c.rect(200, y, bar_width, 18, fill=1, stroke=0)
+
+            y -= 40
+
+        # Benchmark comparison heading
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColor(colors.black)
+        c.drawString(30, y - 20, "Industry Benchmark Comparison:")
+
+        # Bar chart: dynamic
+        fig = plt.figure(figsize=(5.5, 2.8), facecolor="white")
+        ax = fig.add_subplot(111)
+
+        dims = list(dim_scores.keys())
+        user_vals = [dim_scores[d] for d in dims]
+        baseline_vals = [BASELINE_AVG[d] for d in dims]
+
+        x = np.arange(len(dims))
+        ax.bar(x - 0.2, user_vals, width=0.4, color="#003B73", label="Your Score")
+        ax.bar(x + 0.2, baseline_vals, width=0.4, color="#888888", label="Benchmark")
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(dims, rotation=30, ha="right")
+        ax.set_ylim(0, 5)
+        ax.legend()
+
+        temp_bar = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+        fig.savefig(temp_bar.name, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+
+        c.drawImage(temp_bar.name, 30, y - 240, width - 60, preserveAspectRatio=True)
+
+        c.showPage()
+
+        # -----------------------------------------------------
+        # PAGE 3
+        # -----------------------------------------------------
+        draw_header_footer(c, "AI-Enabled Readiness Assessment", 3, logo_path)
+
+        c.setFont("Helvetica-Bold", 14)
+        c.drawString(30, height - 120, "Recommended Actions:")
+
+        c.setFont("Helvetica", 10)
+        text = c.beginText(40, height - 150)
+
+        for dim, items in recs.items():
+            text.textLine(f"• {dim}:")
+            for rec in items:
+                text.textLine(f"   - {rec}")
+            text.textLine("")
+
+        c.drawText(text)
+
+        c.showPage()
+
+        # Finish
+        c.save()
+        return buffer.getvalue()
 
     except Exception as e:
-        # If something goes wrong, return a small PDF with the error message so you can download and inspect it
-        try:
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=10)
-            pdf.multi_cell(0, 6, f"PDF generation error: {str(e)}")
-            out = pdf.output(dest="S")
-            if isinstance(out, str):
-                return out.encode("latin-1", errors="ignore")
-            return bytes(out)
-        except Exception:
-            return b"%PDF-1.4\n%PDF-fallback\n"
+        print("PDF ERROR:", e)
+        return b""
