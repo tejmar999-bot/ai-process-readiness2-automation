@@ -1019,14 +1019,14 @@ def render_results_dashboard():
     }, {
         "range": "11-17",
         "level": "🟨 Emerging",
-        "meaning": "Progress being made",
+        "meaning": "Meaningful progress being made",
         "min": 11,
         "max": 17
     }, {
         "range": "18-24",
-        "level": "🟦 Reliable",
+        "level": "🟦 Dependable",
         "meaning":
-        "Consistent and dependable",
+        "Mostly consistent and reliable processes",
         "min": 18,
         "max": 24
     }, {
@@ -1043,7 +1043,7 @@ def render_results_dashboard():
     color_map = {
         "🟥 Foundational": ("#DC2626", "Foundational"),
         "🟨 Emerging": ("#EAB308", "Emerging"),
-        "🟦 Reliable": ("#42A5F5", "Reliable"),
+        "🟦 Reliable": ("#42A5F5", "Dependable"),
         "🟩 Exceptional": ("#16A34A", "Exceptional")
     }
 

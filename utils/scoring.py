@@ -71,13 +71,13 @@ def get_readiness_band(total_score):
         return {
             'label': 'Emerging',
             'color': '#EAB308',
-            'description': 'Progress being made.'
+            'description': 'Meaningful progress being made.'
         }
     elif total_score < 25:
         return {
-            'label': 'Reliable',
+            'label': 'Dependable',
             'color': '#42A5F5',
-            'description': 'Consistent and dependable.'
+            'description': 'Consistent and mostly reliable.'
         }
     else:
         return {
