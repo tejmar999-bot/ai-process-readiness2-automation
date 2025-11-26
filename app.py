@@ -1971,7 +1971,7 @@ def main():
                                           placeholder="e.g., John Smith",
                                           key="user_name_input")
             with col2:
-                st.markdown('<label style="font-size: 0.9rem; margin-bottom: 0.2rem;">Email <span style="color: red;">*</span></label>', unsafe_allow_html=True)
+                st.markdown('<label style="font-size: 0.9rem; margin-bottom: 0.2rem; margin-top: -0.3rem; display: block;">Email <span style="color: red;">*</span></label>', unsafe_allow_html=True)
                 user_email = st.text_input(
                     "",
                     value=st.session_state.user_email,
