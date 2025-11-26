@@ -42,9 +42,6 @@ def generate_html_report(
         "Governance & Risk"
     ]
     
-    # Map to dict for easier access
-    dimension_scores = {name: score for name, score in zip(dimension_names, dimension_scores_list)}
-    
     # Color mapping for dimensions
     dimension_colors = {
         "Process Maturity": "#DFA5A0",
@@ -59,40 +56,71 @@ def generate_html_report(
     
     logo_html = ""
     if company_logo_b64:
-        logo_html = f'<img src="data:image/png;base64,{company_logo_b64}" alt="Logo" style="height: 60px; width: auto;">'
+        logo_html = '<img src="data:image/png;base64,' + company_logo_b64 + '" alt="Logo" style="height: 60px; width: auto;">'
     
-    html = f"""<!DOCTYPE html>
+    # Build dimension items HTML
+    dimension_items_html = ""
+    for name, score in zip(dimension_names, dimension_scores_list):
+        color = dimension_colors.get(name, '#999')
+        percentage_val = int((score / 5.0) * 100)
+        dimension_items_html += '''
+            <div class="dimension-item" style="border-color: {0};">
+                <div class="dimension-name">{1}</div>
+                <div class="dimension-score">
+                    <span class="score-text">{2:.1f} / 5.0</span>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: {3}%; background-color: {4};"></div>
+                    </div>
+                    <span class="score-text" style="text-align: right; min-width: 40px;">{3}%</span>
+                </div>
+            </div>
+            '''.format(color, name, score, percentage_val, color)
+    
+    # Build dimension table rows HTML
+    dimension_table_rows = ""
+    for name, score in zip(dimension_names, dimension_scores_list):
+        color = dimension_colors.get(name, '#999')
+        status = "✅ Strong" if score >= 4 else "✓ Good" if score >= 3 else "⚠ Needs Work"
+        dimension_table_rows += '''
+                    <tr>
+                        <td>{0}</td>
+                        <td style="font-weight: bold; color: {1};">{2:.1f} / 5.0</td>
+                        <td>{3}</td>
+                    </tr>
+                    '''.format(name, color, score, status)
+    
+    html = '''<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Process Readiness Assessment Report</title>
     <style>
-        * {{
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }}
+        }
         
-        body {{
+        body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #333;
             line-height: 1.6;
             background: white;
-        }}
+        }
         
-        @page {{
+        @page {
             size: A4;
             margin: 1cm;
-        }}
+        }
         
-        @media print {{
-            body {{ margin: 0; padding: 0; }}
-            .page {{ page-break-after: always; margin: 0; padding: 2cm 1.5cm; }}
-            .page:last-child {{ page-break-after: avoid; }}
-        }}
+        @media print {
+            body { margin: 0; padding: 0; }
+            .page { page-break-after: always; margin: 0; padding: 2cm 1.5cm; }
+            .page:last-child { page-break-after: avoid; }
+        }
         
-        .page {{
+        .page {
             width: 8.5in;
             height: 11in;
             margin: 0 auto;
@@ -101,27 +129,27 @@ def generate_html_report(
             position: relative;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             page-break-after: always;
-        }}
+        }
         
-        .page-header {{
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 20px;
             border-bottom: 3px solid {primary_color};
             margin-bottom: 30px;
-        }}
+        }
         
-        .header-left {{
+        .header-left {
             flex: 1;
-        }}
+        }
         
-        .header-right {{
+        .header-right {
             flex: 0 0 80px;
             text-align: right;
-        }}
+        }
         
-        .page-footer {{
+        .page-footer {
             position: absolute;
             bottom: 0.5in;
             left: 0.75in;
@@ -133,122 +161,121 @@ def generate_html_report(
             padding-top: 10px;
             font-size: 0.85em;
             color: #666;
-        }}
+        }
         
-        .page-number {{
+        .page-number {
             text-align: right;
-        }}
+        }
         
-        .company-info {{
+        .company-info {
             font-size: 0.9em;
             text-align: center;
             color: #666;
-        }}
+        }
         
-        h1 {{
+        h1 {
             color: {primary_color};
             font-size: 28px;
             margin-bottom: 10px;
-        }}
+        }
         
-        h2 {{
+        h2 {
             color: {primary_color};
             font-size: 20px;
             margin-top: 20px;
             margin-bottom: 15px;
             border-bottom: 2px solid {primary_color};
             padding-bottom: 10px;
-        }}
+        }
         
-        h3 {{
+        h3 {
             color: {primary_color};
             font-size: 16px;
             margin-top: 15px;
             margin-bottom: 10px;
-        }}
+        }
         
-        .score-box {{
+        .score-box {
             background: linear-gradient(135deg, {primary_color}15, {primary_color}05);
             border-left: 4px solid {primary_color};
             padding: 15px;
             margin: 15px 0;
             border-radius: 4px;
-        }}
+        }
         
-        .score-grid {{
+        .score-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin: 20px 0;
-        }}
+        }
         
-        .score-card {{
+        .score-card {
             background: #f8f8f8;
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 4px;
             text-align: center;
-        }}
+        }
         
-        .score-card-label {{
+        .score-card-label {
             font-size: 0.9em;
             color: #666;
             margin-bottom: 5px;
-        }}
+        }
         
-        .score-card-value {{
+        .score-card-value {
             font-size: 24px;
             font-weight: bold;
             color: {primary_color};
-        }}
+        }
         
-        .score-card-sublabel {{
+        .score-card-sublabel {
             font-size: 0.85em;
             color: {readiness_color};
             margin-top: 5px;
-        }}
+        }
         
-        .dimension-item {{
+        .dimension-item {
             margin: 12px 0;
             padding: 10px;
             background: #f9f9f9;
             border-left: 4px solid;
             border-radius: 2px;
-        }}
+        }
         
-        .dimension-name {{
+        .dimension-name {
             font-weight: 600;
             color: #333;
             margin-bottom: 5px;
-        }}
+        }
         
-        .dimension-score {{
+        .dimension-score {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }}
+        }
         
-        .score-text {{
+        .score-text {
             font-size: 0.95em;
-        }}
+        }
         
-        .score-bar {{
+        .score-bar {
             flex: 1;
             height: 20px;
             background: #e0e0e0;
             border-radius: 10px;
             margin: 0 10px;
             overflow: hidden;
-        }}
+        }
         
-        .score-fill {{
+        .score-fill {
             height: 100%;
-            background: linear-gradient(90deg, {primary_color}, {primary_color}dd);
             border-radius: 10px;
             transition: width 0.3s ease;
-        }}
+        }
         
-        .readiness-badge {{
+        .readiness-badge {
             display: inline-block;
             padding: 8px 16px;
             background-color: {readiness_color};
@@ -256,52 +283,59 @@ def generate_html_report(
             border-radius: 4px;
             font-weight: bold;
             font-size: 0.95em;
-        }}
+        }
         
-        .readiness-description {{
+        .readiness-description {
             color: #666;
             font-size: 0.95em;
             margin-top: 8px;
             font-style: italic;
-        }}
+        }
         
-        table {{
+        table {
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
             font-size: 0.9em;
-        }}
+        }
         
-        th {{
+        th {
             background-color: {primary_color}20;
             border-bottom: 2px solid {primary_color};
             padding: 10px;
             text-align: left;
             color: {primary_color};
             font-weight: 600;
-        }}
+        }
         
-        td {{
+        td {
             border-bottom: 1px solid #e0e0e0;
             padding: 10px;
-        }}
+        }
         
-        tr:hover {{
+        tr:hover {
             background-color: #f5f5f5;
-        }}
+        }
         
-        .content {{
-            height: calc(11in - 2in - 80px);
-            padding-bottom: 40px;
-        }}
-        
-        .page-1 .content {{
+        .content {
             height: auto;
-        }}
+            padding-bottom: 40px;
+        }
+        
+        .page-1 .content {
+            height: auto;
+        }
+        
+        ul {
+            margin-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
-    <!-- PAGE 1: Title and Overview -->
     <div class="page page-1">
         <div class="page-header">
             <div class="header-left">
@@ -331,7 +365,7 @@ def generate_html_report(
                 <div class="score-card">
                     <div class="score-card-label">Readiness Level</div>
                     <div class="score-card-value" style="font-size: 18px; color: {readiness_color};">{readiness_label}</div>
-                    <div class="score-card-sublabel">{readiness_band.get('description', '')}</div>
+                    <div class="score-card-sublabel">{readiness_desc}</div>
                 </div>
             </div>
             
@@ -383,7 +417,6 @@ def generate_html_report(
         </div>
     </div>
     
-    <!-- PAGE 2: Dimension Breakdown -->
     <div class="page page-2">
         <div class="page-header">
             <div class="header-left">
@@ -397,18 +430,7 @@ def generate_html_report(
         <div class="content">
             <p style="margin-bottom: 15px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
             
-            {"".join([f'''
-            <div class="dimension-item" style="border-color: {dimension_colors.get(name, '#999')};">
-                <div class="dimension-name">{name}</div>
-                <div class="dimension-score">
-                    <span class="score-text">{score:.1f} / 5.0</span>
-                    <div class="score-bar">
-                        <div class="score-fill" style="width: {(score/5.0)*100}%; background-color: {dimension_colors.get(name, primary_color)};"></div>
-                    </div>
-                    <span class="score-text" style="text-align: right; min-width: 40px;">{int((score/5.0)*100)}%</span>
-                </div>
-            </div>
-            ''' for name, score in zip(dimension_names, dimension_scores_list)])}
+            {dimension_items_html}
             
             <h2 style="margin-top: 30px;">Summary by Dimension</h2>
             
@@ -421,13 +443,7 @@ def generate_html_report(
                     </tr>
                 </thead>
                 <tbody>
-                    {"".join([f'''
-                    <tr>
-                        <td>{name}</td>
-                        <td style="font-weight: bold; color: {dimension_colors.get(name, '#999')};">{score:.1f} / 5.0</td>
-                        <td>{"✅ Strong" if score >= 4 else "✓ Good" if score >= 3 else "⚠ Needs Work"}</td>
-                    </tr>
-                    ''' for name, score in zip(dimension_names, dimension_scores_list)])}
+                    {dimension_table_rows}
                 </tbody>
             </table>
         </div>
@@ -439,7 +455,6 @@ def generate_html_report(
         </div>
     </div>
     
-    <!-- PAGE 3: Recommendations -->
     <div class="page page-3">
         <div class="page-header">
             <div class="header-left">
@@ -455,23 +470,23 @@ def generate_html_report(
             
             <div class="score-box">
                 <h3>Your Readiness Profile: {readiness_label}</h3>
-                <p>{readiness_band.get('description', '')}</p>
+                <p>{readiness_desc}</p>
                 <p style="margin-top: 10px;">Based on your assessment results, here are key areas to focus on:</p>
             </div>
             
             <h3>Immediate Priority Areas</h3>
-            <ul style="margin-left: 20px; margin-bottom: 20px;">
-                <li style="margin-bottom: 8px;">Evaluate your organization's readiness across all dimensions</li>
-                <li style="margin-bottom: 8px;">Prioritize improvements in your lowest-scoring dimensions</li>
-                <li style="margin-bottom: 8px;">Develop an action plan with clear milestones and timelines</li>
-                <li style="margin-bottom: 8px;">Identify quick wins that can build momentum for change</li>
-                <li style="margin-bottom: 8px;">Engage stakeholders and ensure alignment on AI transformation goals</li>
+            <ul style="margin-bottom: 20px;">
+                <li>Evaluate your organization's readiness across all dimensions</li>
+                <li>Prioritize improvements in your lowest-scoring dimensions</li>
+                <li>Develop an action plan with clear milestones and timelines</li>
+                <li>Identify quick wins that can build momentum for change</li>
+                <li>Engage stakeholders and ensure alignment on AI transformation goals</li>
             </ul>
             
             <div class="score-box">
                 <h3>Get Expert Support</h3>
                 <p>T-Logic specializes in helping organizations like yours accelerate their AI readiness journey. Our team can provide:</p>
-                <ul style="margin-left: 20px; margin-top: 10px;">
+                <ul style="margin-top: 10px;">
                     <li>Detailed assessment consultation</li>
                     <li>Customized implementation roadmaps</li>
                     <li>Change management support</li>
@@ -488,6 +503,20 @@ def generate_html_report(
         </div>
     </div>
 </body>
-</html>"""
+</html>'''
+
+    # Safe string replacement to avoid format string issues
+    readiness_desc = readiness_band.get('description', '')
+    html = html.replace('{primary_color}', primary_color)
+    html = html.replace('{readiness_color}', readiness_color)
+    html = html.replace('{company_name}', company_name)
+    html = html.replace('{current_date}', current_date)
+    html = html.replace('{overall_score:.1f}', str(round(overall_score, 1)))
+    html = html.replace('{percentage}', str(percentage))
+    html = html.replace('{readiness_label}', readiness_label)
+    html = html.replace('{readiness_desc}', readiness_desc)
+    html = html.replace('{logo_html}', logo_html)
+    html = html.replace('{dimension_items_html}', dimension_items_html)
+    html = html.replace('{dimension_table_rows}', dimension_table_rows)
     
     return html
