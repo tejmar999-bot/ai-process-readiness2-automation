@@ -1446,7 +1446,7 @@ def render_results_dashboard():
     # Action buttons
     st.markdown("---")
     
-    # Inject JavaScript to style buttons with softer orange
+    # Inject JavaScript to style buttons with lighter orange
     st.markdown("""
     <script>
     setTimeout(function() {
@@ -1462,8 +1462,8 @@ def render_results_dashboard():
                 text.includes('Resend Code') ||
                 text.includes('Submit Feedback') ||
                 text.includes('Request Assistance')) {
-                // Apply softer orange styling
-                button.style.backgroundColor = '#F59E0B';
+                // Apply lighter orange styling
+                button.style.backgroundColor = '#FCD34D';
                 button.style.color = '#000000';
             }
         });
@@ -1471,7 +1471,7 @@ def render_results_dashboard():
     </script>
     """, unsafe_allow_html=True)
     
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns([1, 2, 1])
 
     with col1:
         if st.button("Retake Assessment", type="primary", use_container_width=True):
@@ -1484,31 +1484,21 @@ def render_results_dashboard():
             st.rerun()
 
     with col2:
+        st.empty()
+    
+    with col3:
         if st.button("📄 Download Text Report", type="primary", use_container_width=True):
             st.session_state.show_email_verification = True
             st.session_state.download_type = "text"
     
-    with col3:
-        if st.button("📊 Download PDF Report", type="primary", use_container_width=True):
-            st.session_state.show_email_verification = True
-            st.session_state.download_type = "pdf"
-
-    with col4:
-        st.empty()
-    
-    with col5:
-        st.empty()
-    
-    # Email Verification Dialog for Report Download (PDF or Text)
+    # Email Verification Dialog for Report Download
     if st.session_state.get("show_email_verification", False):
         st.markdown("---")
-        download_type = st.session_state.get("download_type", "pdf")
-        report_label = "Text Report" if download_type == "text" else "PDF Report"
         st.markdown(
             f'<h4 style="color: {primary_color}; text-align: center;">📧 Verify Your Email</h4>',
             unsafe_allow_html=True)
         st.markdown(
-            f'<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">We need to verify your email before downloading your {report_label}.</p>',
+            '<p style="text-align: center; color: #9CA3AF; margin-bottom: 1rem;">We need to verify your email before downloading your report.</p>',
             unsafe_allow_html=True)
         
         # Initialize verification fields if not present
@@ -1521,7 +1511,7 @@ def render_results_dashboard():
         if 'verification_step' not in st.session_state:
             st.session_state.verification_step = "email"  # email or code
         if 'download_type' not in st.session_state:
-            st.session_state.download_type = "pdf"
+            st.session_state.download_type = "text"
         
         # Step 1: Enter email
         if st.session_state.verification_step == "email":
@@ -1577,77 +1567,43 @@ def render_results_dashboard():
                     elif verification_code_entered != st.session_state.verification_code_expected:
                         st.error("Invalid verification code. Please try again.")
                     else:
-                        # Code is correct - generate report (PDF or Text)
+                        # Code is correct - generate HTML report
                         try:
                             import base64
                             
-                            if st.session_state.download_type == "text":
-                                # Generate HTML report
-                                logo_b64 = None
-                                if st.session_state.company_logo is not None:
-                                    from io import BytesIO
-                                    buffered = BytesIO()
-                                    st.session_state.company_logo.save(buffered, format="PNG")
-                                    logo_b64 = base64.b64encode(buffered.getvalue()).decode()
-                                
-                                html_content = generate_html_report(
-                                    scores_data,
-                                    company_name=st.session_state.company_name,
-                                    company_logo_b64=logo_b64,
-                                    primary_color=st.session_state.primary_color
-                                )
-                                
-                                # Create download link for HTML
-                                filename = f"{st.session_state.company_name}_AI_Readiness_Report.html"
-                                html_b64 = base64.b64encode(html_content.encode()).decode()
-                                
-                                download_script = f"""
-                                <script>
-                                (function() {{
-                                    const link = document.createElement('a');
-                                    link.href = 'data:text/html;base64,{html_b64}';
-                                    link.download = '{filename}';
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                }})();
-                                </script>
-                                """
-                                st.success("✅ Email verified! Downloading your text report...")
-                                st.components.v1.html(download_script, height=0)
-                            else:
-                                # Generate PDF report
-                                dimension_names = [d['title'] for d in DIMENSIONS]
-                                pdf_data = {
-                                    'overall_score': scores_data['total'],
-                                    'dimension_scores': {
-                                        name: score for name, score in zip(dimension_names, scores_data['dimension_scores'])
-                                    },
-                                    'readiness_band': scores_data['readiness_band'],
-                                    'summary': st.session_state.ai_insights_text or f"Assessment completed with overall score of {scores_data['total']}/30",
-                                    'recommendations': {},
-                                    'company_name': st.session_state.company_name
-                                }
-                                pdf_buffer = generate_pdf_report(pdf_data)
-                                
-                                # Encode PDF to base64 for JavaScript download
-                                pdf_b64 = base64.b64encode(pdf_buffer).decode()
-                                filename = f"{st.session_state.company_name}_AI_Readiness_Report.pdf"
-                                
-                                download_script = f"""
-                                <script>
-                                (function() {{
-                                    const link = document.createElement('a');
-                                    link.href = 'data:application/pdf;base64,{pdf_b64}';
-                                    link.download = '{filename}';
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                }})();
-                                </script>
-                                """
-                                st.success("✅ Email verified! Downloading your PDF report...")
-                                st.components.v1.html(download_script, height=0)
+                            # Generate HTML report
+                            logo_b64 = None
+                            if st.session_state.company_logo is not None:
+                                from io import BytesIO
+                                buffered = BytesIO()
+                                st.session_state.company_logo.save(buffered, format="PNG")
+                                logo_b64 = base64.b64encode(buffered.getvalue()).decode()
+                            
+                            html_content = generate_html_report(
+                                scores_data,
+                                company_name=st.session_state.company_name,
+                                company_logo_b64=logo_b64,
+                                primary_color=st.session_state.primary_color
+                            )
+                            
+                            # Create download link for HTML
+                            filename = f"{st.session_state.company_name}_AI_Readiness_Report.html"
+                            html_b64 = base64.b64encode(html_content.encode()).decode()
+                            
+                            download_script = f"""
+                            <script>
+                            (function() {{
+                                const link = document.createElement('a');
+                                link.href = 'data:text/html;base64,{html_b64}';
+                                link.download = '{filename}';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }})();
+                            </script>
+                            """
+                            st.success("✅ Email verified! Downloading your report...")
+                            st.components.v1.html(download_script, height=0)
                             
                             # Send notification to T-Logic
                             send_pdf_download_notification(
