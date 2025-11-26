@@ -1,4 +1,4 @@
-from pdf_generator import generate_pdf_report
+from utils.pdf_generator import generate_pdf_report
 
 mock_results = {
     "overall_score": 22.5,
