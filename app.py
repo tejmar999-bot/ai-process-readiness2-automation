@@ -1978,7 +1978,7 @@ def main():
                     placeholder="e.g., john@company.com",
                     key="user_email_input",
                     label_visibility="collapsed")
-                st.markdown('<p style="margin-top: -0.8rem; margin-bottom: 0.3rem; font-size: 0.8rem; color: #FF0000;">*Required only if downloading PDF output report</p>', unsafe_allow_html=True)
+                st.markdown('<p style="margin-top: -0.8rem; margin-bottom: 0.3rem; font-size: 0.8rem; color: #FF0000;">*Required only if downloading output results report</p>', unsafe_allow_html=True)
 
             # Optional fields
             col3, col4 = st.columns(2)
