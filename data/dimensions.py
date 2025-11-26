@@ -284,35 +284,35 @@ DIMENSIONS = [
         'questions': [
             {
                 'id': 'governance_roles',
-                'text': 'How clearly defined are roles and responsibilities?',
+                'text': 'Is there a formal governance structure for AI decision-making and oversight?',
                 'answer_choices': {
-                    1: 'Unclear',
-                    2: 'Somewhat defined',
-                    3: 'Defined',
-                    4: 'Well-defined',
-                    5: 'Crystal clear & documented'
+                    1: 'No structure - ad-hoc decisions',
+                    2: 'Informal structure - some designated roles',
+                    3: 'Defined committee with documented responsibilities',
+                    4: 'Formal board with clear policies & escalation paths',
+                    5: 'Enterprise AI council with cross-functional representation & documented charter'
                 }
             },
             {
                 'id': 'governance_risk',
-                'text': 'How effectively are risks identified and mitigated?',
+                'text': 'How systematically are AI-related risks identified, assessed, and mitigated?',
                 'answer_choices': {
-                    1: 'No risk management',
-                    2: 'Ad-hoc approach',
-                    3: 'Some processes',
-                    4: 'Structured processes',
-                    5: 'Comprehensive risk management'
+                    1: 'Reactive only - addressed after incidents occur',
+                    2: 'Informal risk discussions - minimal documentation',
+                    3: 'Basic risk registry with periodic reviews',
+                    4: 'Formal risk assessment framework with mitigation plans',
+                    5: 'Comprehensive risk management with continuous monitoring & testing'
                 }
             },
             {
                 'id': 'governance_compliance',
-                'text': 'How effectively are compliance requirements and appropriate guardrails built into processes?',
+                'text': 'How are compliance requirements and guardrails enforced throughout AI processes?',
                 'answer_choices': {
-                    1: 'No guardrails in place',
-                    2: 'Minimal guardrails',
-                    3: 'Basic guardrails defined',
-                    4: 'Strong guardrails & compliance integrated',
-                    5: 'Comprehensive guardrails, fully compliant & monitored'
+                    1: 'No enforcement mechanism - compliance optional',
+                    2: 'Manual checks performed sporadically',
+                    3: 'Documented guardrails with manual verification',
+                    4: 'Automated controls with periodic audits',
+                    5: 'Continuous compliance monitoring with automated alerts & enforcement'
                 }
             }
         ]
