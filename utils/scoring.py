@@ -65,23 +65,23 @@ def get_readiness_band(total_score):
         return {
             'label': 'Foundational',
             'color': '#DC2626',
-            'description': 'First critical steps being laid.'
+            'description': 'Foundation building phase - core AI readiness initiatives beginning with basic infrastructure and organizational awareness.'
         }
     elif total_score < 18:
         return {
             'label': 'Emerging',
             'color': '#EAB308',
-            'description': 'Meaningful progress being made.'
+            'description': 'Initial implementation phase - pilot projects underway with growing organizational support and foundational AI capabilities established.'
         }
     elif total_score < 25:
         return {
             'label': 'Dependable',
             'color': '#42A5F5',
-            'description': 'Consistent and mostly reliable.'
+            'description': 'Scaled deployment phase - proven AI processes operational across multiple areas with strong supporting infrastructure and governance.'
         }
     else:
         return {
             'label': 'Exceptional',
             'color': '#16A34A',
-            'description': 'Best-in-class process performance.'
+            'description': 'Enterprise AI platform - comprehensive AI rollout with mature governance, scaled operations, and continuous optimization capabilities.'
         }

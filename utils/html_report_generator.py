@@ -392,8 +392,9 @@ def generate_html_report(
             <div class="score-box">
                 <h3>Assessment Interpretation</h3>
                 <p>Your organization scored <strong>{overall_score:.1f} out of 30</strong>, placing you in the <strong>{readiness_label}</strong> readiness band. 
-                This score reflects your current state of AI process readiness across six critical dimensions. This assessment provides insights into your organization's 
-                preparedness for AI implementation and highlights areas for improvement.</p>
+                <strong>{readiness_desc}</strong> This assessment evaluates your organization's preparedness for adopting and rolling out AI at scale across 
+                six critical dimensions including process maturity, technology infrastructure, data readiness, people and culture, leadership alignment, and governance. 
+                The insights provided highlight your current capabilities and identify priority areas for advancement.</p>
             </div>
             
             <h2>Scoring Scale</h2>
@@ -402,29 +403,29 @@ def generate_html_report(
                     <tr>
                         <th>Score Range</th>
                         <th>Readiness Level</th>
-                        <th>Meaning</th>
+                        <th>AI Adoption & Rollout Readiness</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>0 - 10</td>
                         <td>Foundational</td>
-                        <td>First critical steps being laid</td>
+                        <td>Foundation building phase - core AI readiness initiatives beginning with basic infrastructure and organizational awareness</td>
                     </tr>
                     <tr>
                         <td>11 - 17</td>
                         <td>Emerging</td>
-                        <td>Meaningful progress being made</td>
+                        <td>Initial implementation phase - pilot projects underway with growing organizational support and foundational AI capabilities established</td>
                     </tr>
                     <tr>
                         <td>18 - 24</td>
                         <td>Dependable</td>
-                        <td>Consistent and mostly reliable</td>
+                        <td>Scaled deployment phase - proven AI processes operational across multiple areas with strong supporting infrastructure and governance</td>
                     </tr>
                     <tr>
                         <td>25 - 30</td>
                         <td>Exceptional</td>
-                        <td>Best-in-class process performance</td>
+                        <td>Enterprise AI platform - comprehensive AI rollout with mature governance, scaled operations, and continuous optimization capabilities</td>
                     </tr>
                 </tbody>
             </table>
