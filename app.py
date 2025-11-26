@@ -1564,7 +1564,19 @@ def render_results_dashboard():
                     else:
                         # Code is correct - generate PDF and notify
                         try:
-                            pdf_buffer = generate_pdf_report(scores_data)
+                            # Transform scores_data from compute_scores format to PDF generator format
+                            dimension_names = [d['title'] for d in DIMENSIONS]
+                            pdf_data = {
+                                'overall_score': scores_data['total'],
+                                'dimension_scores': {
+                                    name: score for name, score in zip(dimension_names, scores_data['dimension_scores'])
+                                },
+                                'readiness_band': scores_data['readiness_band'],
+                                'summary': st.session_state.ai_insights_text or f"Assessment completed with overall score of {scores_data['total']}/30",
+                                'recommendations': {},
+                                'company_name': st.session_state.company_name
+                            }
+                            pdf_buffer = generate_pdf_report(pdf_data)
                             
                             # Send notification to T-Logic
                             send_pdf_download_notification(
