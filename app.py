@@ -776,7 +776,7 @@ def create_dimension_breakdown_chart(dimension_scores):
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#E5E7EB'),
-        height=450,
+        height=495,
         margin=dict(l=200, r=150, t=40, b=40)
     )
 
@@ -1080,13 +1080,13 @@ def render_results_dashboard():
                     unsafe_allow_html=True)
 
     # Dimension Breakdown Chart
-    st.markdown("### Dimension Breakdown")
+    st.markdown(f'<h3 style="font-size: 18px; color: {primary_color}; font-weight: bold;">Dimension Breakdown</h3>', unsafe_allow_html=True)
     fig = create_dimension_breakdown_chart(dimension_scores)
     st.plotly_chart(fig, use_container_width=True)
 
     # Benchmark Comparison Section
     st.markdown("---")
-    st.markdown("### 📊 Industry Benchmark Comparison", unsafe_allow_html=True)
+    st.markdown(f'<h3 style="font-size: 18px; color: {primary_color}; font-weight: bold;">📊 Industry Benchmark Comparison</h3>', unsafe_allow_html=True)
 
     try:
         # Benchmark selector

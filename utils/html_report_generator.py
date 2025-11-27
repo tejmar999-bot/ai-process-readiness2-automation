@@ -115,18 +115,18 @@ def generate_html_report(
             bench_score = dim.get('benchmark_score', 0)
             diff = dim.get('difference', 0)
             
-            # Status based on difference
+            # Status icons based on difference
             if diff > 0.2:
                 status = "✅"
             elif diff >= -0.2:
                 status = "✓"
             else:
-                status = "⚠"
+                status = "⚠️"
             
             # Color negative differences red
             diff_color = '#DC2626' if diff < 0 else 'black'
             
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: black;">{status}</td></tr>'
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: black; text-align: center;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
@@ -190,9 +190,10 @@ def generate_html_report(
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
+            padding: 15px 20px;
             border-bottom: 3px solid {primary_color};
             margin-bottom: 30px;
+            background-color: #4B5563;
         }
         
         .header-left {
@@ -302,9 +303,9 @@ def generate_html_report(
         }
         
         .report-subtitle {
-            font-size: 18px;
-            font-weight: bold;
-            color: {primary_color};
+            font-size: 14px;
+            font-weight: normal;
+            color: #E5E7EB;
             margin-top: 5px;
             margin-bottom: 0;
         }
@@ -467,7 +468,7 @@ def generate_html_report(
             
             {dimension_items_html}
             
-            <h3 style="margin-top: 20px; font-size: 14px;">{benchmark_title}</h3>
+            <h3 style="margin-top: 20px; font-size: 14px; color: {primary_color}; font-weight: bold;">{benchmark_title}</h3>
             {benchmark_table_html}
         </div>
         
