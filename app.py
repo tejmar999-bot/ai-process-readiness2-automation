@@ -1108,87 +1108,87 @@ def render_results_dashboard():
         from data.benchmarks import get_benchmark_comparison as get_comp
         comparison = get_comp(scores_data, benchmark_name)
 
-    # Comparison summary
-    col1, col2, col3 = st.columns(3)
+        # Comparison summary
+        col1, col2, col3 = st.columns(3)
 
-    with col1:
-        st.markdown(f"""
-        <div class="score-card">
-            <h4 style="color: {primary_color};">Your Score</h4>
-            <div style="font-size: 1.5rem; font-weight: bold;">{comparison['your_total']}/30</div>
-        </div>
-        """,
-                    unsafe_allow_html=True)
-
-    with col2:
-        st.markdown(f"""
-        <div class="score-card">
-            <h4 style="color: {primary_color};">Benchmark Score</h4>
-            <div style="font-size: 1.5rem; font-weight: bold;">{comparison['benchmark_total']}/30</div>
-        </div>
-        """,
-                    unsafe_allow_html=True)
-
-    with col3:
-        diff = comparison['total_difference']
-        diff_color = '#16A34A' if diff >= 0 else '#E11D48'
-        diff_symbol = '↑' if diff >= 0 else '↓'
-        diff_text = 'Above' if diff >= 0 else 'Below'
-
-        st.markdown(f"""
-        <div class="score-card">
-            <h4 style="color: {primary_color};">Difference</h4>
-            <div style="font-size: 1.5rem; font-weight: bold; color: {diff_color};">
-                {diff_symbol} {abs(diff):.1f} ({diff_text})
+        with col1:
+            st.markdown(f"""
+            <div class="score-card">
+                <h4 style="color: {primary_color};">Your Score</h4>
+                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['your_total']}/30</div>
             </div>
-        </div>
-        """,
-                    unsafe_allow_html=True)
+            """,
+                        unsafe_allow_html=True)
 
-    # Dimension-by-dimension comparison
-    st.markdown("#### Dimension Comparison")
+        with col2:
+            st.markdown(f"""
+            <div class="score-card">
+                <h4 style="color: {primary_color};">Benchmark Score</h4>
+                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['benchmark_total']}/30</div>
+            </div>
+            """,
+                        unsafe_allow_html=True)
 
-    # Create comparison chart
-    dimension_names = [d['title'] for d in comparison['dimensions']]
-    your_scores_list = [d['your_score'] for d in comparison['dimensions']]
-    benchmark_scores_list = [
-        d['benchmark_score'] for d in comparison['dimensions']
-    ]
+        with col3:
+            diff = comparison['total_difference']
+            diff_color = '#16A34A' if diff >= 0 else '#E11D48'
+            diff_symbol = '↑' if diff >= 0 else '↓'
+            diff_text = 'Above' if diff >= 0 else 'Below'
 
-    fig_comparison = go.Figure()
+            st.markdown(f"""
+            <div class="score-card">
+                <h4 style="color: {primary_color};">Difference</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: {diff_color};">
+                    {diff_symbol} {abs(diff):.1f} ({diff_text})
+                </div>
+            </div>
+            """,
+                        unsafe_allow_html=True)
 
-    # Add your scores with text labels
-    fig_comparison.add_trace(
-        go.Bar(name='Your Scores',
-               x=dimension_names,
-               y=your_scores_list,
-               marker_color=primary_color,
-               text=[f'{score:.1f}' for score in your_scores_list],
-               textposition='outside'))
+        # Dimension-by-dimension comparison
+        st.markdown("#### Dimension Comparison")
 
-    # Add benchmark scores with text labels
-    fig_comparison.add_trace(
-        go.Bar(name='Average of All Submissions',
-               x=dimension_names,
-               y=benchmark_scores_list,
-               marker_color='#6B7280',
-               text=[f'{score:.1f}' for score in benchmark_scores_list],
-               textposition='outside'))
+        # Create comparison chart
+        dimension_names = [d['title'] for d in comparison['dimensions']]
+        your_scores_list = [d['your_score'] for d in comparison['dimensions']]
+        benchmark_scores_list = [
+            d['benchmark_score'] for d in comparison['dimensions']
+        ]
 
-    fig_comparison.update_layout(barmode='group',
-                                 plot_bgcolor='rgba(0,0,0,0)',
-                                 paper_bgcolor='rgba(0,0,0,0)',
-                                 font=dict(color='white'),
-                                 yaxis=dict(title='Score',
-                                            range=[0, 5.5],
-                                            gridcolor='rgba(255,255,255,0.2)'),
-                                 xaxis=dict(gridcolor='rgba(255,255,255,0.2)'),
-                                 legend=dict(orientation="h",
-                                             yanchor="bottom",
-                                             y=1.02,
-                                             xanchor="right",
-                                             x=1),
-                                 height=400)
+        fig_comparison = go.Figure()
+
+        # Add your scores with text labels
+        fig_comparison.add_trace(
+            go.Bar(name='Your Scores',
+                   x=dimension_names,
+                   y=your_scores_list,
+                   marker_color=primary_color,
+                   text=[f'{score:.1f}' for score in your_scores_list],
+                   textposition='outside'))
+
+        # Add benchmark scores with text labels
+        fig_comparison.add_trace(
+            go.Bar(name='Average of All Submissions',
+                   x=dimension_names,
+                   y=benchmark_scores_list,
+                   marker_color='#6B7280',
+                   text=[f'{score:.1f}' for score in benchmark_scores_list],
+                   textposition='outside'))
+
+        fig_comparison.update_layout(barmode='group',
+                                     plot_bgcolor='rgba(0,0,0,0)',
+                                     paper_bgcolor='rgba(0,0,0,0)',
+                                     font=dict(color='white'),
+                                     yaxis=dict(title='Score',
+                                                range=[0, 5.5],
+                                                gridcolor='rgba(255,255,255,0.2)'),
+                                     xaxis=dict(gridcolor='rgba(255,255,255,0.2)'),
+                                     legend=dict(orientation="h",
+                                                 yanchor="bottom",
+                                                 y=1.02,
+                                                 xanchor="right",
+                                                 x=1),
+                                     height=400)
 
         st.plotly_chart(fig_comparison, use_container_width=True)
 
