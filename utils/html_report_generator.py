@@ -296,7 +296,7 @@ def generate_html_report(
             margin: 2px 0;
             padding: 2px 10px;
             background: #f9f9f9;
-            border-left: 4px solid;
+            border-left: 8px solid;
             border-radius: 2px;
             transform: scale(0.805);
             transform-origin: left;
@@ -314,7 +314,7 @@ def generate_html_report(
             font-weight: 600;
             color: #333;
             margin-bottom: 3px;
-            font-size: 0.95em;
+            font-size: 1.05em;
         }
         
         .dimension-score {
@@ -324,7 +324,8 @@ def generate_html_report(
         }
         
         .score-text {
-            font-size: 0.7em;
+            font-size: 0.85em;
+            font-weight: 500;
         }
         
         .score-bar {
@@ -442,6 +443,7 @@ def generate_html_report(
                 <strong>{readiness_desc}</strong> This assessment evaluates your organization's preparedness for adopting and rolling out AI at scale across 
                 six critical dimensions including process maturity, technology infrastructure, data readiness, people and culture, leadership alignment, and governance. 
                 The insights provided highlight your current capabilities and identify priority areas for advancement.</p>
+                <p style="margin-top: 12px; font-size: 0.85em; color: #666; font-style: italic;"><strong>Note:</strong> These results are based on subjective assessments and does not necessarily serve as a substitute for AI implementation preparedness using a more thorough investigation of the organization's capabilities and performance.</p>
             </div>
         </div>
         
@@ -468,7 +470,7 @@ def generate_html_report(
             
             {dimension_items_html}
             
-            <h3 style="margin-top: 20px; font-size: 14px; color: {primary_color}; font-weight: bold;">{benchmark_title}</h3>
+            <h3 style="margin-top: 20px; font-size: 16px; color: #FF8C00; font-weight: bold;">{benchmark_title}</h3>
             {benchmark_table_html}
         </div>
         
