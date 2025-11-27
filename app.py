@@ -1199,11 +1199,12 @@ def render_results_dashboard():
         for dim in comparison['dimensions']:
             diff = dim['difference']
             status = '✅' if diff >= 0 else '⚠️'
+            diff_color = '🟢' if diff >= 0 else '🔴'
             comparison_data.append({
                 'Dimension': dim['title'],
                 'Your Score': f"{dim['your_score']}/5",
                 'Benchmark': f"{dim['benchmark_score']:.1f}/5",
-                'Difference': f"{diff:+.1f}",
+                'Difference': f"{diff_color} {diff:+.1f}",
                 'Status': status
             })
 

@@ -123,7 +123,10 @@ def generate_html_report(
             else:
                 status = "⚠"
             
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: black;">{diff:+.1f}</td><td style="color: black;">{status}</td></tr>'
+            # Color negative differences red
+            diff_color = '#DC2626' if diff < 0 else 'black'
+            
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: black;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
