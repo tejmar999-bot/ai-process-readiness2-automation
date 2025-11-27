@@ -108,7 +108,7 @@ def generate_html_report(
         benchmark_total = benchmark_comparison.get('benchmark_total', 18.4)
         benchmark_title = f"Your Scores vs. Benchmark Scores ({your_total:.1f} vs. Benchmark of {benchmark_total:.1f} overall)"
         
-        benchmark_table_html = '<table style="background-color: #f0f0f0; font-size: 0.85em;"><thead><tr><th style="background-color: #e0e0e0; color: black;">Dimension</th><th style="background-color: #e0e0e0; color: black;">Your Score</th><th style="background-color: #e0e0e0; color: black;">Benchmark</th><th style="background-color: #e0e0e0; color: black;">Difference</th><th style="background-color: #e0e0e0; color: black;">Status</th></tr></thead><tbody>'
+        benchmark_table_html = '<table style="background-color: #f0f0f0; font-size: 0.8em; margin: 0;"><thead><tr><th style="background-color: #e0e0e0; color: black; padding: 6px;">Dimension</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Your Score</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Benchmark</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Difference</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Status</th></tr></thead><tbody>'
         
         for dim in benchmark_comparison.get('dimensions', []):
             your_score = dim.get('your_score', 0)
@@ -129,7 +129,7 @@ def generate_html_report(
             # Color negative differences red
             diff_color = '#DC2626' if diff < 0 else 'black'
             
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold;">{status}</td></tr>'
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
@@ -240,11 +240,11 @@ def generate_html_report(
         
         h2 {
             color: {primary_color};
-            font-size: 20px;
-            margin-top: 20px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            margin-top: 15px;
+            margin-bottom: 10px;
             border-bottom: 2px solid {primary_color};
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
         
         h3 {
@@ -296,12 +296,12 @@ def generate_html_report(
         }
         
         .dimension-item {
-            margin: 3px 0;
-            padding: 3px 10px;
+            margin: 2px 0;
+            padding: 2px 10px;
             background: #f9f9f9;
             border-left: 16px solid;
             border-radius: 2px;
-            transform: scale(0.805);
+            transform: scale(0.765);
             transform-origin: left;
         }
         
@@ -470,11 +470,11 @@ def generate_html_report(
         
         <div class="content">
             <h2>Your Scores Across All Dimensions</h2>
-            <p style="margin-bottom: 15px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
+            <p style="margin-bottom: 12px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
             
             {dimension_items_html}
             
-            <h2 style="margin-top: 20px; font-size: 20px;">{benchmark_title}</h2>
+            <h2 style="margin-top: 12px; margin-bottom: 8px;">{benchmark_title}</h2>
             {benchmark_table_html}
         </div>
         
