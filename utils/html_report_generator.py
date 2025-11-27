@@ -118,18 +118,15 @@ def generate_html_report(
             # Status icons and colors based on difference
             if diff > 0.2:
                 status = "✅"
-                status_color = '#16A34A'
             elif diff >= -0.2:
                 status = "✓"
-                status_color = 'black'
             else:
                 status = "⚠️"
-                status_color = '#FFB800'
             
-            # Color negative differences red
-            diff_color = '#DC2626' if diff < 0 else 'black'
+            # Color both status and difference to match
+            status_color = '#DC2626' if diff < 0 else 'black'
             
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {status_color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
@@ -327,15 +324,15 @@ def generate_html_report(
         }
         
         .score-text {
-            font-size: 0.85em;
+            font-size: 0.95em;
             font-weight: 500;
         }
         
         .score-bar {
             flex: 1;
-            height: 6px;
+            height: 12px;
             background: #e0e0e0;
-            border-radius: 3px;
+            border-radius: 6px;
             margin: 0 4px;
             overflow: hidden;
         }
