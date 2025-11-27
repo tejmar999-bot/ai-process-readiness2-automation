@@ -24,6 +24,10 @@ def generate_html_report(
         HTML string that can be downloaded
     """
     
+    # Use "Your Company" as default if company_name is empty
+    if not company_name or company_name.strip() == "":
+        company_name = "Your Company"
+    
     # Extract data with safe type conversion
     try:
         overall_score = float(results.get('total', 0) or 0)
@@ -257,17 +261,26 @@ def generate_html_report(
         }
         
         .dimension-item {
-            margin: 12px 0;
-            padding: 10px;
+            margin: 6px 0;
+            padding: 6px 10px;
             background: #f9f9f9;
             border-left: 4px solid;
             border-radius: 2px;
         }
         
+        .report-subtitle {
+            font-size: 18px;
+            font-weight: bold;
+            color: {primary_color};
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+        
         .dimension-name {
             font-weight: 600;
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 0.95em;
         }
         
         .dimension-score {
@@ -277,15 +290,15 @@ def generate_html_report(
         }
         
         .score-text {
-            font-size: 0.95em;
+            font-size: 0.85em;
         }
         
         .score-bar {
             flex: 1;
-            height: 20px;
+            height: 12px;
             background: #e0e0e0;
-            border-radius: 10px;
-            margin: 0 10px;
+            border-radius: 6px;
+            margin: 0 8px;
             overflow: hidden;
         }
         
@@ -360,7 +373,7 @@ def generate_html_report(
         <div class="page-header">
             <div class="header-left">
                 <h1>AI-Enabled Process Readiness Assessment</h1>
-                <p style="color: #666; margin-top: 5px; font-size: 0.95em;">Report for {company_name}</p>
+                <p class="report-subtitle">Report for {company_name}</p>
                 <p style="color: #999; font-size: 0.85em; margin-top: 3px;">{current_date}</p>
             </div>
             <div class="header-right">
@@ -409,6 +422,7 @@ def generate_html_report(
         <div class="page-header">
             <div class="header-left">
                 <h1 style="font-size: 22px;">Dimension Breakdown</h1>
+                <p class="report-subtitle">Report for {company_name}</p>
             </div>
             <div class="header-right">
                 {logo_html}
@@ -447,6 +461,7 @@ def generate_html_report(
         <div class="page-header">
             <div class="header-left">
                 <h1 style="font-size: 22px;">Next Steps</h1>
+                <p class="report-subtitle">Report for {company_name}</p>
             </div>
             <div class="header-right">
                 {logo_html}
