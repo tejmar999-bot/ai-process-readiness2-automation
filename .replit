@@ -64,9 +64,5 @@ externalPort = 3002
 localPort = 45847
 externalPort = 5173
 
-[[ports]]
-localPort = 46663
-externalPort = 6000
-
 [agent]
 integrations = ["google-mail:1.0.0", "python_openai:1.0.0"]

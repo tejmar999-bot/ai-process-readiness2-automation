@@ -1583,11 +1583,16 @@ def render_results_dashboard():
                                 st.session_state.company_logo.save(buffered, format="PNG")
                                 logo_b64 = base64.b64encode(buffered.getvalue()).decode()
                             
+                            # Get benchmark comparison
+                            from data.benchmarks import get_benchmark_comparison
+                            benchmark_comp = get_benchmark_comparison(scores_data)
+                            
                             html_content = generate_html_report(
                                 scores_data,
                                 company_name=st.session_state.user_company,
                                 company_logo_b64=logo_b64,
-                                primary_color=st.session_state.primary_color
+                                primary_color=st.session_state.primary_color,
+                                benchmark_comparison=benchmark_comp
                             )
                             
                             # Create download button for HTML

@@ -8,8 +8,9 @@ from datetime import datetime
 def generate_html_report(
     results: dict,
     company_name: str = "Your Company",
-    company_logo_b64: str = None,
-    primary_color: str = "#BF6A16"
+    company_logo_b64=None,
+    primary_color: str = "#BF6A16",
+    benchmark_comparison=None
 ) -> str:
     """
     Generate a professional HTML report that can be printed or saved as PDF.
@@ -99,7 +100,34 @@ def generate_html_report(
             </div>
             '''.format(color, name, score, percentage_val, color)
     
-    # Build dimension table rows HTML
+    # Build benchmark table HTML
+    benchmark_table_html = ""
+    benchmark_title = ""
+    if benchmark_comparison:
+        your_total = benchmark_comparison.get('your_total', overall_score)
+        benchmark_total = benchmark_comparison.get('benchmark_total', 18.4)
+        benchmark_title = f"Your Scores vs. Benchmark Scores ({your_total:.1f} vs. Benchmark of {benchmark_total:.1f} overall)"
+        
+        benchmark_table_html = '<table style="background-color: #f0f0f0; font-size: 0.85em;"><thead><tr><th style="background-color: #e0e0e0; color: black;">Dimension</th><th style="background-color: #e0e0e0; color: black;">Your Score</th><th style="background-color: #e0e0e0; color: black;">Benchmark</th><th style="background-color: #e0e0e0; color: black;">Difference</th><th style="background-color: #e0e0e0; color: black;">Status</th></tr></thead><tbody>'
+        
+        for dim in benchmark_comparison.get('dimensions', []):
+            your_score = dim.get('your_score', 0)
+            bench_score = dim.get('benchmark_score', 0)
+            diff = dim.get('difference', 0)
+            
+            # Status based on difference
+            if diff > 0.2:
+                status = "✅"
+            elif diff >= -0.2:
+                status = "✓"
+            else:
+                status = "⚠"
+            
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: black;">{diff:+.1f}</td><td style="color: black;">{status}</td></tr>'
+        
+        benchmark_table_html += '</tbody></table>'
+    
+    # Build dimension table rows HTML (no longer used but kept for compatibility)
     dimension_table_rows = ""
     for name, score in zip(dimension_names, dimension_scores_list):
         color = dimension_colors.get(name, '#999')
@@ -266,7 +294,7 @@ def generate_html_report(
             background: #f9f9f9;
             border-left: 4px solid;
             border-radius: 2px;
-            transform: scale(0.7);
+            transform: scale(0.805);
             transform-origin: left;
         }
         
@@ -435,6 +463,9 @@ def generate_html_report(
             <p style="margin-bottom: 15px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
             
             {dimension_items_html}
+            
+            <h3 style="margin-top: 20px; font-size: 14px;">{benchmark_title}</h3>
+            {benchmark_table_html}
         </div>
         
         <div class="page-footer">
@@ -508,5 +539,7 @@ def generate_html_report(
     html = html.replace('{logo_html}', logo_html)
     html = html.replace('{dimension_items_html}', dimension_items_html)
     html = html.replace('{dimension_table_rows}', dimension_table_rows)
+    html = html.replace('{benchmark_title}', benchmark_title)
+    html = html.replace('{benchmark_table_html}', benchmark_table_html)
     
     return html
