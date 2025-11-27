@@ -115,18 +115,21 @@ def generate_html_report(
             bench_score = dim.get('benchmark_score', 0)
             diff = dim.get('difference', 0)
             
-            # Status icons based on difference
+            # Status icons and colors based on difference
             if diff > 0.2:
                 status = "✅"
+                status_color = '#16A34A'
             elif diff >= -0.2:
                 status = "✓"
+                status_color = 'black'
             else:
                 status = "⚠️"
+                status_color = '#FFB800'
             
             # Color negative differences red
             diff_color = '#DC2626' if diff < 0 else 'black'
             
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: black; text-align: center;">{status}</td></tr>'
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold;">{your_score:.1f}/5</td><td style="color: black;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
@@ -230,7 +233,7 @@ def generate_html_report(
         }
         
         h1 {
-            color: {primary_color};
+            color: #FF8C00;
             font-size: 28px;
             margin-bottom: 10px;
         }
@@ -293,10 +296,10 @@ def generate_html_report(
         }
         
         .dimension-item {
-            margin: 2px 0;
-            padding: 2px 10px;
+            margin: 3px 0;
+            padding: 3px 10px;
             background: #f9f9f9;
-            border-left: 8px solid;
+            border-left: 16px solid;
             border-radius: 2px;
             transform: scale(0.805);
             transform-origin: left;
@@ -443,14 +446,14 @@ def generate_html_report(
                 <strong>{readiness_desc}</strong> This assessment evaluates your organization's preparedness for adopting and rolling out AI at scale across 
                 six critical dimensions including process maturity, technology infrastructure, data readiness, people and culture, leadership alignment, and governance. 
                 The insights provided highlight your current capabilities and identify priority areas for advancement.</p>
-                <p style="margin-top: 12px; font-size: 0.85em; color: #666; font-style: italic;"><strong>Note:</strong> These results are based on subjective assessments and does not necessarily serve as a substitute for AI implementation preparedness using a more thorough investigation of the organization's capabilities and performance.</p>
+                <p style="margin-top: 12px; font-size: 0.85em; color: #666; font-style: italic;"><strong>Note:</strong> These results are based on subjective assessments and do not necessarily serve as a substitute for AI implementation preparedness using a more thorough investigation of the organization's capabilities and performance.</p>
             </div>
         </div>
         
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Page 1</div>
+            <div class="page-number">Pg. 1/3</div>
         </div>
     </div>
     
@@ -466,18 +469,19 @@ def generate_html_report(
         </div>
         
         <div class="content">
+            <h2>Your Scores Across All Dimensions</h2>
             <p style="margin-bottom: 15px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
             
             {dimension_items_html}
             
-            <h3 style="margin-top: 20px; font-size: 16px; color: #FF8C00; font-weight: bold;">{benchmark_title}</h3>
+            <h2 style="margin-top: 20px; font-size: 20px;">{benchmark_title}</h2>
             {benchmark_table_html}
         </div>
         
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Page 2</div>
+            <div class="page-number">Pg. 2/3</div>
         </div>
     </div>
     
@@ -526,7 +530,7 @@ def generate_html_report(
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Page 3</div>
+            <div class="page-number">Pg. 3/3</div>
         </div>
     </div>
 </body>
