@@ -1585,13 +1585,13 @@ def render_results_dashboard():
                             
                             html_content = generate_html_report(
                                 scores_data,
-                                company_name=st.session_state.company_name,
+                                company_name=st.session_state.user_company,
                                 company_logo_b64=logo_b64,
                                 primary_color=st.session_state.primary_color
                             )
                             
                             # Create download button for HTML
-                            filename = f"{st.session_state.company_name}_AI_Readiness_Report.html"
+                            filename = f"{st.session_state.user_company or 'Your Company'}_AI_Readiness_Report.html"
                             
                             st.success("✅ Email verified! Your report is ready.")
                             

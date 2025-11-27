@@ -261,11 +261,13 @@ def generate_html_report(
         }
         
         .dimension-item {
-            margin: 6px 0;
-            padding: 6px 10px;
+            margin: 2px 0;
+            padding: 2px 10px;
             background: #f9f9f9;
             border-left: 4px solid;
             border-radius: 2px;
+            transform: scale(0.7);
+            transform-origin: left;
         }
         
         .report-subtitle {
@@ -290,15 +292,15 @@ def generate_html_report(
         }
         
         .score-text {
-            font-size: 0.85em;
+            font-size: 0.7em;
         }
         
         .score-bar {
             flex: 1;
-            height: 12px;
+            height: 6px;
             background: #e0e0e0;
-            border-radius: 6px;
-            margin: 0 8px;
+            border-radius: 3px;
+            margin: 0 4px;
             overflow: hidden;
         }
         
@@ -433,21 +435,6 @@ def generate_html_report(
             <p style="margin-bottom: 15px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
             
             {dimension_items_html}
-            
-            <h2 style="margin-top: 30px;">Summary by Dimension</h2>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Dimension</th>
-                        <th>Score</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {dimension_table_rows}
-                </tbody>
-            </table>
         </div>
         
         <div class="page-footer">
