@@ -1088,23 +1088,25 @@ def render_results_dashboard():
     st.markdown("---")
     st.markdown("### 📊 Industry Benchmark Comparison", unsafe_allow_html=True)
 
-    # Benchmark selector
-    col1, col2 = st.columns([2, 3])
+    try:
+        # Benchmark selector
+        col1, col2 = st.columns([2, 3])
 
-    with col1:
-        all_benchmarks = get_all_benchmarks()
-        default_idx = all_benchmarks.index(
-            'Moving Average Benchmark') if 'Moving Average Benchmark' in all_benchmarks else 0
-        benchmark_name = st.selectbox("Compare against:",
-                                      options=all_benchmarks,
-                                      index=default_idx)
+        with col1:
+            all_benchmarks = get_all_benchmarks()
+            default_idx = all_benchmarks.index(
+                'Moving Average Benchmark') if 'Moving Average Benchmark' in all_benchmarks else 0
+            benchmark_name = st.selectbox("Compare against:",
+                                          options=all_benchmarks,
+                                          index=default_idx)
 
-    with col2:
-        benchmark_info = get_benchmark_data(benchmark_name)
-        st.info(benchmark_info['description'])
+        with col2:
+            benchmark_info = get_benchmark_data(benchmark_name)
+            st.info(benchmark_info['description'])
 
-    # Get comparison data
-    comparison = get_benchmark_comparison(scores_data, benchmark_name)
+        # Get comparison data
+        from data.benchmarks import get_benchmark_comparison as get_comp
+        comparison = get_comp(scores_data, benchmark_name)
 
     # Comparison summary
     col1, col2, col3 = st.columns(3)
@@ -1188,25 +1190,27 @@ def render_results_dashboard():
                                              x=1),
                                  height=400)
 
-    st.plotly_chart(fig_comparison, use_container_width=True)
+        st.plotly_chart(fig_comparison, use_container_width=True)
 
-    # Detailed comparison table
-    st.markdown("#### Detailed Comparison")
+        # Detailed comparison table
+        st.markdown("#### Detailed Comparison")
 
-    comparison_data = []
-    for dim in comparison['dimensions']:
-        diff = dim['difference']
-        status = '✅' if diff >= 0 else '⚠️'
-        comparison_data.append({
-            'Dimension': dim['title'],
-            'Your Score': f"{dim['your_score']}/5",
-            'Benchmark': f"{dim['benchmark_score']:.1f}/5",
-            'Difference': f"{diff:+.1f}",
-            'Status': status
-        })
+        comparison_data = []
+        for dim in comparison['dimensions']:
+            diff = dim['difference']
+            status = '✅' if diff >= 0 else '⚠️'
+            comparison_data.append({
+                'Dimension': dim['title'],
+                'Your Score': f"{dim['your_score']}/5",
+                'Benchmark': f"{dim['benchmark_score']:.1f}/5",
+                'Difference': f"{diff:+.1f}",
+                'Status': status
+            })
 
-    df_comparison = pd.DataFrame(comparison_data)
-    st.dataframe(df_comparison, use_container_width=True, hide_index=True)
+        df_comparison = pd.DataFrame(comparison_data)
+        st.dataframe(df_comparison, use_container_width=True, hide_index=True)
+    except Exception as e:
+        st.error(f"Unable to load benchmark comparison: {str(e)}")
 
     # Recommended Actions Section
     st.markdown("---")
