@@ -73,11 +73,12 @@ def build_recommendations_html(dimension_names, dimension_scores, benchmark_comp
         
         # Logic: show recommendations if score < 3.0 OR score < benchmark
         if score < 3.0 or score < bench_score:
-            recs = RECOMMENDATIONS_MAP.get(dim_id, [])
-            if recs:
-                recommendations_list.append(f"<strong>{name}:</strong>")
-                for rec in recs[:3]:  # Limit to first 3 recommendations
-                    recommendations_list.append(f"<li>{rec}</li>")
+            if dim_id is not None:
+                recs = RECOMMENDATIONS_MAP.get(dim_id, [])
+                if recs:
+                    recommendations_list.append(f"<strong>{name}:</strong>")
+                    for rec in recs[:3]:  # Limit to first 3 recommendations
+                        recommendations_list.append(f"<li>{rec}</li>")
         # Show encouraging words for strong dimensions
         elif score > 3.0 and score > bench_score:
             recommendations_list.append(f"<li><strong>{name}:</strong> Excellent work! Your strong performance here positions you well for AI adoption. Keep this momentum going.</li>")
@@ -538,7 +539,7 @@ def generate_html_report(
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 1/3</div>
+            <div class="page-number">Pg. 1/4</div>
         </div>
     </div>
     
@@ -566,7 +567,7 @@ def generate_html_report(
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 2/3</div>
+            <div class="page-number">Pg. 2/4</div>
         </div>
     </div>
     
@@ -581,7 +582,7 @@ def generate_html_report(
             </div>
         </div>
         
-        <div class="content">
+        <div class="content" style="padding-bottom: 100px;">
             <h2>Recommended Actions</h2>
             
             <div class="score-box">
@@ -592,7 +593,27 @@ def generate_html_report(
             
             <h3>Immediate Priority Areas</h3>
             {recommendations_html}
-            
+        </div>
+        
+        <div class="page-footer">
+            <div>www.tlogic.consulting</div>
+            <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
+            <div class="page-number">Pg. 3/4</div>
+        </div>
+    </div>
+    
+    <div class="page page-4">
+        <div class="page-header">
+            <div class="header-left">
+                <h1 style="font-size: 22px;">Expert Support</h1>
+                <p class="report-subtitle">Report for {company_name}</p>
+            </div>
+            <div class="header-right">
+                {logo_html}
+            </div>
+        </div>
+        
+        <div class="content">
             <div class="score-box">
                 <h3>Get Expert Support</h3>
                 <p>T-Logic specializes in helping organizations like yours accelerate their AI readiness journey. Our team can provide:</p>
@@ -609,7 +630,7 @@ def generate_html_report(
         <div class="page-footer">
             <div>www.tlogic.consulting</div>
             <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 3/3</div>
+            <div class="page-number">Pg. 4/4</div>
         </div>
     </div>
 </body>
