@@ -50,6 +50,46 @@ RECOMMENDATIONS_MAP = {
 }
 
 
+def build_recommendations_html(dimension_names, dimension_scores, benchmark_comparison):
+    """
+    Build dynamic recommendations based on scores and benchmarks.
+    Shows recommendations for scores < 3.0 or < benchmark.
+    Shows encouraging words for scores > 3.0 AND > benchmark.
+    """
+    dimension_ids = ['process', 'tech', 'data', 'people', 'leadership', 'governance']
+    recommendations_list = []
+    
+    for i, (name, score) in enumerate(zip(dimension_names, dimension_scores)):
+        dim_id = dimension_ids[i] if i < len(dimension_ids) else None
+        score = float(score) if score else 0.0
+        
+        # Get benchmark score for this dimension
+        bench_score = 0.0
+        if benchmark_comparison:
+            for dim in benchmark_comparison.get('dimensions', []):
+                if dim.get('title') == name or dim.get('id') == dim_id:
+                    bench_score = float(dim.get('benchmark_score', 0))
+                    break
+        
+        # Logic: show recommendations if score < 3.0 OR score < benchmark
+        if score < 3.0 or score < bench_score:
+            recs = RECOMMENDATIONS_MAP.get(dim_id, [])
+            if recs:
+                recommendations_list.append(f"<strong>{name}:</strong>")
+                for rec in recs[:3]:  # Limit to first 3 recommendations
+                    recommendations_list.append(f"<li>{rec}</li>")
+        # Show encouraging words for strong dimensions
+        elif score > 3.0 and score > bench_score:
+            recommendations_list.append(f"<li><strong>{name}:</strong> Excellent work! Your strong performance here positions you well for AI adoption. Keep this momentum going.</li>")
+    
+    # Build HTML
+    if not recommendations_list:
+        recommendations_list = ["<li>Continue building on your current strengths across all dimensions</li>"]
+    
+    recommendations_html = "<ul style='margin-bottom: 20px;'>" + "".join([f"<li>{item}</li>" if not item.startswith("<li>") else item for item in recommendations_list]) + "</ul>"
+    return recommendations_html
+
+
 def generate_html_report(
     results: dict,
     company_name: str = "Your Company",
@@ -174,6 +214,9 @@ def generate_html_report(
             benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
+    
+    # Build dynamic recommendations based on scores and benchmarks
+    recommendations_html = build_recommendations_html(dimension_names, dimension_scores_list, benchmark_comparison)
     
     # Build dimension table rows HTML (no longer used but kept for compatibility)
     dimension_table_rows = ""
@@ -548,13 +591,7 @@ def generate_html_report(
             </div>
             
             <h3>Immediate Priority Areas</h3>
-            <ul style="margin-bottom: 20px;">
-                <li>Evaluate your organization's readiness across all dimensions</li>
-                <li>Prioritize improvements in your lowest-scoring dimensions</li>
-                <li>Develop an action plan with clear milestones and timelines</li>
-                <li>Identify quick wins that can build momentum for change</li>
-                <li>Engage stakeholders and ensure alignment on AI transformation goals</li>
-            </ul>
+            {recommendations_html}
             
             <div class="score-box">
                 <h3>Get Expert Support</h3>
@@ -593,5 +630,6 @@ def generate_html_report(
     html = html.replace('{dimension_table_rows}', dimension_table_rows)
     html = html.replace('{benchmark_title}', benchmark_title)
     html = html.replace('{benchmark_table_html}', benchmark_table_html)
+    html = html.replace('{recommendations_html}', recommendations_html)
     
     return html
