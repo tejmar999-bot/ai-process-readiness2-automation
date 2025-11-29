@@ -115,21 +115,18 @@ def generate_html_report(
             bench_score = dim.get('benchmark_score', 0)
             diff = dim.get('difference', 0)
             
-            # Status icons based on difference
-            if diff > 0.2:
-                status = "✅"
-                status_color = '#16A34A'
-            elif diff >= -0.2:
-                status = "✓"
-                status_color = 'black'
-            else:
+            # Status icons and colors based on difference
+            if diff < 0:
                 status = "⚠️"
-                status_color = '#FFB800'
+                color = '#DC2626'
+            elif diff == 0 or (diff > -0.2 and diff < 0.2):
+                status = "✓"
+                color = 'black'
+            else:
+                status = "✅"
+                color = '#16A34A'
             
-            # Color for difference column
-            diff_color = '#DC2626' if diff < 0 else 'black'
-            
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {diff_color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {status_color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
+            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
         
         benchmark_table_html += '</tbody></table>'
     
