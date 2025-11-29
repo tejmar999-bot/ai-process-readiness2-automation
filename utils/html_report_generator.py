@@ -4,6 +4,51 @@ Generates a professional, printable HTML report with company branding.
 """
 from datetime import datetime
 
+# Recommendations map for each dimension
+RECOMMENDATIONS_MAP = {
+    'process': [
+        "Document and standardize critical business processes with clear workflows and performance metrics",
+        "Implement regular process monitoring and variation analysis to identify optimization opportunities",
+        "Establish a continuous improvement culture with data-driven decision making",
+        "Create process maps that highlight where AI could deliver the most impact"
+    ],
+    'data': [
+        "Digitize manual data collection processes and eliminate paper-based workflows",
+        "Implement data quality frameworks including cleaning, validation, and integration protocols",
+        "Build historical data repositories with proper governance and accessibility controls",
+        "Ensure data is structured and labeled appropriately for AI model training",
+        "Address any data silos by creating unified data access layers"
+    ],
+    'tech': [
+        "Develop API-first infrastructure to enable seamless AI integration",
+        "Invest in secure cloud or hybrid systems with scalability in mind",
+        "Establish AI experimentation platforms or sandboxes for safe testing",
+        "Ensure robust cybersecurity measures are in place before AI deployment",
+        "Evaluate and select AI/ML platforms aligned with your use cases"
+    ],
+    'people': [
+        "Launch AI literacy and awareness programs across all organizational levels",
+        "Provide hands-on training in data-driven decision making and AI tools",
+        "Identify and empower AI champions who can drive adoption within teams",
+        "Create cross-functional teams to bridge technical and business expertise",
+        "Develop clear career paths that reward AI skill development"
+    ],
+    'leadership': [
+        "Integrate AI into strategic planning with clear business objectives and ROI expectations",
+        "Secure executive sponsorship and dedicated funding for AI pilots and initiatives",
+        "Align AI goals with measurable business outcomes and KPIs",
+        "Establish governance frameworks for ethical AI use and risk management",
+        "Communicate a compelling AI vision that connects to organizational mission"
+    ],
+    'governance': [
+        "Establish formal governance structures for AI decision-making and oversight",
+        "Develop comprehensive AI risk assessment and mitigation frameworks",
+        "Create and enforce compliance guardrails throughout AI processes",
+        "Define clear roles and responsibilities for AI initiatives",
+        "Implement continuous monitoring and auditing of AI systems"
+    ]
+}
+
 
 def generate_html_report(
     results: dict,
