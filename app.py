@@ -790,7 +790,6 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
                 linecolor='rgba(255,255,255,0.2)'
             ),
             angularaxis=dict(
-                tickfont=dict(size=0),  # Hide default labels
                 showticklabels=False,
                 linecolor='rgba(255,255,255,0.2)'
             ),
