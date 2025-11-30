@@ -984,10 +984,18 @@ def render_results_dashboard():
 
     with col2:
         band_color = readiness_band['color']
+        
+        # Get critical status to determine if warning icon should be shown
+        critical_status = scores_data['critical_status']
+        warning_icon_html = ""
+        if critical_status['severity'] in ['critical', 'warning']:
+            warning_icon_html = f'<div style="font-size: 1.8rem; margin-top: 0.5rem; text-align: center; color: {critical_status["color"]};">{critical_status["icon"]}</div>'
+        
         st.markdown(f"""
         <div class="score-card">
             <h3 style="color: {primary_color};">Readiness Level</h3>
             <div class="readiness-band" style="color: {band_color}; font-size: 1.8rem;">{readiness_band['label']}</div>
+            {warning_icon_html}
             <p style="color: {band_color}; font-size: 0.9rem; margin-top: 0.5rem;">{readiness_band['description']}</p>
         </div>
         """,
@@ -1005,7 +1013,6 @@ def render_results_dashboard():
     
     # Critical Dimension Status - Prominent Display
     st.markdown("<br>", unsafe_allow_html=True)
-    critical_status = scores_data['critical_status']
     
     st.markdown(f"""
     <div style="background-color: {'#7F1D1D' if critical_status['severity'] == 'critical' else '#78350F' if critical_status['severity'] == 'warning' else '#064E3B'}; 
