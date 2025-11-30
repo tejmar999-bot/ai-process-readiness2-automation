@@ -88,8 +88,8 @@ def get_benchmark_comparison(your_scores, benchmark_name='Industry Average'):
         dim_id = score_data['id']
         your_score = score_data['score']
         
-        # Get benchmark score by ID, default to 3.0 if not found
-        benchmark_score = benchmark.get(dim_id, 3.0)
+        # Get benchmark score by ID, default to 9.1 if not found
+        benchmark_score = benchmark.get(dim_id, 9.1)
         
         # Ensure benchmark_score is valid for division
         if benchmark_score == 0:
@@ -138,7 +138,7 @@ def get_moving_average_benchmark():
         benchmark_dict = {}
         total = 0
         for i, dim_id in enumerate(dimension_ids):
-            score = benchmark_scores[i] if i < len(benchmark_scores) else 3.0
+            score = benchmark_scores[i] if i < len(benchmark_scores) else 9.1
             benchmark_dict[dim_id] = round(score, 1)
             total += score
         
