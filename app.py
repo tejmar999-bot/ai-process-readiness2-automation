@@ -978,10 +978,25 @@ def render_results_dashboard():
 
     with col2:
         band_color = readiness_band['color']
+        
+        # Check for critical dimension warnings
+        raw_scores = scores_data['raw_dimension_scores']
+        data_score = raw_scores[2]  # Data Readiness (index 2)
+        leadership_score = raw_scores[4]  # Leadership & Alignment (index 4)
+        percentage_value = float(percentage.rstrip('%'))
+        
+        # Determine warning icon
+        warning_icon = ""
+        if (7 <= data_score < 10 or 7 <= leadership_score < 10) and percentage_value > 62:
+            warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">⚠️</div>'
+        elif (data_score < 7 or leadership_score < 7) and percentage_value > 46:
+            warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">🛑</div>'
+        
         st.markdown(f"""
         <div class="score-card">
             <h3 style="color: {primary_color};">Readiness Level</h3>
             <div class="readiness-band" style="color: {band_color};">{readiness_band['label']}</div>
+            {warning_icon}
         </div>
         """,
                     unsafe_allow_html=True)
