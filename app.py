@@ -1875,13 +1875,13 @@ def main():
             # White container for modal
             with st.container(border=True):
                 st.markdown("""
-                <h2 style="color: #FF8C00; font-size: 26px; margin-bottom: 8px; margin-top: 0; font-weight: bold;">
+                <h2 style="color: #FF8C00; font-size: 24px; margin-bottom: 6px; margin-top: 0; font-weight: bold;">
                 Before we start the Assessment...
                 </h2>
                 """, unsafe_allow_html=True)
                 
                 st.markdown("""
-                <p style="color: #FFFFFF; font-size: 16px; margin-bottom: 24px; margin-top: 0; line-height: 1.5; font-weight: 500;">
+                <p style="color: #FFFFFF; font-size: 15px; margin-bottom: 16px; margin-top: 0; line-height: 1.4; font-weight: 500;">
                 Please tell us: <strong>What best describes your current AI implementation stage?</strong>
                 </p>
                 """, unsafe_allow_html=True)
@@ -1893,6 +1893,19 @@ def main():
                     "Scaling successful pilots",
                     "AI embedded in operations"
                 ]
+                
+                st.markdown("""
+                <style>
+                .stButton > button {
+                    margin-bottom: 8px !important;
+                    padding: 10px 16px !important;
+                    font-size: 14px !important;
+                }
+                .stButton:last-child > button {
+                    margin-bottom: 0 !important;
+                }
+                </style>
+                """, unsafe_allow_html=True)
                 
                 for stage in stages:
                     if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
