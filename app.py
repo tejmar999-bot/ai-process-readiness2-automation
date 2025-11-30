@@ -727,14 +727,9 @@ def render_navigation_buttons():
 
 def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
     """Create spider/radar chart for dimension scores with color-coded dimension labels"""
-    import math
     
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
-    
-    # Create hover text
-    hover_text = [f"{title}: {score:.1f}/15 ({pct:.0f}%)" 
-                  for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
     
     fig = go.Figure()
     
@@ -746,37 +741,22 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         fillcolor='rgba(96, 165, 244, 0.35)',
         line=dict(color='#60A5FA', width=2),
         marker=dict(size=8, color='#93C5FD'),
-        hovertext=hover_text,
-        hoverinfo='text',
+        hoverinfo='skip',
         showlegend=False
     ))
     
-    # Create color-coded dimension labels as annotations
-    annotations = []
-    num_dimensions = len(dimension_titles)
-    
-    for i in range(num_dimensions):
-        angle = (360 / num_dimensions) * i
-        angle_rad = math.radians(angle - 90)
-        
-        # Position labels outside the polar chart
-        radius = 1.35
-        x_pos = radius * math.cos(angle_rad)
-        y_pos = radius * math.sin(angle_rad)
-        
-        # Create label with score and percentage
-        label_text = f"<b style='color:{dimension_colors[i]}'>{dimension_titles[i]}</b><br><span style='color:{dimension_colors[i]}'><b>{raw_scores[i]:.1f}/15</b> ({percentages[i]:.0f}%)</span>"
-        
-        annotations.append(dict(
-            x=x_pos,
-            y=y_pos,
-            text=label_text,
-            showarrow=False,
-            xanchor='center',
-            yanchor='middle',
-            xref='x domain',
-            yref='y domain',
-            font=dict(size=11, color=dimension_colors[i])
+    # Add text labels for each dimension outside the spider chart
+    # Using scatterpolar traces with text
+    for i in range(len(dimension_titles)):
+        fig.add_trace(go.Scatterpolar(
+            r=[17],
+            theta=[dimension_titles[i]],
+            mode='text',
+            text=[f"<b>{dimension_titles[i]}</b><br>{raw_scores[i]:.1f}/15<br>({percentages[i]:.0f}%)"],
+            textposition='middle center',
+            textfont=dict(size=12, color=dimension_colors[i]),
+            hoverinfo='skip',
+            showlegend=False
         ))
     
     fig.update_layout(
@@ -789,7 +769,7 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
                 showgrid=True
             ),
             angularaxis=dict(
-                tickfont=dict(color='rgba(0,0,0,0)', size=1),
+                tickfont=dict(color='rgba(0,0,0,0)', size=0),
                 showticklabels=False,
                 showgrid=True,
                 gridcolor='rgba(255, 255, 255, 0.1)'
@@ -798,14 +778,11 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=13),
+        font=dict(color='#E5E7EB', size=11),
         height=700,
         margin=dict(l=100, r=100, t=100, b=100),
         showlegend=False,
-        hovermode='closest',
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        annotations=annotations
+        hovermode='closest'
     )
     
     return fig
