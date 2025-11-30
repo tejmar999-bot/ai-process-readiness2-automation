@@ -12,7 +12,7 @@ from utils.pdf_generator import generate_pdf_report
 from utils.html_report_generator import generate_html_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
 from db.operations import (ensure_tables_exist, save_assessment)
-from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code
+from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code, send_assessment_completion_email
 from utils.ai_chat import get_chat_response, get_assessment_insights
 
 def scroll_to_top():
@@ -723,6 +723,22 @@ def render_navigation_buttons():
                     st.session_state.current_assessment_id = assessment.id
                 except Exception as e:
                     st.error(f"Error saving assessment: {str(e)}")
+
+                # Send assessment completion email to T-Logic if user provided email
+                if st.session_state.user_email:
+                    try:
+                        send_assessment_completion_email(
+                            user_name=st.session_state.user_name or "Anonymous",
+                            user_email=st.session_state.user_email,
+                            user_title=st.session_state.user_title or "",
+                            user_company=st.session_state.user_company or "",
+                            user_phone=st.session_state.user_phone or "",
+                            user_location=st.session_state.user_location or "",
+                            ai_stage=st.session_state.ai_implementation_stage or "Not provided",
+                            assessment_results=scores_data
+                        )
+                    except Exception as e:
+                        print(f"Error sending assessment completion email: {e}")
 
                 st.session_state.assessment_complete = True
                 st.session_state.should_scroll_to_top = True  # Scroll to top to show results

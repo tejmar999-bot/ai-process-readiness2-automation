@@ -324,3 +324,100 @@ Sent from AI Process Readiness Assessment Tool
 """
     
     return send_email('tej@tlogic.consulting', subject, body_text, body_html)
+
+def send_assessment_completion_email(user_name, user_email, user_title, user_company, user_phone, user_location, ai_stage, assessment_results):
+    """Send complete assessment results to T-Logic after user completes assessment"""
+    subject = f"Assessment Completed - {user_name}"
+    
+    total_score = assessment_results.get('total', 'N/A')
+    percentage = assessment_results.get('percentage', 'N/A')
+    readiness_level = assessment_results.get('readiness_band', {}).get('label', 'N/A')
+    description = assessment_results.get('readiness_band', {}).get('description', 'N/A')
+    
+    # Format dimension scores
+    raw_scores = assessment_results.get('raw_dimension_scores', [])
+    dimension_titles = ['Process Maturity', 'Technology Infrastructure', 'Data Readiness', 'People & Culture', 'Leadership & Alignment', 'Governance & Risk']
+    
+    dimensions_text = "\n".join([f"- {title}: {score:.1f}/15" for title, score in zip(dimension_titles, raw_scores)]) if raw_scores else "N/A"
+    
+    # Critical dimension status
+    critical_status = assessment_results.get('critical_status', {})
+    critical_msg = f"{critical_status.get('icon', '')} {critical_status.get('message', 'N/A')}"
+    
+    body_text = f"""
+Assessment Completed: {user_name}
+
+=== USER INFORMATION ===
+Name: {user_name}
+Email: {user_email}
+Title: {user_title if user_title else 'Not provided'}
+Company: {user_company if user_company else 'Not provided'}
+Phone: {user_phone if user_phone else 'Not provided'}
+Location: {user_location if user_location else 'Not provided'}
+
+=== AI IMPLEMENTATION STAGE ===
+{ai_stage}
+
+=== ASSESSMENT RESULTS ===
+Total Score: {total_score}/90 ({percentage}%)
+Readiness Level: {readiness_level}
+Description: {description}
+
+Dimension Breakdown:
+{dimensions_text}
+
+Critical Dimension Status:
+{critical_msg}
+
+---
+Sent from AI Process Readiness Assessment Tool
+"""
+    
+    body_html = f"""
+<html>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <h2 style="color: #BF6A16;">✅ Assessment Completed: {user_name}</h2>
+    
+    <h3 style="color: #BF6A16; border-bottom: 2px solid #BF6A16; padding-bottom: 10px;">User Information</h3>
+    <ul>
+        <li><strong>Name:</strong> {user_name}</li>
+        <li><strong>Email:</strong> {user_email}</li>
+        <li><strong>Title:</strong> {user_title if user_title else 'Not provided'}</li>
+        <li><strong>Company:</strong> {user_company if user_company else 'Not provided'}</li>
+        <li><strong>Phone:</strong> {user_phone if user_phone else 'Not provided'}</li>
+        <li><strong>Location:</strong> {user_location if user_location else 'Not provided'}</li>
+    </ul>
+    
+    <h3 style="color: #BF6A16; border-bottom: 2px solid #BF6A16; padding-bottom: 10px;">AI Implementation Stage</h3>
+    <p style="background-color: #f5f5f5; padding: 12px; border-radius: 5px; border-left: 4px solid #BF6A16;">
+        {ai_stage}
+    </p>
+    
+    <h3 style="color: #BF6A16; border-bottom: 2px solid #BF6A16; padding-bottom: 10px;">Assessment Results</h3>
+    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;">
+        <p><strong>Total Score:</strong> <span style="color: #BF6A16; font-size: 1.2em;">{total_score}/90</span> ({percentage}%)</p>
+        <p><strong>Readiness Level:</strong> <span style="font-size: 1.1em;">{readiness_level}</span></p>
+        <p><strong>Description:</strong> {description}</p>
+    </div>
+    
+    <h3 style="color: #BF6A16; border-bottom: 2px solid #BF6A16; padding-bottom: 10px;">Dimension Breakdown</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <tr style="background-color: #f5f5f5;">
+            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;"><strong>Dimension</strong></th>
+            <th style="padding: 10px; text-align: center; border: 1px solid #ddd;"><strong>Score</strong></th>
+        </tr>
+        {"".join([f'<tr><td style="padding: 10px; border: 1px solid #ddd;">{title}</td><td style="padding: 10px; text-align: center; border: 1px solid #ddd;"><strong>{score:.1f}/15</strong></td></tr>' for title, score in zip(dimension_titles, raw_scores)])}
+    </table>
+    
+    <h3 style="color: #BF6A16; border-bottom: 2px solid #BF6A16; padding-bottom: 10px; margin-top: 20px;">Critical Dimension Status</h3>
+    <p style="background-color: #f5f5f5; padding: 12px; border-radius: 5px; border-left: 4px solid #{'DC2626' if critical_status.get('severity') == 'critical' else 'F59E0B' if critical_status.get('severity') == 'warning' else '10B981'};">
+        {critical_msg}
+    </p>
+    
+    <hr style="margin-top: 30px; border: 1px solid #ddd;">
+    <p style="color: #666; font-size: 0.9em;">Sent from AI Process Readiness Assessment Tool</p>
+</body>
+</html>
+"""
+    
+    return send_email('tej@tlogic.consulting', subject, body_text, body_html)
