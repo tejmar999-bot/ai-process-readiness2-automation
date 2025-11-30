@@ -726,39 +726,64 @@ def render_navigation_buttons():
 
 
 def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
-    """Create spider/radar chart for dimension scores"""
+    """Create spider/radar chart for dimension scores with color-coded labels"""
+    import math
     
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
     
-    # Create labels with scores and percentages
-    labels_with_scores = [f"{title}<br>{score:.1f}/15<br>({pct:.0f}%)" 
-                          for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
-    
     fig = go.Figure()
     
-    # Add spider trace
+    # Add spider trace with simple dimension names
     fig.add_trace(go.Scatterpolar(
         r=raw_scores,
-        theta=labels_with_scores,
+        theta=dimension_titles,
         fill='toself',
         fillcolor='rgba(96, 165, 244, 0.35)',
-        line=dict(color='#60A5FA', width=2),
-        marker=dict(size=8, color='#93C5FD'),
+        line=dict(color='#60A5FA', width=3),
+        marker=dict(size=10, color='#93C5FD'),
         showlegend=False
     ))
+    
+    # Create annotations for color-coded labels outside the spider chart
+    annotations = []
+    num_dimensions = len(dimension_titles)
+    
+    for i in range(num_dimensions):
+        angle_deg = (360 / num_dimensions) * i
+        angle_rad = math.radians(angle_deg - 90)
+        
+        # Position labels well outside the chart
+        radius = 1.4
+        x = radius * math.cos(angle_rad)
+        y = radius * math.sin(angle_rad)
+        
+        label_text = f"<b style='font-size:14px; color:{dimension_colors[i]}'>{dimension_titles[i]}</b><br><span style='font-size:13px; color:{dimension_colors[i]}'>{raw_scores[i]:.1f}/15</span><br><span style='font-size:12px; color:{dimension_colors[i]}'>{percentages[i]:.0f}%</span>"
+        
+        annotations.append(dict(
+            x=x,
+            y=y,
+            text=label_text,
+            showarrow=False,
+            xanchor='center',
+            yanchor='middle',
+            xref='x domain',
+            yref='y domain',
+            font=dict(color=dimension_colors[i], size=13)
+        ))
     
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
-                tickfont=dict(color='#9CA3AF', size=11),
+                tickfont=dict(color='#9CA3AF', size=13),
                 gridcolor='rgba(255, 255, 255, 0.2)',
                 showgrid=True
             ),
             angularaxis=dict(
-                tickfont=dict(color='#E5E7EB', size=10),
+                tickfont=dict(color='rgba(0,0,0,0)'),
+                showticklabels=False,
                 showgrid=True,
                 gridcolor='rgba(255, 255, 255, 0.1)'
             ),
@@ -766,11 +791,15 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=10),
-        height=650,
-        margin=dict(l=80, r=80, t=80, b=80),
+        font=dict(color='#E5E7EB', size=13),
+        height=750,
+        width=800,
+        margin=dict(l=120, r=120, t=120, b=120),
         showlegend=False,
-        hovermode='closest'
+        hovermode='closest',
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False),
+        annotations=annotations
     )
     
     return fig
