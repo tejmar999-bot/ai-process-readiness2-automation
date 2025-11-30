@@ -991,9 +991,9 @@ def render_results_dashboard():
         
         # Determine warning icon
         warning_icon = ""
-        if (7 <= data_score < 10 or 7 <= leadership_score < 10) and percentage_value > 55:
+        if (7 <= data_score < 10 or 7 <= leadership_score < 10) and total_score > 55:
             warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">⚠️</div>'
-        elif (data_score < 7 or leadership_score < 7) and percentage_value > 41:
+        elif (data_score < 7 or leadership_score < 7) and total_score > 41:
             warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">🛑</div>'
         
         st.markdown(f"""
