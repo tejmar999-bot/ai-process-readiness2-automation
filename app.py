@@ -984,25 +984,11 @@ def render_results_dashboard():
 
     with col2:
         band_color = readiness_band['color']
-        
-        # Check for critical dimension warnings
-        raw_scores = scores_data['raw_dimension_scores']
-        data_score = raw_scores[2]  # Data Readiness (index 2)
-        leadership_score = raw_scores[4]  # Leadership & Alignment (index 4)
-        percentage_value = float(percentage) if isinstance(percentage, (int, float)) else float(percentage.rstrip('%'))
-        
-        # Determine warning icon
-        warning_icon = ""
-        if (7 <= data_score < 10 or 7 <= leadership_score < 10) and total_score > 55:
-            warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">⚠️</div>'
-        elif (data_score < 7 or leadership_score < 7) and total_score > 41:
-            warning_icon = '<div style="font-size: 2rem; margin-top: 0.5rem; text-align: center;">🛑</div>'
-        
         st.markdown(f"""
         <div class="score-card">
             <h3 style="color: {primary_color};">Readiness Level</h3>
-            <div class="readiness-band" style="color: {band_color};">{readiness_band['label']}</div>
-            {warning_icon}
+            <div class="readiness-band" style="color: {band_color}; font-size: 1.8rem;">{readiness_band['label']}</div>
+            <p style="color: {band_color}; font-size: 0.9rem; margin-top: 0.5rem;">{readiness_band['description']}</p>
         </div>
         """,
                     unsafe_allow_html=True)
@@ -1016,6 +1002,22 @@ def render_results_dashboard():
         </div>
         """,
                     unsafe_allow_html=True)
+    
+    # Critical Dimension Status - Prominent Display
+    st.markdown("<br>", unsafe_allow_html=True)
+    critical_status = scores_data['critical_status']
+    
+    st.markdown(f"""
+    <div style="background-color: {'#7F1D1D' if critical_status['severity'] == 'critical' else '#78350F' if critical_status['severity'] == 'warning' else '#064E3B'}; 
+                border-left: 6px solid {critical_status['color']}; 
+                padding: 1.5rem; 
+                margin: 1rem 0; 
+                border-radius: 0.5rem;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">{critical_status['icon']}</div>
+        <h3 style="color: {critical_status['color']}; margin-bottom: 0.5rem;">{critical_status['title']}</h3>
+        <p style="color: #E5E7EB; line-height: 1.6; margin: 0;">{critical_status['message']}</p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Scoring Model Table
     st.markdown("<br>", unsafe_allow_html=True)

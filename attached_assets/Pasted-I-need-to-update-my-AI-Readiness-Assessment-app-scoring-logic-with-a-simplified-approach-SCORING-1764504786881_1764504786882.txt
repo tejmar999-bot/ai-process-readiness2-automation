@@ -1,0 +1,115 @@
+I need to update my AI Readiness Assessment app scoring logic with a simplified approach:
+
+SCORING LOGIC:
+
+1. CALCULATE RAW SCORES
+Each dimension = sum of 3 questions (range 3-15)
+All 6 dimensions: Process Maturity, Technology Infrastructure, Data Readiness, People & Culture, Leadership & Alignment, Governance & Risk
+
+2. CALCULATE TOTAL SCORE
+Total score = simple sum of all 6 raw dimension scores
+Maximum possible = 90 points (6 dimensions × 15 max each)
+Percentage = total / 90
+
+3. DETERMINE READINESS LEVEL (Based on total score only)
+if total >= 70: "AI-Ready"
+elif total >= 56: "Building Blocks"
+elif total >= 42: "Foundational Gaps"
+else: "Not Ready"
+
+4. CRITICAL DIMENSION FLAGS (Data Readiness & Leadership & Alignment)
+
+Display visual warnings based on critical dimension scores:
+
+IF both Data < 10 AND Leadership < 10:
+  → Show 🛑 STOP icon (red)
+  → Message: "CRITICAL: Both Data Readiness and Leadership & Alignment are below threshold. AI initiatives should not proceed until these are addressed."
+  → Override readiness level display with warning
+
+ELSE IF Data < 10 OR Leadership < 10 (but not both):
+  → Show ⚠️ WARNING icon (orange/yellow)
+  → Message: "WARNING: [Data Readiness / Leadership & Alignment] is below threshold (scored [X]/15). This dimension must reach ≥10 before scaling AI initiatives."
+  → Show alongside readiness level
+
+ELSE (both >= 10):
+  → Show ✓ icon (green)
+  → Message: "Critical dimensions meet thresholds"
+  → Display readiness level normally
+
+READINESS LEVEL DEFINITIONS (use these exact labels):
+
+"AI-Ready" (70-90 points)
+- Emoji: 🟢
+- Description: "Strong foundation for AI implementation. Begin strategic pilots with confidence."
+- Next steps: "Select 1-2 high-value use cases, establish success metrics, launch pilots"
+
+"Building Blocks" (56-69 points)
+- Emoji: 🟠  
+- Description: "Foundational elements in place, but improvements needed before scaling."
+- Next steps: "Strengthen weak dimensions over 3-6 months, then reassess"
+
+"Foundational Gaps" (42-55 points)
+- Emoji: 🔴
+- Description: "Significant foundational work needed before AI can deliver value."
+- Next steps: "Focus on business fundamentals for 9-12 months, not AI"
+
+"Not Ready" (<42 points)
+- Emoji: ⛔
+- Description: "Focus on core operations before considering AI."
+- Next steps: "Improve processes, data, infrastructure (12-18 months)"
+
+UI/VISUALIZATION REQUIREMENTS:
+
+1. OVERALL SCORE DISPLAY:
+   - Total: X/90 (Y%)
+   - Readiness Level: [Level] [Emoji]
+
+2. CRITICAL DIMENSION STATUS (prominent display):
+   Show one of these three states:
+   
+   🛑 STOP - Both Critical Dimensions Below Threshold
+   "Do not proceed with AI initiatives. Address Data Readiness (X/15) and Leadership & Alignment (Y/15) first."
+   
+   ⚠️ WARNING - One Critical Dimension Below Threshold  
+   "[Data Readiness / Leadership & Alignment] scored X/15 (needs ≥10). Address this before scaling AI."
+   
+   ✓ READY - Both Critical Dimensions Meet Threshold
+   "Data Readiness: X/15 ✓ | Leadership & Alignment: Y/15 ✓"
+
+3. DIMENSION BREAKDOWN:
+   - Bar chart or table showing all 6 dimensions
+   - Scores out of 15 for each
+   - Mark Data Readiness and Leadership & Alignment with ⭐ (critical)
+   - Highlight in red/orange if critical dimension < 10
+
+4. RECOMMENDATIONS:
+   Generate recommendations based on:
+   
+   Priority 1 (if applicable):
+   - If Data < 10: "CRITICAL: Improve Data Readiness from X to ≥10 (conduct data inventory, establish governance, clean up quality)"
+   - If Leadership < 10: "CRITICAL: Improve Leadership & Alignment from X to ≥10 (executive education, business case, secure budget)"
+   
+   Priority 2:
+   - Address weakest non-critical dimension
+   
+   Priority 3:
+   - Readiness-level-specific next steps
+
+EXAMPLE SCENARIOS TO TEST:
+
+1. All scores = 5 (total = 90)
+   → "AI-Ready" + ✓ READY (both critical = 15)
+
+2. Data = 9, Leadership = 14, others average 12 (total ≈ 68)
+   → "Building Blocks" + ⚠️ WARNING (Data below 10)
+
+3. Data = 8, Leadership = 8, others = 15 (total = 76)
+   → "AI-Ready" + 🛑 STOP (both critical below 10)
+   → Even though total score suggests "AI-Ready", show STOP warning prominently
+
+4. Data = 12, Leadership = 13, others average 8 (total = 57)
+   → "Building Blocks" + ✓ READY (both critical meet threshold)
+
+The key principle: Simple total score determines readiness level, but critical dimension flags provide important warnings. If both critical dimensions are below 10, show a prominent STOP warning regardless of total score.
+
+Please update scoring.py, the UI/visualization components, and recommendation generation to match this logic.
