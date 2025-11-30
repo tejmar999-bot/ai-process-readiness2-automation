@@ -1,0 +1,322 @@
+═══════════════════════════════════════════════════════════════════════════
+                 SCENARIO 2 FORMULA REFERENCE GUIDE
+═══════════════════════════════════════════════════════════════════════════
+
+This document explains the exact Excel formulas used in the Calculations sheet.
+
+───────────────────────────────────────────────────────────────────────────
+STEP 1: CALCULATE RAW DIMENSION SCORES
+───────────────────────────────────────────────────────────────────────────
+
+Each dimension raw score = SUM of 3 question scores
+
+Process Maturity (B4):
+=SUM('Assessment Input'!B10:'Assessment Input'!B12)
+
+Technology Infrastructure (B5):
+=SUM('Assessment Input'!B15:'Assessment Input'!B17)
+
+Data Readiness (B6):
+=SUM('Assessment Input'!B20:'Assessment Input'!B22)
+
+People & Culture (B7):
+=SUM('Assessment Input'!B25:'Assessment Input'!B27)
+
+Leadership & Alignment (B8):
+=SUM('Assessment Input'!B30:'Assessment Input'!B32)
+
+Governance & Risk (B9):
+=SUM('Assessment Input'!B35:'Assessment Input'!B37)
+
+───────────────────────────────────────────────────────────────────────────
+STEP 2: APPLY WEIGHTING TO CREATE WEIGHTED SCORES
+───────────────────────────────────────────────────────────────────────────
+
+STANDARD DIMENSIONS (No adjustment):
+─────────────────────────────────────
+Process Maturity (C4):
+=B4
+
+Technology Infrastructure (C5):
+=B5
+
+People & Culture (C7):
+=B7
+
+Governance & Risk (C9):
+=B9
+
+CRITICAL DIMENSIONS (Asymmetric weighting):
+──────────────────────────────────────────
+
+Data Readiness (C6):
+=IF(B6>=10, B6, IF(B6>=7, B6/1.5, B6/2.5))
+
+Breakdown:
+  IF B6 ≥ 10  → Return B6 (no penalty)
+  ELSE IF B6 ≥ 7  → Return B6/1.5 (moderate penalty)
+  ELSE  → Return B6/2.5 (severe penalty)
+
+Leadership & Alignment (C8):
+=IF(B8>=10, B8, IF(B8>=7, B8/1.5, B8/2.5))
+
+Breakdown:
+  IF B8 ≥ 10  → Return B8 (no penalty)
+  ELSE IF B8 ≥ 7  → Return B8/1.5 (moderate penalty)
+  ELSE  → Return B8/2.5 (severe penalty)
+
+───────────────────────────────────────────────────────────────────────────
+STEP 3: CALCULATE TOTAL SCORE
+───────────────────────────────────────────────────────────────────────────
+
+Total Weighted Score (C11):
+=SUM(C4:C9)
+
+This sums all 6 weighted dimension scores.
+
+Maximum when both critical ≥10: 90 points
+  (15+15+15+15+15+15)
+
+Maximum when one critical 7-9: 85 points
+  (15+15+10+15+10+15 or similar)
+
+Maximum when both critical <7: Variable depending on scores
+
+───────────────────────────────────────────────────────────────────────────
+STEP 4: CALCULATE PERCENTAGE
+───────────────────────────────────────────────────────────────────────────
+
+Percentage Score (B13):
+=C11/90
+
+This divides total weighted score by maximum possible (90).
+
+Note: This assumes both critical dimensions ≥10. The percentage is still
+calculated even when critical dimensions are low, but the READINESS LEVEL
+determination (next step) will cap the final level.
+
+───────────────────────────────────────────────────────────────────────────
+STEP 5: DETERMINE READINESS LEVEL (The Complex Part)
+───────────────────────────────────────────────────────────────────────────
+
+Readiness Level (B21):
+=IF(AND(B6>=10,B8>=10),
+    IF(C11>=70,"AI-Ready",
+       IF(C11>=56,"Building Blocks",
+          IF(C11>=42,"Foundational Gaps","Not Ready"))),
+    IF(OR(AND(B6>=7,B6<10),AND(B8>=7,B8<10)),
+       IF(C11/90>=0.70,"AI-Ready with Caution",
+          IF(C11/90>=0.56,"Building Blocks","Foundational Gaps")),
+       IF(OR(B6<7,B8<7),
+          IF(AND(B6<7,B8<7),"Foundational Gaps (CAPPED)",
+             IF(C11/90>=0.70,"Building Blocks (CAPPED)",
+                IF(C11/90>=0.56,"Building Blocks","Foundational Gaps"))),"Foundational Gaps")))
+
+FORMULA BREAKDOWN (Nested IF Logic):
+════════════════════════════════════
+
+MAIN IF: Are both critical dimensions strong (≥10)?
+┌──────────────────────────────────────────────────────────────────────┐
+│ IF both B6≥10 AND B8≥10 (both critical dimensions strong)           │
+│                                                                      │
+│   THEN: Use standard readiness bands based on total score           │
+│   ├─ IF C11≥70  → "AI-Ready"                                        │
+│   ├─ IF C11≥56  → "Building Blocks"                                 │
+│   ├─ IF C11≥42  → "Foundational Gaps"                               │
+│   └─ ELSE       → "Not Ready"                                        │
+│                                                                      │
+│ ELSE: One or both critical dimensions are weak                      │
+└──────────────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ ELSE IF: Is one (or both) critical dimension in yellow zone (7-9)?  │
+│                                                                      │
+│   IF (B6 is 7-9) OR (B8 is 7-9)                                     │
+│                                                                      │
+│   THEN: Apply caution-level logic                                   │
+│   ├─ IF C11/90≥0.70  → "AI-Ready with Caution"                      │
+│   ├─ IF C11/90≥0.56  → "Building Blocks"                            │
+│   └─ ELSE            → "Foundational Gaps"                           │
+│                                                                      │
+│ ELSE: One or both critical dimensions are in red zone (<7)          │
+└──────────────────────────────────────────────────────────────────────┘
+        │
+        ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ ELSE IF: One or both critical dimensions are failing (<7)           │
+│                                                                      │
+│   IF both B6<7 AND B8<7 (both critical failing)                     │
+│   ├─ RETURN: "Foundational Gaps (CAPPED)"                           │
+│   │   (Even if total score is high, both critical failures cap)     │
+│   │                                                                  │
+│   ELSE: Only one critical is failing                                │
+│   ├─ IF C11/90≥0.70  → "Building Blocks (CAPPED)"                   │
+│   ├─ IF C11/90≥0.56  → "Building Blocks"                            │
+│   └─ ELSE            → "Foundational Gaps"                           │
+│                                                                      │
+│ ELSE: (Fallback - should never reach here)                          │
+│   └─ RETURN: "Foundational Gaps"                                    │
+└──────────────────────────────────────────────────────────────────────┘
+
+───────────────────────────────────────────────────────────────────────────
+STEP 6: CRITICAL DIMENSION STATUS INDICATORS
+───────────────────────────────────────────────────────────────────────────
+
+Data Readiness Status (C16):
+=IF(B6>=10,"✓ Strong",IF(B6>=7,"⚠ Yellow Flag","❌ Red Flag"))
+
+Leadership Status (C17):
+=IF(B8>=10,"✓ Strong",IF(B8>=7,"⚠ Yellow Flag","❌ Red Flag"))
+
+These provide visual indicators of critical dimension health.
+
+───────────────────────────────────────────────────────────────────────────
+WORKED EXAMPLES
+───────────────────────────────────────────────────────────────────────────
+
+EXAMPLE 1: Strong Overall, Data Weak
+═════════════════════════════════════
+Raw Scores: Process=12, Tech=12, Data=6, People=12, Leadership=14, Gov=12
+
+Step 1 - Raw Scores: (Already shown above)
+
+Step 2 - Apply Weighting:
+  Process: 12 (no adjustment)
+  Tech: 12 (no adjustment)
+  Data: 6 < 7, so 6/2.5 = 2.4
+  People: 12 (no adjustment)
+  Leadership: 14 ≥ 10, so 14 (no adjustment)
+  Governance: 12 (no adjustment)
+
+Step 3 - Total: 12+12+2.4+12+14+12 = 64.4
+
+Step 4 - Percentage: 64.4/90 = 71.6%
+
+Step 5 - Readiness Level:
+  Both critical ≥10? NO (Data is 6)
+  One critical 7-9? NO (Data is 6, Leadership is 14)
+  One critical <7? YES (Data is 6)
+    Both <7? NO
+    C11/90 ≥ 0.70? YES (71.6% ≥ 70%)
+    RESULT: "Building Blocks (CAPPED)"
+
+Despite 71.6% overall, Data failure caps at Building Blocks.
+
+───────────────────────────────────────────────────────────────────────────
+
+EXAMPLE 2: Both Critical Strong, Lower Overall
+═══════════════════════════════════════════════
+Raw Scores: Process=10, Tech=10, Data=12, People=10, Leadership=11, Gov=10
+
+Step 2 - Apply Weighting:
+  Process: 10
+  Tech: 10
+  Data: 12 ≥ 10, so 12 (no penalty)
+  People: 10
+  Leadership: 11 ≥ 10, so 11 (no penalty)
+  Governance: 10
+
+Step 3 - Total: 10+10+12+10+11+10 = 63
+
+Step 4 - Percentage: 63/90 = 70%
+
+Step 5 - Readiness Level:
+  Both critical ≥10? YES (Data=12, Leadership=11)
+  C11 ≥ 70? YES (63 ≥ 70... wait, 63 < 70)
+  C11 ≥ 56? YES
+  RESULT: "Building Blocks"
+
+Actually at 70% exactly, would be borderline AI-Ready.
+
+───────────────────────────────────────────────────────────────────────────
+
+EXAMPLE 3: Sample Data in Spreadsheet
+══════════════════════════════════════
+Raw Scores: Process=12, Tech=10, Data=9, People=11, Leadership=14, Gov=10
+
+Step 2 - Apply Weighting:
+  Process: 12
+  Tech: 10
+  Data: 9 is 7-9, so 9/1.5 = 6.0
+  People: 11
+  Leadership: 14 ≥ 10, so 14
+  Governance: 10
+
+Step 3 - Total: 12+10+6+11+14+10 = 63
+
+Step 4 - Percentage: 63/90 = 70%
+
+Step 5 - Readiness Level:
+  Both critical ≥10? NO (Data is 9)
+  One critical 7-9? YES (Data is 9)
+  C11/90 ≥ 0.70? YES (70%)
+  RESULT: "AI-Ready with Caution"
+
+This is the sample scenario loaded in the spreadsheet.
+
+───────────────────────────────────────────────────────────────────────────
+KEY INSIGHTS FROM FORMULA ANALYSIS
+───────────────────────────────────────────────────────────────────────────
+
+1. THRESHOLD EFFECTS ARE NON-LINEAR
+   Going from Data=9 to Data=10 is huge:
+   - At 9: Contribution = 9/1.5 = 6.0
+   - At 10: Contribution = 10 (no penalty)
+   - Difference: 4 point jump in total score!
+
+2. RED ZONE PENALTIES ARE SEVERE
+   - Score of 6: Contribution = 6/2.5 = 2.4
+   - Score of 10: Contribution = 10
+   - A failing critical dimension loses 76% of its contribution
+
+3. YELLOW ZONE MATTERS FOR TOTAL SCORE
+   - Score of 9: Contribution = 6.0
+   - Score of 10: Contribution = 10
+   - But also affects readiness level determination
+
+4. GATING IS SEPARATE FROM SCORING
+   - You can have 71% total score
+   - But if Data<7, you're capped at Building Blocks
+   - The MATH says one thing, the GATE says another
+
+5. BOTH CRITICAL WEAK = SEVERE CAP
+   - If both Data<7 AND Leadership<7
+   - Maximum readiness = "Foundational Gaps (CAPPED)"
+   - No matter how high other scores are
+
+───────────────────────────────────────────────────────────────────────────
+FORMULA VALIDATION TESTS
+───────────────────────────────────────────────────────────────────────────
+
+To verify formulas are working correctly, test these scenarios:
+
+TEST 1: Perfect Score
+Input: All questions = 5
+Expected: All raw = 15, Total = 90, Level = "AI-Ready"
+
+TEST 2: All Minimum
+Input: All questions = 1  
+Expected: All raw = 3, Data/Lead contribute ~1.2 each, Total ~16.4, Level = "Not Ready"
+
+TEST 3: Data Threshold Test
+Input: Data questions = 3,3,4 (sum=10), all others = 5
+Expected: Data raw = 10, contributes 10, should not penalize
+
+TEST 4: Data Just Below Threshold
+Input: Data questions = 3,3,3 (sum=9), all others = 5
+Expected: Data raw = 9, contributes 6.0, triggers "Caution" if total still ≥70%
+
+TEST 5: Both Critical Failing
+Input: Data = 2,2,2 (sum=6), Leadership = 2,2,2 (sum=6), all others = 5
+Expected: Both contribute ~2.4 each, Level = "Foundational Gaps (CAPPED)"
+
+───────────────────────────────────────────────────────────────────────────
+
+This formula structure ensures:
+✓ No false positives (critical weaknesses gate readiness)
+✓ Graduated penalties (10, 7-9, <7 zones)
+✓ Transparent calculation (users can see the math)
+✓ Non-compensatory (can't offset critical failures with other strengths)
+
+═══════════════════════════════════════════════════════════════════════════
