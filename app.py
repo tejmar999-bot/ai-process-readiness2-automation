@@ -1014,40 +1014,38 @@ def render_results_dashboard():
 
     # Define scoring model data
     scoring_model = [{
-        "range": "0-30",
-        "level": "🟥 Foundational",
-        "meaning": "Critical gaps across dimensions—significant foundational work required before AI deployment",
+        "range": "0-41",
+        "level": "🟥 Not Ready",
+        "meaning": "High risk; focus on business fundamentals first. Significant foundational work required before AI deployment.",
         "min": 0,
-        "max": 30
+        "max": 41
     }, {
-        "range": "31-51",
-        "level": "🟨 Emerging",
-        "meaning": "Basic readiness established—small-scale AI pilots possible, substantial progress needed in processes, data, and governance",
-        "min": 31,
-        "max": 51
+        "range": "42-55",
+        "level": "🟨 Foundational Gaps",
+        "meaning": "Significant work needed; start with process and data basics. Address foundational gaps before scaling.",
+        "min": 42,
+        "max": 55
     }, {
-        "range": "52-72",
-        "level": "🟦 Dependable",
-        "meaning":
-        "Strong foundation present—ready to scale AI across multiple business units with focused efforts on governance",
-        "min": 52,
-        "max": 72
+        "range": "56-69",
+        "level": "🟦 Building Blocks",
+        "meaning": "Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.",
+        "min": 56,
+        "max": 69
     }, {
-        "range": "73-90",
-        "level": "🟩 Exceptional",
-        "meaning":
-        "Mature AI capabilities—organization ready for enterprise-wide AI deployment with optimized processes and governance",
-        "min": 73,
+        "range": "70-90",
+        "level": "🟩 AI-Ready",
+        "meaning": "Strong foundation; focus on strategic pilots. Your organization is well-positioned for AI implementation.",
+        "min": 70,
         "max": 90
     }]
 
     # Create table with clean, properly aligned cells
     # Map emoji colors to their hex equivalents for CSS squares
     color_map = {
-        "🟥 Foundational": ("#DC2626", "Foundational"),
-        "🟨 Emerging": ("#EAB308", "Emerging"),
-        "🟦 Dependable": ("#42A5F5", "Dependable"),
-        "🟩 Exceptional": ("#16A34A", "Exceptional")
+        "🟥 Not Ready": ("#DC2626", "Not Ready"),
+        "🟨 Foundational Gaps": ("#EAB308", "Foundational Gaps"),
+        "🟦 Building Blocks": ("#42A5F5", "Building Blocks"),
+        "🟩 AI-Ready": ("#16A34A", "AI-Ready")
     }
 
     # Build table rows
