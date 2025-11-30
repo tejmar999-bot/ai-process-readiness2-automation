@@ -753,12 +753,12 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
-                tickfont=dict(color='#9CA3AF', size=11),
+                tickfont=dict(color='#9CA3AF', size=13),
                 gridcolor='rgba(255, 255, 255, 0.2)',
                 showgrid=True
             ),
             angularaxis=dict(
-                tickfont=dict(color='#E5E7EB', size=10),
+                tickfont=dict(color='#E5E7EB', size=13),
                 showgrid=True,
                 gridcolor='rgba(255, 255, 255, 0.1)'
             ),
@@ -766,9 +766,9 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=10),
-        height=650,
-        margin=dict(l=80, r=80, t=80, b=80),
+        font=dict(color='#E5E7EB', size=13),
+        height=700,
+        margin=dict(l=100, r=100, t=100, b=100),
         showlegend=False,
         hovermode='closest'
     )
