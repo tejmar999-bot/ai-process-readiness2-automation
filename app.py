@@ -727,6 +727,7 @@ def render_navigation_buttons():
 
 def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
     """Create spider/radar chart for dimension scores with raw scores and percentages"""
+    import math
     
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
@@ -734,8 +735,8 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     # Create hover text with both raw score and percentage
     hover_text = [f"{raw:.1f}/15 ({pct:.0f}%)" for raw, pct in zip(raw_scores, percentages)]
     
-    # Create simple theta labels (without score/percentage for now, will use annotations)
-    theta_labels = dimension_titles
+    # Use numbered labels for theta (will be hidden and replaced with annotations)
+    theta_labels = list(range(len(dimension_titles)))
     
     fig = go.Figure()
     
@@ -757,21 +758,24 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     annotations = []
     num_dimensions = len(dimension_titles)
     for i in range(num_dimensions):
-        angle = (360 / num_dimensions) * i
-        # Convert angle to radians for positioning
-        import math
-        angle_rad = math.radians(angle)
-        # Position annotations at radius ~16.5 (outside the 0-15 range)
-        radius = 16.5
+        # Calculate angle for this dimension (in degrees)
+        angle_deg = (360 / num_dimensions) * i - 90  # -90 to start at top
+        # Convert to radians
+        angle_rad = math.radians(angle_deg)
+        # Position at radius 17 (outside the 0-15 range)
+        radius = 17
+        
+        x = radius * math.cos(angle_rad)
+        y = radius * math.sin(angle_rad)
         
         annotations.append(dict(
-            x=radius * math.cos(angle_rad - math.pi/2),
-            y=radius * math.sin(angle_rad - math.pi/2),
+            x=x,
+            y=y,
             xref="x",
             yref="y",
-            text=f"<b style='color:{dimension_colors[i]}'>{dimension_titles[i]}</b><br><b>{raw_scores[i]:.1f}/15</b><br>({percentages[i]:.0f}%)",
+            text=f"<b>{dimension_titles[i]}</b><br><b>{raw_scores[i]:.1f}/15</b><br>({percentages[i]:.0f}%)",
             showarrow=False,
-            font=dict(size=14, color=dimension_colors[i]),
+            font=dict(size=12, color=dimension_colors[i]),
             xanchor='center',
             yanchor='middle'
         ))
@@ -786,7 +790,8 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
                 linecolor='rgba(255,255,255,0.2)'
             ),
             angularaxis=dict(
-                tickfont=dict(color='#E5E7EB', size=14),
+                tickfont=dict(size=0),  # Hide default labels
+                showticklabels=False,
                 linecolor='rgba(255,255,255,0.2)'
             ),
             bgcolor='rgba(0,0,0,0)'
