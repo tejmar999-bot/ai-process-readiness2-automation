@@ -2093,7 +2093,7 @@ def main():
                     if dim_answers:
                         avg_score = sum(dim_answers) / len(dim_answers)
                         st.write(
-                            f"**{dimension['title']}**: {avg_score:.1f}/5 (raw), {scores_data['raw_dimension_scores'][dim_idx]}/15 (weighted)")
+                            f"**{dimension['title']}**: {avg_score:.1f}/5")
 
     else:
         # Results mode

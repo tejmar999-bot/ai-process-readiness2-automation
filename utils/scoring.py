@@ -142,7 +142,7 @@ def get_readiness_band_with_gating(total_score, percentage, data_raw, leadership
             }
         elif total_score >= 56:
             return {
-                'label': 'Building Blocks In Place',
+                'label': 'Building Blocks',
                 'color': '#42A5F5',
                 'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
             }
@@ -169,7 +169,7 @@ def get_readiness_band_with_gating(total_score, percentage, data_raw, leadership
             }
         elif percentage >= 56:
             return {
-                'label': 'Building Blocks In Place',
+                'label': 'Building Blocks',
                 'color': '#42A5F5',
                 'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
             }
@@ -189,14 +189,15 @@ def get_readiness_band_with_gating(total_score, percentage, data_raw, leadership
         }
     
     else:
-        # One critical dimension red (<7): capped at Building Blocks
-        if percentage >= 70:
+        # One critical dimension red (<7): moderate cap
+        percentage_decimal = total_score / 90
+        if percentage_decimal >= 0.70:
             return {
                 'label': 'Building Blocks (CAPPED)',
                 'color': '#42A5F5',
                 'description': 'Critical gap limiting readiness. Address the weak critical dimension before scaling AI initiatives.'
             }
-        elif percentage >= 56:
+        elif percentage_decimal >= 0.56:
             return {
                 'label': 'Building Blocks',
                 'color': '#42A5F5',
