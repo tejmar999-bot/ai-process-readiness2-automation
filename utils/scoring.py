@@ -126,7 +126,7 @@ def get_critical_dimension_status(data_readiness, leadership):
     Returns:
         Dictionary with status, icon, message, and color
     """
-    if data_readiness < 10 and leadership < 10:
+    if data_readiness < 9 and leadership < 9:
         # Both critical dimensions below threshold - STOP
         return {
             'status': 'stop',
@@ -136,9 +136,9 @@ def get_critical_dimension_status(data_readiness, leadership):
             'color': '#DC2626',
             'severity': 'critical'
         }
-    elif data_readiness < 10 or leadership < 10:
+    elif data_readiness < 9 or leadership < 9:
         # One critical dimension below threshold - WARNING
-        if data_readiness < 10:
+        if data_readiness < 9:
             dim_name = 'Data Readiness'
             dim_score = data_readiness
         else:
@@ -149,7 +149,7 @@ def get_critical_dimension_status(data_readiness, leadership):
             'status': 'warning',
             'icon': '⚠️',
             'title': 'WARNING: Critical Dimension Below Threshold',
-            'message': f'{dim_name} scored {dim_score:.1f}/15 (needs ≥10). This must be addressed before scaling AI initiatives.',
+            'message': f'{dim_name} scored {dim_score:.1f}/15 (needs ≥9). This must be addressed before scaling AI initiatives.',
             'color': '#F59E0B',
             'severity': 'warning'
         }
