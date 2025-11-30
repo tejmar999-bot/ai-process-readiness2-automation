@@ -29,34 +29,6 @@ def get_or_create_organization(company_name: str) -> Organization:
     finally:
         session.close()
 
-def save_ai_implementation_stage(company_name: str, stage: str) -> bool:
-    """Save AI implementation stage for organization"""
-    session = get_db_session()
-    try:
-        org = session.query(Organization).filter_by(name=company_name).first()
-        if org:
-            org.ai_implementation_stage = stage
-            session.commit()
-            return True
-        return False
-    except Exception as e:
-        session.rollback()
-        print(f"Error saving AI implementation stage: {e}")
-        return False
-    finally:
-        session.close()
-
-def get_ai_implementation_stage(company_name: str) -> Optional[str]:
-    """Get AI implementation stage for organization"""
-    session = get_db_session()
-    try:
-        org = session.query(Organization).filter_by(name=company_name).first()
-        if org:
-            return org.ai_implementation_stage
-        return None
-    finally:
-        session.close()
-
 def get_or_create_user(name: str, email: str, organization_id: int) -> User:
     """Get existing user or create new one"""
     session = get_db_session()

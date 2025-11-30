@@ -11,7 +11,7 @@ from data.dimensions import DIMENSIONS, BRIGHT_PALETTE, get_all_questions
 from utils.pdf_generator import generate_pdf_report
 from utils.html_report_generator import generate_html_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
-from db.operations import (ensure_tables_exist, save_assessment, save_ai_implementation_stage, get_ai_implementation_stage, get_or_create_organization)
+from db.operations import (ensure_tables_exist, save_assessment)
 from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code
 from utils.ai_chat import get_chat_response, get_assessment_insights
 
@@ -129,12 +129,6 @@ st.set_page_config(page_title="AI Process Readiness Assessment",
                    page_icon="🤖",
                    layout="wide",
                    initial_sidebar_state="collapsed")
-
-# Initialize session state for modal
-if 'startup_modal_shown' not in st.session_state:
-    st.session_state.startup_modal_shown = False
-if 'ai_stage_selected' not in st.session_state:
-    st.session_state.ai_stage_selected = None
 
 # Custom CSS for styling
 st.markdown("""
@@ -1848,91 +1842,7 @@ def render_chatgpt_assistant():
 
 def main():
     """Main application function"""
-    ensure_tables_exist()
     initialize_session_state()
-
-    # Show AI implementation stage modal on first visit
-    if st.session_state.ai_stage_selected is None:
-        # Black background, no scrollbars
-        st.markdown("""
-        <style>
-        html, body, [data-testid="stAppViewContainer"], [data-testid="stFullScreenFrame"], .main {
-            background: #000000 !important;
-            overflow: hidden !important;
-            height: 100vh !important;
-        }
-        [data-testid="stBaseLayer"] {
-            background: #000000 !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        # Center modal with black background
-        col_left, col_center, col_right = st.columns([0.05, 0.9, 0.05])
-        with col_center:
-            st.markdown("<br>" * 2, unsafe_allow_html=True)
-            
-            # White container for modal
-            with st.container(border=True):
-                st.markdown("""
-                <h2 style="color: #FF8C00; font-size: 22px; margin-bottom: 4px; margin-top: 0; font-weight: bold;">
-                Before we start the Assessment...
-                </h2>
-                """, unsafe_allow_html=True)
-                
-                st.markdown("""
-                <p style="color: #FFFFFF; font-size: 13px; margin-bottom: 12px; margin-top: 0; line-height: 1.3; font-weight: 500;">
-                Please tell us: <strong>What best describes your current AI implementation stage?</strong>
-                </p>
-                """, unsafe_allow_html=True)
-                
-                stages = [
-                    "Exploring / learning about AI",
-                    "Planning first pilot project",
-                    "Running 1-2 pilot projects",
-                    "Scaling successful pilots",
-                    "AI embedded in operations"
-                ]
-                
-                st.markdown("""
-                <style>
-                .stButton > button {
-                    margin-bottom: 4px !important;
-                    padding: 8px 12px !important;
-                    font-size: 12px !important;
-                    line-height: 1.2 !important;
-                    height: auto !important;
-                }
-                .stButton:last-child > button {
-                    margin-bottom: 0 !important;
-                }
-                </style>
-                """, unsafe_allow_html=True)
-                
-                for stage in stages:
-                    if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
-                        # Save stage to session state immediately
-                        st.session_state.ai_stage_selected = stage
-                        
-                        # Try to save to database if company name is available
-                        company_name = st.session_state.get('user_company', 'Your Company')
-                        if company_name and company_name.strip():
-                            try:
-                                get_or_create_organization(company_name)
-                                save_ai_implementation_stage(company_name, stage)
-                            except Exception as e:
-                                print(f"Could not save to DB on modal selection: {e}")
-                        
-                        # Show thank you message
-                        st.success("✓ Thank you! Proceeding to the assessment...", icon="✓")
-                        st.markdown("<br>" * 1, unsafe_allow_html=True)
-                        
-                        # Small delay before rerun
-                        import time
-                        time.sleep(1.5)
-                        st.rerun()
-        
-        return  # Stop rendering rest of page while modal is shown
 
     # Render branding sidebar first
     render_branding_sidebar()
