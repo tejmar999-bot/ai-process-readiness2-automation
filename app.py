@@ -726,51 +726,39 @@ def render_navigation_buttons():
 
 
 def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
-    """Create spider/radar chart for dimension scores with color-coded dimension labels"""
+    """Create spider/radar chart for dimension scores"""
     
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
     
+    # Create labels with scores and percentages
+    labels_with_scores = [f"{title}<br>{score:.1f}/15<br>({pct:.0f}%)" 
+                          for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
+    
     fig = go.Figure()
     
-    # Add spider trace with visible web
+    # Add spider trace
     fig.add_trace(go.Scatterpolar(
         r=raw_scores,
-        theta=dimension_titles,
+        theta=labels_with_scores,
         fill='toself',
         fillcolor='rgba(96, 165, 244, 0.35)',
         line=dict(color='#60A5FA', width=2),
         marker=dict(size=8, color='#93C5FD'),
-        hoverinfo='skip',
         showlegend=False
     ))
-    
-    # Add text labels for each dimension outside the spider chart
-    # Using scatterpolar traces with text
-    for i in range(len(dimension_titles)):
-        fig.add_trace(go.Scatterpolar(
-            r=[17],
-            theta=[dimension_titles[i]],
-            mode='text',
-            text=[f"<b>{dimension_titles[i]}</b><br>{raw_scores[i]:.1f}/15<br>({percentages[i]:.0f}%)"],
-            textposition='middle center',
-            textfont=dict(size=12, color=dimension_colors[i]),
-            hoverinfo='skip',
-            showlegend=False
-        ))
     
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
-                tickfont=dict(color='#9CA3AF', size=12),
+                tickfont=dict(color='#9CA3AF', size=11),
                 gridcolor='rgba(255, 255, 255, 0.2)',
                 showgrid=True
             ),
             angularaxis=dict(
-                tickfont=dict(color='rgba(0,0,0,0)', size=0),
-                showticklabels=False,
+                tickfont=dict(color='#E5E7EB', size=10),
                 showgrid=True,
                 gridcolor='rgba(255, 255, 255, 0.1)'
             ),
@@ -778,9 +766,9 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=11),
-        height=700,
-        margin=dict(l=100, r=100, t=100, b=100),
+        font=dict(color='#E5E7EB', size=10),
+        height=650,
+        margin=dict(l=80, r=80, t=80, b=80),
         showlegend=False,
         hovermode='closest'
     )
