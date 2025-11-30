@@ -734,47 +734,70 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     # Create hover text with both raw score and percentage
     hover_text = [f"{raw:.1f}/15 ({pct:.0f}%)" for raw, pct in zip(raw_scores, percentages)]
     
-    # Enhance theta labels to include score and percentage
-    enhanced_theta = [f"{title}<br><b>{score:.1f}/15</b><br>({pct:.0f}%)" 
-                      for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
+    # Create simple theta labels (without score/percentage for now, will use annotations)
+    theta_labels = dimension_titles
     
     fig = go.Figure()
     
     # Add spider trace
     fig.add_trace(go.Scatterpolar(
         r=raw_scores,
-        theta=enhanced_theta,
+        theta=theta_labels,
         fill='toself',
         name='Your Score',
         line=dict(color='#60A5FA', width=2),
-        marker=dict(size=8),
+        marker=dict(size=10),
         fillcolor='rgba(96, 165, 244, 0.3)',
         hovertemplate='Score: %{customdata}<extra></extra>',
         customdata=hover_text,
         showlegend=False
     ))
     
+    # Create colored annotations for dimension labels with scores and percentages
+    annotations = []
+    num_dimensions = len(dimension_titles)
+    for i in range(num_dimensions):
+        angle = (360 / num_dimensions) * i
+        # Convert angle to radians for positioning
+        import math
+        angle_rad = math.radians(angle)
+        # Position annotations at radius ~16.5 (outside the 0-15 range)
+        radius = 16.5
+        
+        annotations.append(dict(
+            x=radius * math.cos(angle_rad - math.pi/2),
+            y=radius * math.sin(angle_rad - math.pi/2),
+            xref="x",
+            yref="y",
+            text=f"<b style='color:{dimension_colors[i]}'>{dimension_titles[i]}</b><br><b>{raw_scores[i]:.1f}/15</b><br>({percentages[i]:.0f}%)",
+            showarrow=False,
+            font=dict(size=14, color=dimension_colors[i]),
+            xanchor='center',
+            yanchor='middle'
+        ))
+    
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
-                tickfont=dict(color='#9CA3AF', size=10),
+                tickfont=dict(color='#9CA3AF', size=13),
                 gridcolor='rgba(255,255,255,0.2)',
                 linecolor='rgba(255,255,255,0.2)'
             ),
             angularaxis=dict(
-                tickfont=dict(color='#E5E7EB', size=10),
+                tickfont=dict(color='#E5E7EB', size=14),
                 linecolor='rgba(255,255,255,0.2)'
             ),
             bgcolor='rgba(0,0,0,0)'
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=10),
-        height=550,
-        margin=dict(l=100, r=100, t=100, b=100),
-        showlegend=False
+        font=dict(color='#E5E7EB', size=13),
+        height=600,
+        margin=dict(l=120, r=120, t=120, b=120),
+        showlegend=False,
+        annotations=annotations
     )
     
     return fig
