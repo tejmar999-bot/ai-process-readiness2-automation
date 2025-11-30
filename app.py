@@ -11,7 +11,7 @@ from data.dimensions import DIMENSIONS, BRIGHT_PALETTE, get_all_questions
 from utils.pdf_generator import generate_pdf_report
 from utils.html_report_generator import generate_html_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
-from db.operations import (ensure_tables_exist, save_assessment)
+from db.operations import (ensure_tables_exist, save_assessment, save_ai_implementation_stage, get_ai_implementation_stage, get_or_create_organization)
 from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code
 from utils.ai_chat import get_chat_response, get_assessment_insights
 
@@ -129,6 +129,142 @@ st.set_page_config(page_title="AI Process Readiness Assessment",
                    page_icon="🤖",
                    layout="wide",
                    initial_sidebar_state="collapsed")
+
+# Initialize session state for modal
+if 'startup_modal_shown' not in st.session_state:
+    st.session_state.startup_modal_shown = False
+if 'ai_stage_selected' not in st.session_state:
+    st.session_state.ai_stage_selected = None
+
+# Function to render AI implementation stage modal
+def render_ai_stage_modal():
+    """Render startup modal for AI implementation stage selection"""
+    st.markdown("""
+    <style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        position: relative;
+    }
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #666;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-close:hover {
+        color: #000;
+    }
+    .modal-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        margin-top: 0;
+    }
+    .modal-option {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        background: #f5f5f5;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: left;
+        font-size: 14px;
+        color: #333;
+        transition: all 0.2s;
+    }
+    .modal-option:hover {
+        background: #e8f4f8;
+        border-color: #BF6A16;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Show modal overlay
+    col1, col2, col3 = st.columns([0.5, 2, 0.5])
+    with col2:
+        st.markdown("""
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                    background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); 
+                    z-index: 999;"></div>
+        """, unsafe_allow_html=True)
+    
+    # Modal dialog
+    modal_html = """
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                z-index: 1000; width: 90%; max-width: 500px;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.dispatchEvent(new CustomEvent('close_modal'))">✕</button>
+            <h2 class="modal-title">What best describes your AI implementation stage?</h2>
+    """
+    
+    options = [
+        "Exploring / learning about AI",
+        "Planning first pilot project",
+        "Running 1-2 pilot projects",
+        "Scaling successful pilots",
+        "AI embedded in operations"
+    ]
+    
+    for i, option in enumerate(options):
+        option_id = f"ai_stage_{i}"
+        modal_html += f"""
+        <button class="modal-option" onclick="document.dispatchEvent(new CustomEvent('ai_stage_selected', 
+                        {{detail: {{option: '{option}'}}}}))">{option}</button>
+        """
+    
+    modal_html += """
+        </div>
+    </div>
+    """
+    
+    st.markdown(modal_html, unsafe_allow_html=True)
+    
+    # Handle modal interactions with JavaScript
+    st.markdown("""
+    <script>
+    document.addEventListener('ai_stage_selected', function(e) {
+        const option = e.detail.option;
+        window.parent.postMessage({type: 'ai_stage_selected', option: option}, '*');
+    });
+    document.addEventListener('close_modal', function(e) {
+        window.parent.postMessage({type: 'close_modal'}, '*');
+    });
+    </script>
+    """, unsafe_allow_html=True)
+
 
 # Custom CSS for styling
 st.markdown("""

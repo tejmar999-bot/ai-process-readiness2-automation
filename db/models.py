@@ -18,6 +18,7 @@ class Organization(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
+    ai_implementation_stage = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
