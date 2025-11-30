@@ -996,7 +996,6 @@ def render_results_dashboard():
             <h3 style="color: {primary_color};">Readiness Level</h3>
             <div class="readiness-band" style="color: {band_color}; font-size: 1.8rem;">{readiness_band['label']}</div>
             {warning_icon_html}
-            <p style="color: {band_color}; font-size: 0.9rem; margin-top: 0.5rem;">{readiness_band['description']}</p>
         </div>
         """,
                     unsafe_allow_html=True)

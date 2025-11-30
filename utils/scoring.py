@@ -91,24 +91,24 @@ def get_readiness_band(total_score):
         }
     elif total_score >= 56:
         return {
-            'label': '🟠 Building Blocks',
-            'emoji': '🟠',
-            'color': '#F59E0B',
+            'label': '🔵 Building Blocks',
+            'emoji': '🔵',
+            'color': '#3B82F6',
             'description': 'Foundational elements in place, but improvements needed before scaling.',
             'next_steps': 'Strengthen weak dimensions over 3-6 months, then reassess'
         }
     elif total_score >= 42:
         return {
-            'label': '🔴 Foundational Gaps',
-            'emoji': '🔴',
-            'color': '#EF4444',
+            'label': '🟡 Foundational Gaps',
+            'emoji': '🟡',
+            'color': '#FBBF24',
             'description': 'Significant foundational work needed before AI can deliver value.',
             'next_steps': 'Focus on business fundamentals for 9-12 months, not AI'
         }
     else:
         return {
-            'label': '⛔ Not Ready',
-            'emoji': '⛔',
+            'label': '🔴 Not Ready',
+            'emoji': '🔴',
             'color': '#DC2626',
             'description': 'Focus on core operations before considering AI.',
             'next_steps': 'Improve processes, data, infrastructure (12-18 months)'
