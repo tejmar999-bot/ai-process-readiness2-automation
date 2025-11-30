@@ -87,7 +87,6 @@ def compute_scores(answers):
     
     readiness_band = get_readiness_band_with_gating(
         total_weighted_score_rounded,
-        percentage,
         data_raw,
         leadership_raw
     )
@@ -104,111 +103,98 @@ def compute_scores(answers):
     }
 
 
-def get_readiness_band_with_gating(total_score, percentage, data_raw, leadership_raw):
+def get_readiness_band_with_gating(total_weighted_score, data_raw, leadership_raw):
     """
-    Determine readiness band with critical dimension gating.
-    
-    Critical dimensions gate overall readiness:
-    - Both critical ≥10: Standard bands apply
-    - One critical 7-9: Can reach "AI-Ready with Caution"
-    - One critical <7: Capped at "Building Blocks"
-    - Both critical <7: Capped at "Foundational Gaps"
+    Determine readiness level using critical dimension gating.
     
     Args:
-        total_score: Total weighted score (0-90)
-        percentage: Percentage (0-100)
+        total_weighted_score: Sum of all weighted dimension scores (0-90)
         data_raw: Raw Data Readiness score (3-15)
-        leadership_raw: Raw Leadership score (3-15)
+        leadership_raw: Raw Leadership & Alignment score (3-15)
     
     Returns:
         Dictionary with label, color, and description
     """
-    
-    # Check critical dimension status
-    both_critical_strong = (data_raw >= 10) and (leadership_raw >= 10)
-    one_critical_yellow = ((data_raw >= 7 and data_raw < 10) or 
-                           (leadership_raw >= 7 and leadership_raw < 10))
-    one_critical_red = (data_raw < 7) or (leadership_raw < 7)
-    both_critical_red = (data_raw < 7) and (leadership_raw < 7)
-    
-    # Main gating logic
-    if both_critical_strong:
-        # Both critical dimensions strong: use standard bands
-        if total_score >= 70:
-            return {
-                'label': 'AI-Ready',
-                'color': '#16A34A',
-                'description': 'Strong foundation; focus on strategic pilots. Your organization is well-positioned for AI implementation.'
-            }
-        elif total_score >= 56:
-            return {
-                'label': 'Building Blocks',
-                'color': '#42A5F5',
-                'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
-            }
-        elif total_score >= 42:
-            return {
-                'label': 'Foundational Gaps',
-                'color': '#EAB308',
-                'description': 'Significant work needed; start with process and data basics. Address foundational gaps before scaling.'
-            }
+    # Check if both critical dimensions are strong
+    if data_raw >= 10 and leadership_raw >= 10:
+        # Standard readiness bands (no gating)
+        if total_weighted_score >= 70:
+            label = "AI-Ready"
+        elif total_weighted_score >= 56:
+            label = "Building Blocks"
+        elif total_weighted_score >= 42:
+            label = "Foundational Gaps"
         else:
-            return {
-                'label': 'Not Ready',
-                'color': '#DC2626',
-                'description': 'High risk; focus on business fundamentals first. Significant foundational work required before AI deployment.'
-            }
+            label = "Not Ready"
     
-    elif one_critical_yellow:
-        # One critical dimension is yellow (7-9): can reach "AI-Ready with Caution"
-        if percentage >= 70:
-            return {
-                'label': 'AI-Ready with Caution',
-                'color': '#F59E0B',
-                'description': 'Addressable gaps in critical dimensions. Proceed with focused improvement plan before scaling; monitor closely.'
-            }
-        elif percentage >= 56:
-            return {
-                'label': 'Building Blocks',
-                'color': '#42A5F5',
-                'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
-            }
+    # One or both critical dimensions are weak
+    elif (7 <= data_raw < 10) or (7 <= leadership_raw < 10):
+        # Yellow flag: one or both in caution zone
+        percentage = total_weighted_score / 90
+        if percentage >= 0.70:
+            label = "AI-Ready with Caution"
+        elif percentage >= 0.56:
+            label = "Building Blocks"
         else:
-            return {
-                'label': 'Foundational Gaps',
-                'color': '#EAB308',
-                'description': 'Significant work needed; start with process and data basics. Address foundational gaps before scaling.'
-            }
+            label = "Foundational Gaps"
     
-    elif both_critical_red:
-        # Both critical dimensions red (<7): capped at Foundational Gaps
-        return {
-            'label': 'Foundational Gaps (CAPPED)',
+    # One or both critical dimensions are failing
+    elif data_raw < 7 or leadership_raw < 7:
+        # Red flag: cap readiness level
+        if data_raw < 7 and leadership_raw < 7:
+            # Both critical failing: hard cap
+            label = "Foundational Gaps (CAPPED)"
+        else:
+            # One critical failing: moderate cap
+            percentage = total_weighted_score / 90
+            if percentage >= 0.70:
+                label = "Building Blocks (CAPPED)"
+            elif percentage >= 0.56:
+                label = "Building Blocks"
+            else:
+                label = "Foundational Gaps"
+    else:
+        # Fallback (should never reach)
+        label = "Foundational Gaps"
+    
+    # Map label to color and description
+    label_mapping = {
+        "AI-Ready": {
+            'color': '#16A34A',
+            'description': 'Strong foundation; focus on strategic pilots. Your organization is well-positioned for AI implementation.'
+        },
+        "Building Blocks": {
+            'color': '#42A5F5',
+            'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
+        },
+        "Foundational Gaps": {
+            'color': '#EAB308',
+            'description': 'Significant work needed; start with process and data basics. Address foundational gaps before scaling.'
+        },
+        "Not Ready": {
+            'color': '#DC2626',
+            'description': 'High risk; focus on business fundamentals first. Significant foundational work required before AI deployment.'
+        },
+        "AI-Ready with Caution": {
+            'color': '#F59E0B',
+            'description': 'Addressable gaps in critical dimensions. Proceed with focused improvement plan before scaling; monitor closely.'
+        },
+        "Foundational Gaps (CAPPED)": {
             'color': '#EAB308',
             'description': 'Critical gaps in both Data and Leadership. Foundational work required—cannot proceed with AI until both critical dimensions improve.'
+        },
+        "Building Blocks (CAPPED)": {
+            'color': '#42A5F5',
+            'description': 'Critical gap limiting readiness. Address the weak critical dimension before scaling AI initiatives.'
         }
+    }
     
-    else:
-        # One critical dimension red (<7): moderate cap
-        percentage_decimal = total_score / 90
-        if percentage_decimal >= 0.70:
-            return {
-                'label': 'Building Blocks (CAPPED)',
-                'color': '#42A5F5',
-                'description': 'Critical gap limiting readiness. Address the weak critical dimension before scaling AI initiatives.'
-            }
-        elif percentage_decimal >= 0.56:
-            return {
-                'label': 'Building Blocks',
-                'color': '#42A5F5',
-                'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
-            }
-        else:
-            return {
-                'label': 'Foundational Gaps',
-                'color': '#EAB308',
-                'description': 'Significant work needed; start with process and data basics. Address foundational gaps before scaling.'
-            }
+    mapping = label_mapping.get(label, label_mapping["Foundational Gaps"])
+    return {
+        'label': label,
+        'color': mapping['color'],
+        'description': mapping['description']
+    }
 
 
 def get_critical_dimension_analysis(data_raw, leadership_raw):
