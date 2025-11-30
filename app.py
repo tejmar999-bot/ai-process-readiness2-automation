@@ -980,7 +980,7 @@ def render_results_dashboard():
         st.markdown(f"""
         <div class="score-card">
             <h3 style="color: {primary_color};">Total Score</h3>
-            <div style="font-size: 2rem; font-weight: bold;">{total_score}/30</div>
+            <div style="font-size: 2rem; font-weight: bold;">{total_score}/90</div>
             <div style="font-size: 2rem; font-weight: bold; color: #9CA3AF;">({percentage}%)</div>
         </div>
         """,
@@ -1001,7 +1001,7 @@ def render_results_dashboard():
         st.markdown(f"""
         <div class="score-card">
             <h3 style="color: {primary_color};">Average Score</h3>
-            <div style="font-size: 2rem; font-weight: bold;">{avg_score}/5</div>
+            <div style="font-size: 2rem; font-weight: bold;">{avg_score}/15</div>
         </div>
         """,
                     unsafe_allow_html=True)
@@ -1015,31 +1015,31 @@ def render_results_dashboard():
 
     # Define scoring model data
     scoring_model = [{
-        "range": "0-10",
+        "range": "0-30",
         "level": "🟥 Foundational",
         "meaning": "Critical gaps across dimensions—significant foundational work required before AI deployment",
         "min": 0,
-        "max": 10
+        "max": 30
     }, {
-        "range": "11-17",
+        "range": "31-51",
         "level": "🟨 Emerging",
         "meaning": "Basic readiness established—small-scale AI pilots possible, substantial progress needed in processes, data, and governance",
-        "min": 11,
-        "max": 17
+        "min": 31,
+        "max": 51
     }, {
-        "range": "18-24",
+        "range": "52-72",
         "level": "🟦 Dependable",
         "meaning":
         "Strong foundation present—ready to scale AI across multiple business units with focused efforts on governance",
-        "min": 18,
-        "max": 24
+        "min": 52,
+        "max": 72
     }, {
-        "range": "25-30",
+        "range": "73-90",
         "level": "🟩 Exceptional",
         "meaning":
         "Mature AI capabilities—organization ready for enterprise-wide AI deployment with optimized processes and governance",
-        "min": 25,
-        "max": 30
+        "min": 73,
+        "max": 90
     }]
 
     # Create table with clean, properly aligned cells
@@ -1118,7 +1118,7 @@ def render_results_dashboard():
             st.markdown(f"""
             <div class="score-card">
                 <h4 style="color: {primary_color};">Your Score</h4>
-                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['your_total']}/30</div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['your_total']}/90</div>
             </div>
             """,
                         unsafe_allow_html=True)
@@ -1127,7 +1127,7 @@ def render_results_dashboard():
             st.markdown(f"""
             <div class="score-card">
                 <h4 style="color: {primary_color};">Benchmark Score</h4>
-                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['benchmark_total']}/30</div>
+                <div style="font-size: 1.5rem; font-weight: bold;">{comparison['benchmark_total']}/90</div>
             </div>
             """,
                         unsafe_allow_html=True)
@@ -1183,7 +1183,7 @@ def render_results_dashboard():
                                      paper_bgcolor='rgba(0,0,0,0)',
                                      font=dict(color='white'),
                                      yaxis=dict(title='Score',
-                                                range=[0, 5.5],
+                                                range=[0, 15.5],
                                                 gridcolor='rgba(255,255,255,0.2)'),
                                      xaxis=dict(gridcolor='rgba(255,255,255,0.2)'),
                                      legend=dict(orientation="h",
@@ -1205,8 +1205,8 @@ def render_results_dashboard():
             diff_color = '🟢' if diff >= 0 else '🔴'
             comparison_data.append({
                 'Dimension': dim['title'],
-                'Your Score': f"{dim['your_score']}/5",
-                'Benchmark': f"{dim['benchmark_score']:.1f}/5",
+                'Your Score': f"{dim['your_score']}/15",
+                'Benchmark': f"{dim['benchmark_score']:.1f}/15",
                 'Difference': f"{diff_color} {diff:+.1f}",
                 'Status': status
             })
@@ -1677,7 +1677,7 @@ def render_results_dashboard():
                         user_email=st.session_state.user_email
                         or "No email provided",
                         feedback_text=feedback_text,
-                        assessment_score=f"{total_score}/30 ({percentage}%)")
+                        assessment_score=f"{total_score}/90 ({percentage}%)")
 
                     if success:
                         st.session_state.feedback_text = feedback_text
@@ -2093,7 +2093,7 @@ def main():
                     if dim_answers:
                         avg_score = sum(dim_answers) / len(dim_answers)
                         st.write(
-                            f"**{dimension['title']}**: {avg_score:.1f}/5")
+                            f"**{dimension['title']}**: {avg_score:.1f}/5 (raw), {scores_data['raw_dimension_scores'][dim_idx]}/15 (weighted)")
 
     else:
         # Results mode
