@@ -1853,118 +1853,48 @@ def main():
 
     # Show AI implementation stage modal on first visit
     if st.session_state.ai_stage_selected is None:
-        st.markdown("""
-        <style>
-        .ai-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .ai-modal-box {
-            background: white;
-            border-radius: 14px;
-            padding: 45px;
-            width: 95%;
-            max-width: 520px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            position: relative;
-        }
-        .ai-modal-close {
-            position: absolute;
-            top: 18px;
-            right: 18px;
-            background: none;
-            border: none;
-            font-size: 32px;
-            cursor: pointer;
-            color: #999;
-            padding: 0;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .ai-modal-close:hover {
-            color: #333;
-        }
-        .ai-modal-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #1a1a1a;
-            margin-bottom: 28px;
-            margin-top: 0;
-            line-height: 1.3;
-        }
-        .ai-stage-option {
-            display: block;
-            width: 100%;
-            padding: 15px 18px;
-            margin-bottom: 12px;
-            background: #f8f9fa;
-            border: 2px solid #e8e8e8;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 15px;
-            color: #333;
-            transition: all 0.25s ease;
-            font-family: inherit;
-            font-weight: 500;
-        }
-        .ai-stage-option:hover {
-            background: #e3f2fd;
-            border-color: #BF6A16;
-            color: #BF6A16;
-            transform: translateX(2px);
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        # Display modal
-        st.markdown("""
-        <div class="ai-modal-overlay">
-        <div class="ai-modal-box">
-            <button class="ai-modal-close" onclick="window.location.reload()">✕</button>
-            <h2 class="ai-modal-title">What best describes your AI implementation stage?</h2>
-        </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Modal options
-        col_spacer1, col_modal, col_spacer2 = st.columns([0.5, 2, 0.5])
-        with col_modal:
-            stages = [
-                "Exploring / learning about AI",
-                "Planning first pilot project",
-                "Running 1-2 pilot projects",
-                "Scaling successful pilots",
-                "AI embedded in operations"
-            ]
+        # Center the modal
+        col_left, col_center, col_right = st.columns([0.5, 2, 0.5])
+        with col_center:
+            st.markdown("<br>" * 2, unsafe_allow_html=True)
             
-            for stage in stages:
-                if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
-                    # Save stage to session state immediately
-                    st.session_state.ai_stage_selected = stage
-                    
-                    # Try to save to database if company name is available
-                    company_name = st.session_state.get('user_company', 'Your Company')
-                    if company_name and company_name.strip():
-                        try:
-                            get_or_create_organization(company_name)
-                            save_ai_implementation_stage(company_name, stage)
-                        except Exception as e:
-                            print(f"Could not save to DB on modal selection: {e}")
-                    
-                    st.rerun()
+            # Modal container with styling
+            with st.container(border=True):
+                st.markdown("""
+                <h2 style="color: #1a1a1a; font-size: 26px; margin-bottom: 8px; margin-top: 0; font-weight: bold;">
+                Before we start the Assessment...
+                </h2>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("""
+                <p style="color: #555; font-size: 16px; margin-bottom: 24px; margin-top: 0; line-height: 1.5; font-weight: 500;">
+                Please tell us: <strong>What best describes your current AI implementation stage?</strong>
+                </p>
+                """, unsafe_allow_html=True)
+                
+                stages = [
+                    "Exploring / learning about AI",
+                    "Planning first pilot project",
+                    "Running 1-2 pilot projects",
+                    "Scaling successful pilots",
+                    "AI embedded in operations"
+                ]
+                
+                for stage in stages:
+                    if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
+                        # Save stage to session state immediately
+                        st.session_state.ai_stage_selected = stage
+                        
+                        # Try to save to database if company name is available
+                        company_name = st.session_state.get('user_company', 'Your Company')
+                        if company_name and company_name.strip():
+                            try:
+                                get_or_create_organization(company_name)
+                                save_ai_implementation_stage(company_name, stage)
+                            except Exception as e:
+                                print(f"Could not save to DB on modal selection: {e}")
+                        
+                        st.rerun()
         
         return  # Stop rendering rest of page while modal is shown
 
