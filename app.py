@@ -136,136 +136,6 @@ if 'startup_modal_shown' not in st.session_state:
 if 'ai_stage_selected' not in st.session_state:
     st.session_state.ai_stage_selected = None
 
-# Function to render AI implementation stage modal
-def render_ai_stage_modal():
-    """Render startup modal for AI implementation stage selection"""
-    st.markdown("""
-    <style>
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .modal-content {
-        background: white;
-        border-radius: 12px;
-        padding: 40px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
-        position: relative;
-    }
-    .modal-close {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: none;
-        border: none;
-        font-size: 28px;
-        cursor: pointer;
-        color: #666;
-        padding: 0;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .modal-close:hover {
-        color: #000;
-    }
-    .modal-title {
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 20px;
-        margin-top: 0;
-    }
-    .modal-option {
-        display: block;
-        width: 100%;
-        padding: 12px 16px;
-        margin-bottom: 10px;
-        background: #f5f5f5;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-        text-align: left;
-        font-size: 14px;
-        color: #333;
-        transition: all 0.2s;
-    }
-    .modal-option:hover {
-        background: #e8f4f8;
-        border-color: #BF6A16;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Show modal overlay
-    col1, col2, col3 = st.columns([0.5, 2, 0.5])
-    with col2:
-        st.markdown("""
-        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                    background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); 
-                    z-index: 999;"></div>
-        """, unsafe_allow_html=True)
-    
-    # Modal dialog
-    modal_html = """
-    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                z-index: 1000; width: 90%; max-width: 500px;">
-        <div class="modal-content">
-            <button class="modal-close" onclick="document.dispatchEvent(new CustomEvent('close_modal'))">✕</button>
-            <h2 class="modal-title">What best describes your AI implementation stage?</h2>
-    """
-    
-    options = [
-        "Exploring / learning about AI",
-        "Planning first pilot project",
-        "Running 1-2 pilot projects",
-        "Scaling successful pilots",
-        "AI embedded in operations"
-    ]
-    
-    for i, option in enumerate(options):
-        option_id = f"ai_stage_{i}"
-        modal_html += f"""
-        <button class="modal-option" onclick="document.dispatchEvent(new CustomEvent('ai_stage_selected', 
-                        {{detail: {{option: '{option}'}}}}))">{option}</button>
-        """
-    
-    modal_html += """
-        </div>
-    </div>
-    """
-    
-    st.markdown(modal_html, unsafe_allow_html=True)
-    
-    # Handle modal interactions with JavaScript
-    st.markdown("""
-    <script>
-    document.addEventListener('ai_stage_selected', function(e) {
-        const option = e.detail.option;
-        window.parent.postMessage({type: 'ai_stage_selected', option: option}, '*');
-    });
-    document.addEventListener('close_modal', function(e) {
-        window.parent.postMessage({type: 'close_modal'}, '*');
-    });
-    </script>
-    """, unsafe_allow_html=True)
-
-
 # Custom CSS for styling
 st.markdown("""
 <style>
@@ -1978,7 +1848,125 @@ def render_chatgpt_assistant():
 
 def main():
     """Main application function"""
+    ensure_tables_exist()
     initialize_session_state()
+
+    # Show AI implementation stage modal on first visit
+    if st.session_state.ai_stage_selected is None:
+        st.markdown("""
+        <style>
+        .ai-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .ai-modal-box {
+            background: white;
+            border-radius: 14px;
+            padding: 45px;
+            width: 95%;
+            max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+        .ai-modal-close {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ai-modal-close:hover {
+            color: #333;
+        }
+        .ai-modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 28px;
+            margin-top: 0;
+            line-height: 1.3;
+        }
+        .ai-stage-option {
+            display: block;
+            width: 100%;
+            padding: 15px 18px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            border: 2px solid #e8e8e8;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
+            color: #333;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+        .ai-stage-option:hover {
+            background: #e3f2fd;
+            border-color: #BF6A16;
+            color: #BF6A16;
+            transform: translateX(2px);
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Display modal
+        st.markdown("""
+        <div class="ai-modal-overlay">
+        <div class="ai-modal-box">
+            <button class="ai-modal-close" onclick="window.location.reload()">✕</button>
+            <h2 class="ai-modal-title">What best describes your AI implementation stage?</h2>
+        </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Modal options
+        col_spacer1, col_modal, col_spacer2 = st.columns([0.5, 2, 0.5])
+        with col_modal:
+            stages = [
+                "Exploring / learning about AI",
+                "Planning first pilot project",
+                "Running 1-2 pilot projects",
+                "Scaling successful pilots",
+                "AI embedded in operations"
+            ]
+            
+            for stage in stages:
+                if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
+                    # Save stage to session state immediately
+                    st.session_state.ai_stage_selected = stage
+                    
+                    # Try to save to database if company name is available
+                    company_name = st.session_state.get('user_company', 'Your Company')
+                    if company_name and company_name.strip():
+                        try:
+                            get_or_create_organization(company_name)
+                            save_ai_implementation_stage(company_name, stage)
+                        except Exception as e:
+                            print(f"Could not save to DB on modal selection: {e}")
+                    
+                    st.rerun()
+        
+        return  # Stop rendering rest of page while modal is shown
 
     # Render branding sidebar first
     render_branding_sidebar()
