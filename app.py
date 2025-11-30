@@ -983,7 +983,7 @@ def render_results_dashboard():
         raw_scores = scores_data['raw_dimension_scores']
         data_score = raw_scores[2]  # Data Readiness (index 2)
         leadership_score = raw_scores[4]  # Leadership & Alignment (index 4)
-        percentage_value = float(percentage.rstrip('%'))
+        percentage_value = float(percentage) if isinstance(percentage, (int, float)) else float(percentage.rstrip('%'))
         
         # Determine warning icon
         warning_icon = ""
