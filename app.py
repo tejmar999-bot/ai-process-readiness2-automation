@@ -1868,20 +1868,20 @@ def main():
         """, unsafe_allow_html=True)
         
         # Center modal with black background
-        col_left, col_center, col_right = st.columns([0.1, 0.8, 0.1])
+        col_left, col_center, col_right = st.columns([0, 1, 0])
         with col_center:
-            st.markdown("<br>" * 3, unsafe_allow_html=True)
+            st.markdown("<br>" * 2, unsafe_allow_html=True)
             
             # White container for modal
             with st.container(border=True):
                 st.markdown("""
-                <h2 style="color: #FF8C00; font-size: 24px; margin-bottom: 6px; margin-top: 0; font-weight: bold;">
+                <h2 style="color: #FF8C00; font-size: 22px; margin-bottom: 4px; margin-top: 0; font-weight: bold;">
                 Before we start the Assessment...
                 </h2>
                 """, unsafe_allow_html=True)
                 
                 st.markdown("""
-                <p style="color: #FFFFFF; font-size: 15px; margin-bottom: 16px; margin-top: 0; line-height: 1.4; font-weight: 500;">
+                <p style="color: #FFFFFF; font-size: 13px; margin-bottom: 12px; margin-top: 0; line-height: 1.3; font-weight: 500;">
                 Please tell us: <strong>What best describes your current AI implementation stage?</strong>
                 </p>
                 """, unsafe_allow_html=True)
@@ -1897,9 +1897,11 @@ def main():
                 st.markdown("""
                 <style>
                 .stButton > button {
-                    margin-bottom: 8px !important;
-                    padding: 10px 16px !important;
-                    font-size: 14px !important;
+                    margin-bottom: 4px !important;
+                    padding: 8px 12px !important;
+                    font-size: 12px !important;
+                    line-height: 1.2 !important;
+                    height: auto !important;
                 }
                 .stButton:last-child > button {
                     margin-bottom: 0 !important;
