@@ -6,6 +6,39 @@ Implements Scenario 2: Asymmetric Threshold Weighting
 from data.dimensions import DIMENSIONS
 
 
+def get_critical_status(raw_score):
+    """
+    Return status indicator for critical dimension.
+    
+    Args:
+        raw_score: Raw dimension score (3-15)
+    
+    Returns:
+        Dictionary with status, emoji, message, and color
+    """
+    if raw_score >= 10:
+        return {
+            'status': 'strong',
+            'emoji': '✓',
+            'message': 'Above threshold (≥10)',
+            'color': 'green'
+        }
+    elif raw_score >= 7:
+        return {
+            'status': 'yellow_flag',
+            'emoji': '⚠',
+            'message': 'YELLOW FLAG: Below threshold',
+            'color': 'orange'
+        }
+    else:
+        return {
+            'status': 'red_flag',
+            'emoji': '❌',
+            'message': 'RED FLAG: Critical weakness',
+            'color': 'red'
+        }
+
+
 def compute_scores(answers):
     """
     Compute scores using Scenario 2: Asymmetric Threshold Weighting.
@@ -62,12 +95,7 @@ def compute_scores(answers):
                 dim_weighted_score = dim_raw_score / 2.5  # Severe penalty
             
             # Set critical dimension status
-            if dim_raw_score >= 10:
-                critical_statuses[dim_id] = {'status': 'Strong', 'emoji': '✓', 'color': '#16A34A'}
-            elif dim_raw_score >= 7:
-                critical_statuses[dim_id] = {'status': 'Yellow Flag', 'emoji': '⚠', 'color': '#EAB308'}
-            else:
-                critical_statuses[dim_id] = {'status': 'Red Flag', 'emoji': '❌', 'color': '#DC2626'}
+            critical_statuses[dim_id] = get_critical_status(dim_raw_score)
         else:
             # Standard dimension: no adjustment
             dim_weighted_score = dim_raw_score
