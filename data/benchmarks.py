@@ -6,53 +6,53 @@ from db.models import DEFAULT_BASELINE
 # Industry benchmark scores (average scores across different maturity levels)
 INDUSTRY_BENCHMARKS = {
     'Small Business (< 50 employees)': {
-        'process': 2.5,
-        'data': 2.3,
-        'tech': 2.4,
-        'people': 2.2,
-        'leadership': 2.6,
-        'change': 2.7,
-        'total': 14.7,
+        'process': 7.4,
+        'tech': 7.0,
+        'data': 6.8,
+        'people': 7.7,
+        'leadership': 6.4,
+        'change': 6.1,
+        'total': 41.4,
         'description': 'Small businesses typically have informal processes and limited AI infrastructure'
     },
     'Mid-Market (50-500 employees)': {
-        'process': 3.2,
-        'data': 3.0,
-        'tech': 3.1,
-        'people': 2.8,
-        'leadership': 3.3,
-        'change': 3.1,
-        'total': 18.5,
+        'process': 8.9,
+        'tech': 8.4,
+        'data': 8.3,
+        'people': 9.3,
+        'leadership': 8.1,
+        'change': 7.8,
+        'total': 50.8,
         'description': 'Mid-market companies often have established processes and are beginning AI adoption'
     },
     'Enterprise (500+ employees)': {
-        'process': 3.8,
-        'data': 3.7,
-        'tech': 3.9,
-        'people': 3.5,
-        'leadership': 4.0,
-        'change': 3.6,
-        'total': 22.5,
+        'process': 10.1,
+        'tech': 10.3,
+        'data': 9.9,
+        'people': 11.0,
+        'leadership': 9.5,
+        'change': 9.1,
+        'total': 59.9,
         'description': 'Large enterprises typically have mature processes and active AI initiatives'
     },
     'Technology Leaders': {
-        'process': 4.3,
-        'data': 4.5,
-        'tech': 4.6,
-        'people': 4.2,
-        'leadership': 4.5,
-        'change': 4.4,
-        'total': 26.5,
+        'process': 11.5,
+        'tech': 11.8,
+        'data': 11.2,
+        'people': 12.3,
+        'leadership': 10.9,
+        'change': 10.5,
+        'total': 68.2,
         'description': 'Technology-first companies with advanced AI capabilities and mature practices'
     },
     'Industry Average': {
-        'process': 3.1,
-        'data': 3.0,
-        'tech': 3.2,
-        'people': 2.9,
-        'leadership': 3.2,
-        'change': 3.0,
-        'total': 18.4,
+        'process': 11.1,
+        'tech': 10.5,
+        'data': 10.2,
+        'people': 11.5,
+        'leadership': 9.6,
+        'change': 9.2,
+        'total': 62.1,
         'description': 'Overall average across all industries and company sizes'
     }
 }
@@ -143,12 +143,12 @@ def get_moving_average_benchmark():
             total += score
         
         return {
-            'process': benchmark_dict.get('process', 3.2),
-            'tech': benchmark_dict.get('tech', 3.4),
-            'data': benchmark_dict.get('data', 3.1),
-            'people': benchmark_dict.get('people', 3.8),
-            'leadership': benchmark_dict.get('leadership', 3.7),
-            'change': benchmark_dict.get('change', 3.3),
+            'process': benchmark_dict.get('process', 11.1),
+            'tech': benchmark_dict.get('tech', 10.5),
+            'data': benchmark_dict.get('data', 10.2),
+            'people': benchmark_dict.get('people', 11.5),
+            'leadership': benchmark_dict.get('leadership', 9.6),
+            'change': benchmark_dict.get('change', 9.2),
             'total': round(total, 1),
             'description': 'Moving average benchmark from all valid assessments'
         }
@@ -156,12 +156,12 @@ def get_moving_average_benchmark():
         print(f"Error fetching moving average benchmark: {e}")
         # Return default baseline on error
         return {
-            'process': 3.2,
-            'tech': 3.4,
-            'data': 3.1,
-            'people': 3.8,
-            'leadership': 3.7,
-            'change': 3.3,
-            'total': 20.4,
+            'process': 11.1,
+            'tech': 10.5,
+            'data': 10.2,
+            'people': 11.5,
+            'leadership': 9.6,
+            'change': 9.2,
+            'total': 62.1,
             'description': 'Default baseline (moving average unavailable)'
         }
