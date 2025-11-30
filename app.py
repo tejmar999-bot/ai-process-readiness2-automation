@@ -1853,62 +1853,69 @@ def main():
 
     # Show AI implementation stage modal on first visit
     if st.session_state.ai_stage_selected is None:
-        # Hide all scrollbars and set full height
+        # Black background, no scrollbars
         st.markdown("""
         <style>
-        html, body, .main, [data-testid="stAppViewContainer"] {
+        html, body, [data-testid="stAppViewContainer"], [data-testid="stFullScreenFrame"], .main {
+            background: #000000 !important;
             overflow: hidden !important;
             height: 100vh !important;
+        }
+        [data-testid="stBaseLayer"] {
+            background: #000000 !important;
         }
         </style>
         """, unsafe_allow_html=True)
         
-        # Center the modal with fixed sizing
-        col_left, col_center, col_right = st.columns([0.5, 2, 0.5])
+        # Center modal with black background
+        col_left, col_center, col_right = st.columns([0.1, 0.8, 0.1])
         with col_center:
-            st.markdown("""
-            <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box;">
-                <div style="background: white; border-radius: 12px; padding: 40px; border: 1px solid #e0e0e0; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 100%; max-width: 500px; overflow: hidden;">
-                    <h2 style="color: #FF8C00; font-size: 26px; margin-bottom: 12px; margin-top: 0; font-weight: bold;">
-                    Before we start the Assessment...
-                    </h2>
-                    <p style="color: #FFFFFF; font-size: 16px; margin-bottom: 28px; margin-top: 0; line-height: 1.5; font-weight: 500;">
-                    Please tell us: <strong>What best describes your current AI implementation stage?</strong>
-                    </p>
-            </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<br>" * 3, unsafe_allow_html=True)
             
-            stages = [
-                "Exploring / learning about AI",
-                "Planning first pilot project",
-                "Running 1-2 pilot projects",
-                "Scaling successful pilots",
-                "AI embedded in operations"
-            ]
-            
-            for stage in stages:
-                if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
-                    # Save stage to session state immediately
-                    st.session_state.ai_stage_selected = stage
-                    
-                    # Try to save to database if company name is available
-                    company_name = st.session_state.get('user_company', 'Your Company')
-                    if company_name and company_name.strip():
-                        try:
-                            get_or_create_organization(company_name)
-                            save_ai_implementation_stage(company_name, stage)
-                        except Exception as e:
-                            print(f"Could not save to DB on modal selection: {e}")
-                    
-                    # Show thank you message
-                    st.success("✓ Thank you! Proceeding to the assessment...", icon="✓")
-                    st.markdown("<br>" * 1, unsafe_allow_html=True)
-                    
-                    # Small delay before rerun
-                    import time
-                    time.sleep(1.5)
-                    st.rerun()
+            # White container for modal
+            with st.container(border=True):
+                st.markdown("""
+                <h2 style="color: #FF8C00; font-size: 26px; margin-bottom: 8px; margin-top: 0; font-weight: bold;">
+                Before we start the Assessment...
+                </h2>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("""
+                <p style="color: #FFFFFF; font-size: 16px; margin-bottom: 24px; margin-top: 0; line-height: 1.5; font-weight: 500;">
+                Please tell us: <strong>What best describes your current AI implementation stage?</strong>
+                </p>
+                """, unsafe_allow_html=True)
+                
+                stages = [
+                    "Exploring / learning about AI",
+                    "Planning first pilot project",
+                    "Running 1-2 pilot projects",
+                    "Scaling successful pilots",
+                    "AI embedded in operations"
+                ]
+                
+                for stage in stages:
+                    if st.button(stage, key=f"ai_stage_btn_{stage}", use_container_width=True):
+                        # Save stage to session state immediately
+                        st.session_state.ai_stage_selected = stage
+                        
+                        # Try to save to database if company name is available
+                        company_name = st.session_state.get('user_company', 'Your Company')
+                        if company_name and company_name.strip():
+                            try:
+                                get_or_create_organization(company_name)
+                                save_ai_implementation_stage(company_name, stage)
+                            except Exception as e:
+                                print(f"Could not save to DB on modal selection: {e}")
+                        
+                        # Show thank you message
+                        st.success("✓ Thank you! Proceeding to the assessment...", icon="✓")
+                        st.markdown("<br>" * 1, unsafe_allow_html=True)
+                        
+                        # Small delay before rerun
+                        import time
+                        time.sleep(1.5)
+                        st.rerun()
         
         return  # Stop rendering rest of page while modal is shown
 
