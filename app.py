@@ -284,6 +284,10 @@ def initialize_session_state():
         st.session_state.current_page = "assessment"
     if 'standalone_chat_messages' not in st.session_state:
         st.session_state.standalone_chat_messages = []
+    if 'ai_implementation_stage' not in st.session_state:
+        st.session_state.ai_implementation_stage = None
+    if 'show_stage_modal' not in st.session_state:
+        st.session_state.show_stage_modal = False
 
 
 def render_header():
@@ -2075,6 +2079,70 @@ def main():
 
         else:
             # Assessment mode
+            # Show AI Implementation Stage modal on first dimension load
+            if st.session_state.current_dimension == 0 and st.session_state.ai_implementation_stage is None:
+                st.markdown("""
+                <style>
+                    .modal-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 999;
+                    }
+                    .modal-content {
+                        background-color: #2a3f5f;
+                        border-radius: 8px;
+                        padding: 2rem;
+                        max-width: 500px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                        border: 1px solid #BF6A16;
+                    }
+                    .modal-title {
+                        color: #BF6A16;
+                        font-size: 1.5rem;
+                        margin-bottom: 1.5rem;
+                        text-align: center;
+                    }
+                </style>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("<h2 style='text-align: center; color: #BF6A16; margin-bottom: 2rem;'>Before we start...</h2>", unsafe_allow_html=True)
+                st.markdown("<p style='text-align: center; font-size: 1.1rem; margin-bottom: 1.5rem;'>What best describes your AI implementation stage?</p>", unsafe_allow_html=True)
+                
+                stage_options = [
+                    "Exploring / learning about AI",
+                    "Planning first pilot project",
+                    "Running 1-2 pilot projects",
+                    "Scaling successful pilots",
+                    "AI embedded in operations"
+                ]
+                
+                selected_stage = st.selectbox(
+                    "Select your AI implementation stage:",
+                    options=stage_options,
+                    index=None,
+                    key="stage_modal_selectbox"
+                )
+                
+                if selected_stage:
+                    st.session_state.ai_implementation_stage = selected_stage
+                    # Show thank you message
+                    st.success("Thank you!")
+                    st.markdown("<p style='text-align: center; margin-top: 1rem;'>Proceeding to Dimension 1...</p>", unsafe_allow_html=True)
+                    st.balloons()
+                    import time
+                    time.sleep(1.5)
+                    st.rerun()
+                else:
+                    st.info("Please select an option to continue")
+                    st.stop()
+            
             render_progress_bar()
 
             # Render current dimension questions
