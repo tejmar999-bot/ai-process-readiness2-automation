@@ -616,7 +616,7 @@ def render_dimension_questions(dimension_idx):
             format_func=lambda x: f"{x} - {answer_choices[x]}",
             key=question_id,
             index=current_answer - 1,  # Convert to 0-indexed
-            horizontal=True,
+            horizontal=False,
             on_change=on_answer_change,
             args=(question['id'], i),
             label_visibility="collapsed")

@@ -25,7 +25,7 @@ BRIGHT_PALETTE = [
 DIMENSIONS = [
     {
         'id': 'process',
-        'title': 'Process Maturity (Weight: 1.0x)',
+        'title': 'Process Maturity',
         'weight': 1.0,
         'what_it_measures': 'How well-defined, measured, and optimized processes are before applying AI.',
         'description': 'How well defined and measured your processes are.',
@@ -75,7 +75,7 @@ DIMENSIONS = [
     },
     {
         'id': 'tech',
-        'title': 'Technology Infrastructure (Weight: 1.2x)',
+        'title': 'Technology Infrastructure',
         'weight': 1.2,
         'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
         'description': 'Tools and platforms available for analytics and automation.',
@@ -125,7 +125,7 @@ DIMENSIONS = [
     },
     {
         'id': 'data',
-        'title': 'Data Readiness (Weight: 1.5x - CRITICAL)',
+        'title': 'Data Readiness',
         'weight': 1.5,
         'what_it_measures': 'Availability, accessibility, and accuracy of operational data for decision-making and AI.',
         'description': 'Availability, accessibility and accuracy of operational data.',
@@ -175,7 +175,7 @@ DIMENSIONS = [
     },
     {
         'id': 'people',
-        'title': 'People & Culture (Weight: 1.3x)',
+        'title': 'People & Culture',
         'weight': 1.3,
         'what_it_measures': 'Workforce awareness, capability, and openness toward AI and digital transformation.',
         'description': 'Workforce capability and understanding of AI and data-driven methods.',
@@ -225,7 +225,7 @@ DIMENSIONS = [
     },
     {
         'id': 'leadership',
-        'title': 'Leadership & Alignment (Weight: 1.5x - CRITICAL)',
+        'title': 'Leadership & Alignment',
         'weight': 1.5,
         'what_it_measures': 'Executive commitment and strategic clarity for AI adoption.',
         'description': 'Executive commitment and strategic alignment for AI.',
@@ -275,7 +275,7 @@ DIMENSIONS = [
     },
     {
         'id': 'governance',
-        'title': 'Governance & Risk (Weight: 1.0x)',
+        'title': 'Governance & Risk',
         'weight': 1.0,
         'what_it_measures': 'Clear roles, risk management, guardrails, and compliance frameworks for AI and process management.',
         'description': 'Roles, risk management, guardrails, and compliance frameworks.',
