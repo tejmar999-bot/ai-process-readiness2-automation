@@ -725,63 +725,54 @@ def render_navigation_buttons():
                 st.rerun()
 
 
-def create_dimension_breakdown_chart(dimension_scores):
-    """Create horizontal bar chart for dimension scores with percentages"""
-    # Reverse the order so Process Maturity is at top and Governance & Risk is at bottom
-    dimension_scores_reversed = list(reversed(dimension_scores))
+def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
+    """Create spider/radar chart for dimension scores with raw scores and percentages"""
     
-    categories = [score['title'] for score in dimension_scores_reversed]
-    values = [score['score'] for score in dimension_scores_reversed]
-    percentages = [(score['score'] / 5) * 100 for score in dimension_scores_reversed]
-    colors = [score['color'] for score in dimension_scores_reversed]
-
-    # Create text labels with score and percentage in bold, positioned inside bars when possible
-    text_labels = [f"<b>{val:.1f}/5 ({pct:.0f}%)</b>" for val, pct in zip(values, percentages)]
-    text_positions = []
+    # Calculate percentages (raw score out of 15)
+    percentages = [(score / 15) * 100 for score in raw_scores]
     
-    # Position text inside bar if there's enough space, otherwise outside
-    for val in values:
-        if val > 2.5:
-            text_positions.append('inside')
-        else:
-            text_positions.append('outside')
-
+    # Create hover text with both raw score and percentage
+    hover_text = [f"{raw:.1f}/15 ({pct:.0f}%)" for raw, pct in zip(raw_scores, percentages)]
+    
     fig = go.Figure()
-
-    fig.add_trace(
-        go.Bar(
-            y=categories,
-            x=values,
-            orientation='h',
-            marker=dict(color=colors),
-            text=text_labels,
-            textposition=text_positions,
-            textfont=dict(size=12, color=['#000000' if pos == 'inside' else '#E5E7EB' for pos in text_positions]),
-            hovertemplate='<b>%{y}</b><br>Score: %{x:.1f}/5<extra></extra>',
-            showlegend=False
-        )
-    )
-
+    
+    # Add spider trace
+    fig.add_trace(go.Scatterpolar(
+        r=raw_scores,
+        theta=dimension_titles,
+        fill='toself',
+        name='Your Score',
+        line=dict(color='#60A5FA', width=2),
+        marker=dict(size=8),
+        fillcolor='rgba(96, 165, 244, 0.3)',
+        hovertemplate='<b>%{theta}</b><br>Score: %{customdata}<extra></extra>',
+        customdata=hover_text,
+        showlegend=False
+    ))
+    
     fig.update_layout(
-        xaxis=dict(
-            range=[0, 5],
-            tickfont=dict(color='#9CA3AF', size=11),
-            gridcolor='rgba(255,255,255,0.1)',
-            showgrid=True,
-            title='Score'
-        ),
-        yaxis=dict(
-            tickfont=dict(color='#E5E7EB', size=14),
-            categoryorder='array',
-            categoryarray=categories
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 15],
+                tickfont=dict(color='#9CA3AF', size=10),
+                gridcolor='rgba(255,255,255,0.2)',
+                linecolor='rgba(255,255,255,0.2)'
+            ),
+            angularaxis=dict(
+                tickfont=dict(color='#E5E7EB', size=11),
+                linecolor='rgba(255,255,255,0.2)'
+            ),
+            bgcolor='rgba(0,0,0,0)'
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB'),
-        height=495,
-        margin=dict(l=200, r=150, t=40, b=40)
+        font=dict(color='#E5E7EB', size=11),
+        height=500,
+        margin=dict(l=80, r=80, t=80, b=80),
+        showlegend=False
     )
-
+    
     return fig
 
 
@@ -1079,9 +1070,12 @@ def render_results_dashboard():
         """,
                     unsafe_allow_html=True)
 
-    # Dimension Breakdown Chart
+    # Dimension Breakdown Chart (Spider/Radar)
     st.markdown(f'<h3 style="font-size: 18px; color: {primary_color}; font-weight: bold;">Dimension Breakdown</h3>', unsafe_allow_html=True)
-    fig = create_dimension_breakdown_chart(dimension_scores)
+    raw_scores_list = scores_data['raw_dimension_scores']
+    dimension_titles = [d['title'] for d in DIMENSIONS]
+    dimension_colors = BRIGHT_PALETTE
+    fig = create_dimension_breakdown_chart(raw_scores_list, dimension_titles, dimension_colors)
     st.plotly_chart(fig, use_container_width=True)
 
     # Benchmark Comparison Section
