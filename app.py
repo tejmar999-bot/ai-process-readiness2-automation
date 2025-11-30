@@ -731,26 +731,26 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
     
-    # Create hover text with both raw score and percentage
-    hover_text = [f"{raw:.1f}/15 ({pct:.0f}%)" for raw, pct in zip(raw_scores, percentages)]
+    # Create enhanced labels with dimension names, scores, and percentages
+    enhanced_theta = [f"{title}<br><b>{score:.1f}/15</b><br>({pct:.0f}%)" 
+                      for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
     
-    # Create dimension labels with scores and percentages inline
-    enhanced_labels = [f"{title}<br>{score:.1f}/15 ({pct:.0f}%)" 
-                       for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
+    # Create hover text
+    hover_text = [f"{title}: {score:.1f}/15 ({pct:.0f}%)" 
+                  for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
     
     fig = go.Figure()
     
-    # Add spider trace
+    # Add spider trace with visible web
     fig.add_trace(go.Scatterpolar(
         r=raw_scores,
-        theta=enhanced_labels,
+        theta=enhanced_theta,
         fill='toself',
-        name='Your Score',
+        fillcolor='rgba(96, 165, 244, 0.35)',
         line=dict(color='#60A5FA', width=2),
-        marker=dict(size=10),
-        fillcolor='rgba(96, 165, 244, 0.3)',
-        hovertemplate='Score: %{customdata}<extra></extra>',
-        customdata=hover_text,
+        marker=dict(size=8, color='#93C5FD'),
+        hovertext=hover_text,
+        hoverinfo='text',
         showlegend=False
     ))
     
@@ -759,21 +759,24 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
-                tickfont=dict(color='#9CA3AF', size=13),
-                showgrid=False
+                tickfont=dict(color='#9CA3AF', size=12),
+                gridcolor='rgba(255, 255, 255, 0.2)',
+                showgrid=True
             ),
             angularaxis=dict(
-                tickfont=dict(color='#E5E7EB', size=11),
-                showgrid=False
+                tickfont=dict(color='#E5E7EB', size=13),
+                showgrid=True,
+                gridcolor='rgba(255, 255, 255, 0.1)'
             ),
             bgcolor='rgba(0,0,0,0)'
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=11),
-        height=550,
-        margin=dict(l=100, r=100, t=100, b=100),
-        showlegend=False
+        font=dict(color='#E5E7EB', size=13),
+        height=600,
+        margin=dict(l=80, r=80, t=80, b=80),
+        showlegend=False,
+        hovermode='closest'
     )
     
     return fig
