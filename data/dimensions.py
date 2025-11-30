@@ -25,294 +25,300 @@ BRIGHT_PALETTE = [
 DIMENSIONS = [
     {
         'id': 'process',
-        'title': 'Process Maturity',
+        'title': 'Process Maturity (Weight: 1.0x)',
+        'weight': 1.0,
         'what_it_measures': 'How well-defined, measured, and optimized processes are before applying AI.',
         'description': 'How well defined and measured your processes are.',
         'color': PALETTE[0],
         'scoring_labels': {
-            1: 'Ad hoc',
-            2: 'Defined',
-            3: 'Measured',
-            4: 'Controlled',
-            5: 'Optimized'
+            1: 'Undocumented',
+            2: 'Informal',
+            3: 'Documented',
+            4: 'Followed',
+            5: 'Updated'
         },
         'questions': [
             {
-                'id': 'proc_defined',
-                'text': 'How well-defined and repeatable are your core processes?',
+                'id': 'proc_doc',
+                'text': 'How well are your core business processes documented?',
                 'answer_choices': {
-                    1: 'Ad hoc processes',
-                    2: 'Partially defined',
-                    3: 'Well-documented with consistent application',
-                    4: 'Standardized across teams with governance',
-                    5: 'Fully optimized & continuously refined'
+                    1: 'Mostly undocumented; exists in people\'s heads',
+                    2: 'Some informal documentation (emails, notes)',
+                    3: 'Key processes documented but not consistently followed',
+                    4: 'Processes documented and regularly followed',
+                    5: 'Processes documented, followed, and regularly updated'
                 }
             },
             {
-                'id': 'proc_compliance',
-                'text': 'How consistently do teams follow documented procedures?',
+                'id': 'proc_sop',
+                'text': 'Do you have standard operating procedures (SOPs) for priority workflows?',
                 'answer_choices': {
-                    1: 'Rarely follow',
-                    2: 'Sometimes follow',
-                    3: 'Generally follow',
-                    4: 'Consistently follow with periodic monitoring',
-                    5: 'Flawless adherence with continuous auditing'
+                    1: 'No written procedures exist',
+                    2: 'Procedures exist for 1-2 critical processes only',
+                    3: 'Procedures exist for some key processes (~25-50%)',
+                    4: 'Procedures exist for most key processes (~50-75%)',
+                    5: 'Comprehensive procedures for all critical processes (75%+)'
                 }
             },
             {
-                'id': 'proc_efficiency',
-                'text': 'How efficiently are tasks completed with minimal delays?',
+                'id': 'proc_metrics',
+                'text': 'How do you track process performance?',
                 'answer_choices': {
-                    1: 'Significant delays',
-                    2: 'Occasional delays',
-                    3: 'Mostly timely',
-                    4: 'Very timely',
-                    5: 'Highly efficient'
+                    1: 'No metrics tracked',
+                    2: 'Ad-hoc tracking when problems arise',
+                    3: 'Basic metrics tracked manually (spreadsheets)',
+                    4: 'Regular metrics tracked with some automation',
+                    5: 'Real-time dashboards with KPIs for key processes'
                 }
             }
         ]
     },
     {
         'id': 'tech',
-        'title': 'Technology Infrastructure',
+        'title': 'Technology Infrastructure (Weight: 1.2x)',
+        'weight': 1.2,
         'what_it_measures': 'Availability of tools, platforms, and IT support for AI deployment.',
         'description': 'Tools and platforms available for analytics and automation.',
         'color': PALETTE[1],
         'scoring_labels': {
-            1: 'Mostly manual',
-            2: 'Some digital data',
-            3: 'Structured data in silos',
-            4: 'Integrated systems',
-            5: 'Unified, high-quality data'
+            1: 'Legacy',
+            2: 'Mixed',
+            3: 'Current',
+            4: 'Modern',
+            5: 'Cutting-edge'
         },
         'questions': [
             {
-                'id': 'tech_modern',
-                'text': 'How modern and scalable is your tech stack?',
+                'id': 'tech_systems',
+                'text': 'How would you describe your technology systems?',
                 'answer_choices': {
-                    1: 'Legacy systems - significant modernization needed',
-                    2: 'Outdated with limited scalability',
-                    3: 'Partially modern with some scalability constraints',
-                    4: 'Modern infrastructure with cloud-native capabilities',
-                    5: 'Cutting-edge & highly scalable architecture'
+                    1: 'Legacy systems, many unsupported or outdated',
+                    2: 'Mix of old and new; some systems nearing end-of-life',
+                    3: 'Mostly current systems with vendor support',
+                    4: 'Modern, cloud-based systems with regular updates',
+                    5: 'Cutting-edge, API-first platforms with strong vendor roadmaps'
                 }
             },
             {
-                'id': 'tech_reliability',
-                'text': 'How well-maintained and reliable are your core systems?',
+                'id': 'tech_integration',
+                'text': 'How well do your systems share data with each other?',
                 'answer_choices': {
-                    1: 'Frequently unstable with regular outages',
-                    2: 'Periodically unstable with occasional failures',
-                    3: 'Generally reliable with minor issues',
-                    4: 'Very reliable with documented maintenance plans',
-                    5: 'Highly reliable with proactive monitoring & SLAs'
+                    1: 'Siloed systems; manual data transfer (email, USB, re-keying)',
+                    2: 'Limited integration; mostly manual processes',
+                    3: 'Some automated integration for critical workflows',
+                    4: 'Most systems integrated with reliable data flow',
+                    5: 'Fully integrated ecosystem with real-time data sync'
                 }
             },
             {
-                'id': 'tech_automation',
-                'text': 'How effectively do your tools support automation?',
+                'id': 'tech_security',
+                'text': 'How consistently is security and access control applied?',
                 'answer_choices': {
-                    1: 'Manual processes only',
-                    2: 'Limited automation',
-                    3: 'Some automation',
-                    4: 'Strong automation',
-                    5: 'Fully automated'
+                    1: 'Minimal security; shared passwords common',
+                    2: 'Basic security but inconsistently applied',
+                    3: 'Security policies exist; moderately enforced',
+                    4: 'Strong security with role-based access mostly enforced',
+                    5: 'Enterprise-grade security, audited, consistently enforced'
                 }
             }
         ]
     },
     {
         'id': 'data',
-        'title': 'Data Readiness',
+        'title': 'Data Readiness (Weight: 1.5x - CRITICAL)',
+        'weight': 1.5,
         'what_it_measures': 'Availability, accessibility, and accuracy of operational data for decision-making and AI.',
         'description': 'Availability, accessibility and accuracy of operational data.',
         'color': PALETTE[2],
         'scoring_labels': {
-            1: 'Minimal',
-            2: 'Basic tools',
-            3: 'Analytics in place',
-            4: 'Automation + ML tools',
-            5: 'AI-integrated platforms'
+            1: 'Missing',
+            2: 'Fragmented',
+            3: 'Available',
+            4: 'Accessible',
+            5: 'Self-service'
         },
         'questions': [
             {
-                'id': 'data_accessible',
-                'text': 'How accessible is relevant data to teams who need it?',
+                'id': 'data_available',
+                'text': 'How available is the data you need for decision-making?',
                 'answer_choices': {
-                    1: 'Not accessible',
-                    2: 'Difficult to access',
-                    3: 'Moderately accessible',
-                    4: 'Easily accessible',
-                    5: 'Readily accessible'
+                    1: 'Critical data often missing or inaccessible',
+                    2: 'Data exists but hard to access or fragmented',
+                    3: 'Most data available but requires significant effort to compile',
+                    4: 'Data readily accessible for most decisions',
+                    5: 'Comprehensive data available on-demand via self-service tools'
                 }
             },
             {
                 'id': 'data_quality',
-                'text': 'How complete and accurate is your operational data?',
+                'text': 'How would you rate your data quality?',
                 'answer_choices': {
-                    1: 'Incomplete & inaccurate',
-                    2: 'Often incomplete',
-                    3: 'Mostly complete',
-                    4: 'Complete & accurate',
-                    5: 'Comprehensive & verified'
+                    1: 'Significant errors, duplicates, or gaps in data',
+                    2: 'Quality issues frequently impact decisions',
+                    3: 'Acceptable quality but some known issues',
+                    4: 'Good quality with occasional cleanup needed',
+                    5: 'High quality, actively monitored and continuously improved'
                 }
             },
             {
-                'id': 'data_standardized',
-                'text': 'How standardized are data formats across systems?',
+                'id': 'data_pipelines',
+                'text': 'How reliable are your data pipelines and access?',
                 'answer_choices': {
-                    1: 'No standardization',
-                    2: 'Minimal standardization',
-                    3: 'Partial standardization',
-                    4: 'Well standardized',
-                    5: 'Fully standardized'
+                    1: 'No automated pipelines; manual data collection',
+                    2: 'Unreliable pipelines; frequent breaks or delays',
+                    3: 'Pipelines work but require regular manual intervention',
+                    4: 'Reliable automated pipelines with minimal issues',
+                    5: 'Enterprise-grade pipelines with monitoring and alerting'
                 }
             }
         ]
     },
     {
         'id': 'people',
-        'title': 'People & Culture',
+        'title': 'People & Culture (Weight: 1.3x)',
+        'weight': 1.3,
         'what_it_measures': 'Workforce awareness, capability, and openness toward AI and digital transformation.',
         'description': 'Workforce capability and understanding of AI and data-driven methods.',
         'color': PALETTE[3],
         'scoring_labels': {
-            1: 'Unaware',
-            2: 'Skeptical',
-            3: 'Learning',
-            4: 'Engaged',
-            5: 'Proactive AI advocates'
+            1: 'Limited',
+            2: 'Basic',
+            3: 'Comfortable',
+            4: 'Skilled',
+            5: 'Champions'
         },
         'questions': [
             {
-                'id': 'people_adoption',
-                'text': 'How comfortable are staff with adopting new tools?',
+                'id': 'people_capability',
+                'text': 'What is your team\'s baseline capability with data and technology?',
                 'answer_choices': {
-                    1: 'Very uncomfortable',
-                    2: 'Somewhat uncomfortable',
-                    3: 'Neutral',
-                    4: 'Comfortable',
-                    5: 'Very comfortable'
+                    1: 'Limited digital/data skills; resistance to tech changes',
+                    2: 'Basic digital literacy; minimal data analysis skills',
+                    3: 'Comfortable with standard tools (Excel, email, CRM)',
+                    4: 'Some team members skilled in data analysis/automation',
+                    5: 'Strong data literacy across teams; champions in place'
                 }
             },
             {
-                'id': 'people_experiment',
-                'text': 'How willing are teams to experiment with new technology?',
+                'id': 'people_openness',
+                'text': 'How open is your organization to data-driven change?',
                 'answer_choices': {
-                    1: 'Resistant',
-                    2: 'Reluctant',
-                    3: 'Somewhat willing',
-                    4: 'Willing',
-                    5: 'Highly willing & proactive'
+                    1: 'Strong resistance; "we\'ve always done it this way" culture',
+                    2: 'Skeptical; change happens slowly with pushback',
+                    3: 'Neutral; willing to try but need convincing',
+                    4: 'Generally open; early adopters encourage others',
+                    5: 'Innovation-focused culture; actively seeks improvements'
                 }
             },
             {
-                'id': 'people_collaboration',
-                'text': 'How effectively do teams collaborate across functions?',
+                'id': 'people_learning',
+                'text': 'What learning and upskilling efforts are in place?',
                 'answer_choices': {
-                    1: 'Siloed',
-                    2: 'Limited collaboration',
-                    3: 'Regular collaboration',
-                    4: 'Strong collaboration',
-                    5: 'Excellent cross-functional collaboration'
+                    1: 'No formal training or development programs',
+                    2: 'Occasional ad-hoc training when issues arise',
+                    3: 'Annual training budget but not strategically planned',
+                    4: 'Regular training programs with some tracking',
+                    5: 'Comprehensive learning paths with tracked skill development'
                 }
             }
         ]
     },
     {
         'id': 'leadership',
-        'title': 'Leadership & Alignment',
+        'title': 'Leadership & Alignment (Weight: 1.5x - CRITICAL)',
+        'weight': 1.5,
         'what_it_measures': 'Executive commitment and strategic clarity for AI adoption.',
         'description': 'Executive commitment and strategic alignment for AI.',
         'color': PALETTE[4],
         'scoring_labels': {
-            1: 'No alignment',
-            2: 'Conceptual interest',
-            3: 'Pilot discussions',
-            4: 'Clear roadmap',
-            5: 'Fully integrated vision'
+            1: 'Unaware',
+            2: 'Aware',
+            3: 'Supportive',
+            4: 'Sponsor',
+            5: 'Champion'
         },
         'questions': [
             {
-                'id': 'leadership_commitment',
-                'text': 'How committed are leaders to operational improvement?',
+                'id': 'leadership_involvement',
+                'text': 'How involved is senior leadership in AI/digital initiatives?',
                 'answer_choices': {
-                    1: 'No commitment - viewed as distraction',
-                    2: 'Minimal commitment - passive participation only',
-                    3: 'Active support with limited budget allocation',
-                    4: 'Strong commitment with dedicated resources & oversight',
-                    5: 'Strategic priority with executive sponsorship & investment'
+                    1: 'Unaware or dismissive of AI opportunities',
+                    2: 'Aware but not actively engaged',
+                    3: 'Supportive when asked; delegates to others',
+                    4: 'Actively sponsors specific initiatives',
+                    5: 'Champions AI strategy; personally involved in key decisions'
                 }
             },
             {
-                'id': 'leadership_communication',
-                'text': 'How consistently leadership communicates priorities?',
+                'id': 'leadership_goals',
+                'text': 'How well are AI/automation goals connected to business outcomes?',
                 'answer_choices': {
-                    1: 'Inconsistent & unclear - frequently contradictory',
-                    2: 'Sporadic communication - mostly reactive responses',
-                    3: 'Regular cadence with general alignment',
-                    4: 'Consistent messaging with documented roadmap',
-                    5: 'Crystal clear with ongoing reinforcement & alignment mechanisms'
+                    1: 'No clear goals for AI or automation',
+                    2: 'Vague aspirations ("we should use AI somehow")',
+                    3: 'General goals but not linked to specific business metrics',
+                    4: 'Clear goals tied to measurable business outcomes',
+                    5: 'Strategic roadmap with AI tied to revenue, cost, or customer goals'
                 }
             },
             {
-                'id': 'leadership_resources',
-                'text': 'How well are resources allocated toward transformation?',
+                'id': 'leadership_budget',
+                'text': 'Is there committed budget and resources for AI initiatives?',
                 'answer_choices': {
-                    1: 'No dedicated resources',
-                    2: 'Minimal resources - ad-hoc funding',
-                    3: 'Adequate resources for pilots only',
-                    4: 'Substantial budget with multi-year commitment',
-                    5: 'Strategic investment with contingency for scaling'
+                    1: 'No budget allocated',
+                    2: 'Budget discussions only; no commitment',
+                    3: 'Small experimental budget (<5% of IT/ops budget)',
+                    4: 'Dedicated budget with assigned resources (5-15%)',
+                    5: 'Strategic investment with cross-functional resources (15%+)'
                 }
             }
         ]
     },
     {
         'id': 'governance',
-        'title': 'Governance & Risk',
+        'title': 'Governance & Risk (Weight: 1.0x)',
+        'weight': 1.0,
         'what_it_measures': 'Clear roles, risk management, guardrails, and compliance frameworks for AI and process management.',
         'description': 'Roles, risk management, guardrails, and compliance frameworks.',
         'color': PALETTE[5],
         'scoring_labels': {
-            1: 'Resistant',
-            2: 'Limited openness',
-            3: 'Accepting',
-            4: 'Adaptive',
-            5: 'Agile & innovation-oriented'
+            1: 'No policies',
+            2: 'Informal',
+            3: 'Basic',
+            4: 'Clear',
+            5: 'Comprehensive'
         },
         'questions': [
             {
-                'id': 'governance_roles',
-                'text': 'Is there a formal governance structure for AI decision-making and oversight?',
+                'id': 'governance_policies',
+                'text': 'What policies exist for responsible AI use?',
                 'answer_choices': {
-                    1: 'No structure - ad-hoc decisions',
-                    2: 'Informal structure - some designated roles',
-                    3: 'Defined committee with documented responsibilities',
-                    4: 'Formal board with clear policies & escalation paths',
-                    5: 'Enterprise AI council with cross-functional representation & documented charter'
+                    1: 'No policies or guidelines',
+                    2: 'Aware of the need but nothing documented',
+                    3: 'Basic guidelines in development',
+                    4: 'Clear policies documented and communicated',
+                    5: 'Comprehensive framework with regular reviews and training'
                 }
             },
             {
-                'id': 'governance_risk',
-                'text': 'How systematically are AI-related risks identified, assessed, and mitigated?',
+                'id': 'governance_change',
+                'text': 'How is change managed when implementing new processes or tools?',
                 'answer_choices': {
-                    1: 'Reactive only - addressed after incidents occur',
-                    2: 'Informal risk discussions - minimal documentation',
-                    3: 'Basic risk registry with periodic reviews',
-                    4: 'Formal risk assessment framework with mitigation plans',
-                    5: 'Comprehensive risk management with continuous monitoring & testing'
+                    1: 'No formal change management; changes announced and imposed',
+                    2: 'Minimal communication; changes often surprise employees',
+                    3: 'Basic communication plan for major changes',
+                    4: 'Structured change management for most initiatives',
+                    5: 'Mature change management with stakeholder engagement and feedback loops'
                 }
             },
             {
                 'id': 'governance_compliance',
-                'text': 'How are compliance requirements and guardrails enforced throughout AI processes?',
+                'text': 'How are compliance and regulatory risks addressed?',
                 'answer_choices': {
-                    1: 'No enforcement mechanism - compliance optional',
-                    2: 'Manual checks performed sporadically',
-                    3: 'Documented guardrails with manual verification',
-                    4: 'Automated controls with periodic audits',
-                    5: 'Continuous compliance monitoring with automated alerts & enforcement'
+                    1: 'Not considered or reactive only when issues arise',
+                    2: 'Aware of requirements but inconsistently addressed',
+                    3: 'Compliance checked for major initiatives',
+                    4: 'Regular compliance reviews with documented processes',
+                    5: 'Proactive risk monitoring with legal/compliance integration'
                 }
             }
         ]

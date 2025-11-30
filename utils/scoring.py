@@ -5,18 +5,18 @@ from data.dimensions import DIMENSIONS
 
 def compute_scores(answers):
     """
-    Compute scores for each dimension and total score.
+    Compute weighted scores for each dimension and total score.
     
     Args:
-        answers: Dictionary with question IDs as keys (e.g., 'proc_doc', 'data_quality')
-                 and scores (1-5) as values
+        answers: Dictionary with question IDs as keys and scores (1-5) as values
     
     Returns:
         Dictionary with dimension_scores (list), total score, percentage, and readiness_band
     """
     dimension_scores = []
+    total_weighted_score = 0
     
-    # Calculate score for each dimension based on its questions
+    # Calculate weighted score for each dimension based on its questions
     for dimension in DIMENSIONS:
         dim_total = 0
         question_count = 0
@@ -27,18 +27,23 @@ def compute_scores(answers):
                 dim_total += answers[question_id]
                 question_count += 1
         
-        # Calculate average for this dimension (out of 5)
+        # Calculate raw score for this dimension (sum of 3 questions)
         if question_count > 0:
-            dim_score = dim_total / question_count
+            dim_raw_score = dim_total  # Sum of the 3 questions (3-15 range)
         else:
-            dim_score = 0
+            dim_raw_score = 0
         
-        dimension_scores.append(round(dim_score, 1))
+        # Apply weight to get weighted score
+        weight = dimension.get('weight', 1.0)
+        dim_weighted_score = dim_raw_score * weight
+        
+        # Store weighted score as the dimension score
+        dimension_scores.append(round(dim_weighted_score, 1))
+        total_weighted_score += dim_weighted_score
     
-    # Total score is sum of all dimension scores
-    total_score = sum(dimension_scores)
-    total_score_rounded = round(total_score, 1)
-    percentage = round((total_score / 30) * 100)  # 30 is max (6 dimensions * 5)
+    # Total score is sum of all weighted dimension scores (max 270)
+    total_score_rounded = round(total_weighted_score, 1)
+    percentage = round((total_score_rounded / 270) * 100)  # Max is 270
     
     # Get readiness band
     readiness_band = get_readiness_band(total_score_rounded)
@@ -53,35 +58,35 @@ def compute_scores(answers):
 
 def get_readiness_band(total_score):
     """
-    Determine readiness band based on total score.
+    Determine readiness band based on total weighted score.
     
     Args:
-        total_score: Total score out of 30
+        total_score: Total weighted score out of 270
     
     Returns:
         Dictionary with label, color, and description
     """
-    if total_score < 11:
+    if total_score < 90:
         return {
-            'label': 'Foundational',
+            'label': 'Not Ready',
             'color': '#DC2626',
-            'description': 'Critical gaps across multiple dimensions—significant foundational work required before AI can be successfully deployed.'
+            'description': 'High risk; focus on business fundamentals first. Significant foundational work required before AI deployment.'
         }
-    elif total_score < 18:
+    elif total_score < 135:
         return {
-            'label': 'Emerging',
+            'label': 'Foundational Gaps',
             'color': '#EAB308',
-            'description': 'Basic readiness established—small-scale AI pilots possible, but substantial progress needed in processes, data, and governance for scaled deployment.'
+            'description': 'Significant work needed; start with process and data basics. Address foundational gaps before scaling.'
         }
-    elif total_score < 25:
+    elif total_score < 180:
         return {
-            'label': 'Dependable',
+            'label': 'Building Blocks In Place',
             'color': '#42A5F5',
-            'description': 'Strong foundation present—ready to scale AI across multiple business units with focused efforts on governance and organizational change management.'
+            'description': 'Address 1-2 weak dimensions before scaling. You have a foundation to build upon with focused improvements.'
         }
     else:
         return {
-            'label': 'Exceptional',
+            'label': 'AI-Ready',
             'color': '#16A34A',
-            'description': 'Mature AI capabilities established—organization ready for enterprise-wide AI deployment with optimized processes, robust governance, and continuous advancement.'
+            'description': 'Strong foundation; focus on strategic pilots. Your organization is well-positioned for AI implementation.'
         }
