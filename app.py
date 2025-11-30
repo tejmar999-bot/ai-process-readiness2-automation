@@ -1868,7 +1868,7 @@ def main():
         """, unsafe_allow_html=True)
         
         # Center modal with black background
-        col_left, col_center, col_right = st.columns([0, 1, 0])
+        col_left, col_center, col_right = st.columns([0.05, 0.9, 0.05])
         with col_center:
             st.markdown("<br>" * 2, unsafe_allow_html=True)
             
