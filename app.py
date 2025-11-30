@@ -1853,6 +1853,15 @@ def main():
 
     # Show AI implementation stage modal on first visit
     if st.session_state.ai_stage_selected is None:
+        # Hide scrollbars when modal is showing
+        st.markdown("""
+        <style>
+        body, html, .main {
+            overflow: hidden !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
         # Center the modal
         col_left, col_center, col_right = st.columns([0.5, 2, 0.5])
         with col_center:
@@ -1861,13 +1870,13 @@ def main():
             # Modal container with styling
             with st.container(border=True):
                 st.markdown("""
-                <h2 style="color: #1a1a1a; font-size: 26px; margin-bottom: 8px; margin-top: 0; font-weight: bold;">
+                <h2 style="color: #FF8C00; font-size: 26px; margin-bottom: 8px; margin-top: 0; font-weight: bold;">
                 Before we start the Assessment...
                 </h2>
                 """, unsafe_allow_html=True)
                 
                 st.markdown("""
-                <p style="color: #555; font-size: 16px; margin-bottom: 24px; margin-top: 0; line-height: 1.5; font-weight: 500;">
+                <p style="color: #FFFFFF; font-size: 16px; margin-bottom: 24px; margin-top: 0; line-height: 1.5; font-weight: 500;">
                 Please tell us: <strong>What best describes your current AI implementation stage?</strong>
                 </p>
                 """, unsafe_allow_html=True)
@@ -1894,6 +1903,13 @@ def main():
                             except Exception as e:
                                 print(f"Could not save to DB on modal selection: {e}")
                         
+                        # Show thank you message
+                        st.success("✓ Thank you! Proceeding to the assessment...", icon="✓")
+                        st.markdown("<br>" * 1, unsafe_allow_html=True)
+                        
+                        # Small delay before rerun
+                        import time
+                        time.sleep(1.5)
                         st.rerun()
         
         return  # Stop rendering rest of page while modal is shown
