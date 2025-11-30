@@ -411,7 +411,7 @@ def render_progress_bar():
         z_index = len(DIMENSIONS) - i
 
         # Fixed width arrows with text wrapping - single line to avoid rendering issues
-        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 60px; width: 120px; min-width: 100px; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.85rem; font-weight: 600; text-align: center; padding: 0 8px; line-height: 1.2; word-wrap: break-word; overflow-wrap: break-word; max-width: 104px;">{dim["title"]}</span></div>'
+        arrow_html = f'<div style="position: relative; background-color: {arrow_color}; height: 60px; width: 120px; min-width: 100px; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%); margin-left: {margin_left}; z-index: {z_index};"><span style="color: {text_color}; font-size: 0.75rem; font-weight: 600; text-align: center; padding: 0 8px; line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; max-width: 104px;">{dim["title"]}</span></div>'
         arrows_html += arrow_html
 
     arrows_html += '</div>'
@@ -462,7 +462,10 @@ def render_progress_bar():
             {arrows_html}
             <div class="header-content-row">
                 <div class="title-description">
-                    <span style="color: {bright_color}; font-size: 2rem; font-weight: 700;">{dimension["title"]}</span>
+                    <div>
+                        <span style="color: {bright_color}; font-size: 2rem; font-weight: 700;">{dimension["title"]}</span>
+                        <span style="color: white; font-size: 0.9rem; font-weight: 700; margin-left: 0.5rem;">(Weight {dimension["weight"]}x{'  - CRITICAL' if dimension.get('critical', False) else ''})</span>
+                    </div>
                     <span style="color: #D1D5DB; font-size: 1.05rem; font-style: italic;"> - {dimension["what_it_measures"]}</span>
                 </div>
                 <div class="dimension-label">
