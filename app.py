@@ -727,7 +727,6 @@ def render_navigation_buttons():
 
 def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_colors):
     """Create spider/radar chart for dimension scores with raw scores and percentages"""
-    import math
     
     # Calculate percentages (raw score out of 15)
     percentages = [(score / 15) * 100 for score in raw_scores]
@@ -735,15 +734,16 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     # Create hover text with both raw score and percentage
     hover_text = [f"{raw:.1f}/15 ({pct:.0f}%)" for raw, pct in zip(raw_scores, percentages)]
     
-    # Use numbered labels for theta (will be hidden and replaced with annotations)
-    theta_labels = list(range(len(dimension_titles)))
+    # Create dimension labels with scores and percentages inline
+    enhanced_labels = [f"{title}<br>{score:.1f}/15 ({pct:.0f}%)" 
+                       for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
     
     fig = go.Figure()
     
     # Add spider trace
     fig.add_trace(go.Scatterpolar(
         r=raw_scores,
-        theta=theta_labels,
+        theta=enhanced_labels,
         fill='toself',
         name='Your Score',
         line=dict(color='#60A5FA', width=2),
@@ -754,54 +754,26 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
         showlegend=False
     ))
     
-    # Create colored annotations for dimension labels with scores and percentages
-    annotations = []
-    num_dimensions = len(dimension_titles)
-    for i in range(num_dimensions):
-        # Calculate angle for this dimension (in degrees)
-        angle_deg = (360 / num_dimensions) * i - 90  # -90 to start at top
-        # Convert to radians
-        angle_rad = math.radians(angle_deg)
-        # Position at radius 17 (outside the 0-15 range)
-        radius = 17
-        
-        x = radius * math.cos(angle_rad)
-        y = radius * math.sin(angle_rad)
-        
-        annotations.append(dict(
-            x=x,
-            y=y,
-            xref="x",
-            yref="y",
-            text=f"<b>{dimension_titles[i]}</b><br><b>{raw_scores[i]:.1f}/15</b><br>({percentages[i]:.0f}%)",
-            showarrow=False,
-            font=dict(size=12, color=dimension_colors[i]),
-            xanchor='center',
-            yanchor='middle'
-        ))
-    
     fig.update_layout(
         polar=dict(
             radialaxis=dict(
                 visible=True,
                 range=[0, 15],
                 tickfont=dict(color='#9CA3AF', size=13),
-                gridcolor='rgba(255,255,255,0.2)',
-                linecolor='rgba(255,255,255,0.2)'
+                showgrid=False
             ),
             angularaxis=dict(
-                showticklabels=False,
-                linecolor='rgba(255,255,255,0.2)'
+                tickfont=dict(color='#E5E7EB', size=11),
+                showgrid=False
             ),
             bgcolor='rgba(0,0,0,0)'
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#E5E7EB', size=13),
-        height=600,
-        margin=dict(l=120, r=120, t=120, b=120),
-        showlegend=False,
-        annotations=annotations
+        font=dict(color='#E5E7EB', size=11),
+        height=550,
+        margin=dict(l=100, r=100, t=100, b=100),
+        showlegend=False
     )
     
     return fig
