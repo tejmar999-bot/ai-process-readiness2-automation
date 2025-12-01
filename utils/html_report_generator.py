@@ -20,6 +20,9 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         HTML string for the report
     """
     
+    # Color palette
+    PALETTE = ['#D17070', '#FDD9B8', '#FFFB4B', '#B9F0C9', '#9DD0F8', '#D7BDE2']
+    
     if not assessment_date:
         assessment_date = datetime.now().strftime("%B %d, %Y")
     
@@ -49,6 +52,7 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     
     # Executive summary
     exec_summary = generate_executive_summary(scores_data)
+    exec_summary_short = exec_summary[:300]
     
     # Build recommendations by dimension
     recommendations = {
@@ -73,9 +77,78 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     
     priority_actions = sorted(priority_actions, key=lambda x: x['score'])[:4]
     
-    # Build HTML
-    html = f"""
-<!DOCTYPE html>
+    # Build dimension bars HTML
+    dimension_bars_html = ""
+    for i in range(len(dimension_names)):
+        star = " ⭐" if i in critical_dims else ""
+        bar_width = (raw_scores[i] / 15) * 100
+        bar_color = get_score_color(raw_scores[i])
+        dimension_bars_html += f'''
+        <div class="bar-item">
+            <div class="bar-label">{dimension_icons[i]} {dimension_names[i]}{star}</div>
+            <div class="bar-container">
+                <div class="bar-fill" style="width: {bar_width:.0f}%; background-color: {bar_color};">
+                    {raw_scores[i]:.1f}/15
+                </div>
+            </div>
+        </div>
+        '''
+    
+    # Build dimension cards HTML
+    dimension_cards_html = ""
+    for i in range(len(dimension_names)):
+        star = " ⭐" if i in critical_dims else ""
+        score_pct = int((raw_scores[i] / 15) * 100)
+        recs = recommendations[i]
+        rec_bullets = "".join([f"<li>{rec}</li>" for rec in recs[:2]])
+        dimension_cards_html += f'''
+    <div class="dimension-card" style="border-left-color: {PALETTE[i]};">
+        <h4>{dimension_icons[i]} {dimension_names[i]}{star}</h4>
+        <div class="dimension-score">Score: {raw_scores[i]:.1f}/15 ({score_pct}%)</div>
+        <ul>
+        {rec_bullets}
+        </ul>
+    </div>
+    '''
+    
+    # Build priority actions HTML
+    priority_html = ""
+    for idx, action in enumerate(priority_actions):
+        priority_html += f'''
+    <div class="priority-box">
+        <strong>Priority {idx + 1}: {action['dimension']}</strong><br>
+        {action['action']}<br>
+        <strong style="color: #6B7280;">Timeline: {action['timeline']}</strong>
+    </div>
+    '''
+    
+    # Critical alert HTML
+    critical_alert_html = ""
+    if critical_status.get('severity') != 'info':
+        critical_alert_html = f'''<div class="critical-alert">
+        <strong>{critical_status.get("icon", "")} {critical_status.get("title", "")}</strong>
+        {critical_status.get("message", "")}
+    </div>'''
+    
+    # Determine current scoring level row
+    scoring_table_html = ""
+    scoring_rows = [
+        ("0-41", "🔴 Not Ready", "High risk; focus on business fundamentals first.", 0, 41),
+        ("42-55", "🟡 Foundational Gaps", "Significant work needed; start with basics.", 42, 55),
+        ("56-69", "🔵 Building Blocks", "Address weak dimensions before scaling.", 56, 69),
+        ("70-90", "🟢 AI-Ready", "Strong foundation; focus on strategic pilots.", 70, 90)
+    ]
+    
+    for range_str, level, meaning, min_score, max_score in scoring_rows:
+        is_current = min_score <= total_score <= max_score
+        current_class = "class='current'" if is_current else ""
+        scoring_table_html += f"<tr {current_class}><td>{range_str}</td><td>{level}</td><td>{meaning}</td></tr>"
+    
+    # Company header info
+    company_section = f"Company: {company_name}<br>" if company_name else ""
+    
+    # Build final HTML
+    html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -97,7 +170,7 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         
         .report {{
             max-width: 8.5in;
-            height: 11in;
+            min-height: 11in;
             margin: 0.5in auto;
             background-color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -167,8 +240,8 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         }}
         
         .critical-alert {{
-            background-color: {('#FEF3C7' if critical_status.get('severity') == 'warning' else '#FEE2E2')};
-            border-left: 4px solid {('#F59E0B' if critical_status.get('severity') == 'warning' else '#DC2626')};
+            border-left: 4px solid #F59E0B;
+            background-color: #FEF3C7;
             padding: 0.75rem;
             margin-bottom: 1rem;
             border-radius: 4px;
@@ -242,11 +315,6 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             color: white;
             font-size: 9px;
             font-weight: bold;
-        }}
-        
-        .bar-star {{
-            margin-left: 0.3rem;
-            font-size: 14px;
         }}
         
         .exec-summary {{
@@ -385,7 +453,7 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         <div class="header-right">
             <strong>T-Logic Consulting</strong><br>
             Date: {assessment_date}<br>
-            {f'Company: {company_name}' if company_name else ''}
+            {company_section}
         </div>
     </div>
     
@@ -407,10 +475,7 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     </div>
     
     <!-- Critical Alert -->
-    {f'''<div class="critical-alert">
-        <strong>{critical_status.get("icon", "")} {critical_status.get("title", "")}</strong>
-        {critical_status.get("message", "")}
-    </div>''' if critical_status.get('severity') != 'info' else ''}
+    {critical_alert_html}
     
     <!-- Scoring Model Table -->
     <table class="scoring-table">
@@ -422,48 +487,20 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             </tr>
         </thead>
         <tbody>
-            <tr {"class='current'" if 0 <= total_score <= 41 else ""}>
-                <td>0-41</td>
-                <td>🔴 Not Ready</td>
-                <td>High risk; focus on business fundamentals first.</td>
-            </tr>
-            <tr {"class='current'" if 42 <= total_score <= 55 else ""}>
-                <td>42-55</td>
-                <td>🟡 Foundational Gaps</td>
-                <td>Significant work needed; start with basics.</td>
-            </tr>
-            <tr {"class='current'" if 56 <= total_score <= 69 else ""}>
-                <td>56-69</td>
-                <td>🔵 Building Blocks</td>
-                <td>Address weak dimensions before scaling.</td>
-            </tr>
-            <tr {"class='current'" if total_score >= 70 else ""}>
-                <td>70-90</td>
-                <td>🟢 AI-Ready</td>
-                <td>Strong foundation; focus on strategic pilots.</td>
-            </tr>
+            {scoring_table_html}
         </tbody>
     </table>
     
     <!-- Dimension Scores -->
     <h3 style="font-size: 14px; margin-bottom: 0.6rem;">Dimension Scores</h3>
     <div class="dimension-bars">
-        {f""".join([f'''
-        <div class="bar-item">
-            <div class="bar-label">{dimension_icons[i]} {dimension_names[i]}{' ⭐' if i in critical_dims else ''}</div>
-            <div class="bar-container">
-                <div class="bar-fill" style="width: {(raw_scores[i]/15)*100:.0f}%; background-color: {get_score_color(raw_scores[i])};">
-                    {raw_scores[i]:.1f}/15
-                </div>
-            </div>
-        </div>
-        ''' for i in range(len(dimension_names))])}
+        {dimension_bars_html}
     </div>
     
     <!-- Executive Summary -->
     <h3 style="font-size: 13px; margin-top: 1rem; margin-bottom: 0.5rem;">Executive Summary</h3>
     <div class="exec-summary">
-        {exec_summary[:300]}...
+        {exec_summary_short}...
     </div>
     
     <div class="footer">
@@ -476,25 +513,11 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     <h2>Recommendations & Action Plan</h2>
     
     <!-- Dimension-by-Dimension -->
-    {f""".join([f'''
-    <div class="dimension-card" style="border-left-color: {PALETTE[i]};">
-        <h4>{dimension_icons[i]} {dimension_names[i]} {' ⭐' if i in critical_dims else ''}</h4>
-        <div class="dimension-score">Score: {raw_scores[i]:.1f}/15 ({int((raw_scores[i]/15)*100)}%)</div>
-        <ul>
-    ''' + "".join([f"<li>{rec}</li>" for rec in recommendations[i][:2]]) + f"""
-        </ul>
-    </div>
-    ''' for i in range(len(dimension_names))])}
+    {dimension_cards_html}
     
     <!-- Priority Actions -->
     <h3 style="margin-top: 1.2rem;">Priority Actions</h3>
-    {f""".join([f'''
-    <div class="priority-box">
-        <strong>Priority {i+1}: {action['dimension']}</strong><br>
-        {action['action']}<br>
-        <strong style="color: #6B7280;">Timeline: {action['timeline']}</strong>
-    </div>
-    ''' for i, action in enumerate(priority_actions)])}
+    {priority_html}
     
     <!-- Timeline Roadmap -->
     <h3 style="margin-top: 1rem;">Implementation Timeline</h3>
@@ -528,8 +551,5 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
 </body>
 </html>
 """
-    
-    # Add PALETTE constant reference
-    PALETTE = ['#D17070', '#FDD9B8', '#FFFB4B', '#B9F0C9', '#9DD0F8', '#D7BDE2']
     
     return html
