@@ -111,16 +111,36 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     </div>
     '''
     
-    # Build priority actions HTML
-    priority_html = ""
+    # Build priority actions HTML with 2-column layout
+    priority_col1 = ""
+    priority_col2 = ""
     for idx, action in enumerate(priority_actions):
-        priority_html += f'''
+        priority_box = f'''
     <div class="priority-box">
         <strong>Priority {idx + 1}: {action['dimension']}</strong><br>
         {action['action']}<br>
         <strong style="color: #6B7280;">Timeline: {action['timeline']}</strong>
     </div>
     '''
+        if idx < 2:
+            priority_col1 += priority_box
+        else:
+            priority_col2 += priority_box
+    
+    # Wrap in columns if we have more than 2 priorities
+    if len(priority_actions) > 2:
+        priority_html = f'''
+    <div class="priority-columns">
+        <div class="priority-column">
+            {priority_col1}
+        </div>
+        <div class="priority-column">
+            {priority_col2}
+        </div>
+    </div>
+    '''
+    else:
+        priority_html = priority_col1
     
     # Critical alert HTML
     critical_alert_html = ""
@@ -144,8 +164,13 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         current_class = "class='current'" if is_current else ""
         scoring_table_html += f"<tr {current_class}><td>{range_str}</td><td>{level}</td><td>{meaning}</td></tr>"
     
-    # Company header info
-    company_section = f"Company: {company_name}<br>" if company_name else ""
+    # Company header info with increased font size
+    company_section = f"<div class='company-name'>{company_name}</div><div>Date: {assessment_date}</div>" if company_name else f"<div>Date: {assessment_date}</div>"
+    
+    # Logo HTML
+    logo_html = ""
+    if company_logo_b64:
+        logo_html = f'<img src="data:image/png;base64,{company_logo_b64}" alt="Company Logo" class="header-logo">'
     
     # Build final HTML
     html = f"""<!DOCTYPE html>
@@ -190,6 +215,11 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             margin-bottom: 1.5rem;
             border-bottom: 2px solid {primary_color};
             padding-bottom: 1rem;
+            gap: 1rem;
+        }}
+        
+        .header-left {{
+            flex: 1;
         }}
         
         .header-left h1 {{
@@ -204,10 +234,28 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             color: #6B7280;
         }}
         
-        .header-right {{
-            text-align: right;
+        .header-center {{
+            flex: 1;
             font-size: 10px;
             color: #6B7280;
+            text-align: left;
+        }}
+        
+        .company-name {{
+            font-size: 14px;
+            font-weight: bold;
+            color: #1F2937;
+            margin-bottom: 0.3rem;
+        }}
+        
+        .header-right {{
+            text-align: right;
+        }}
+        
+        .header-logo {{
+            max-width: 100px;
+            max-height: 60px;
+            object-fit: contain;
         }}
         
         .metrics-box {{
@@ -371,12 +419,24 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             margin-bottom: 0.2rem;
         }}
         
+        .priority-columns {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }}
+        
+        .priority-column {{
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }}
+        
         .priority-box {{
             background-color: #F0F9FF;
             border: 1px solid #BAE6FD;
             border-radius: 4px;
             padding: 0.6rem;
-            margin-bottom: 0.8rem;
             font-size: 10px;
         }}
         
@@ -450,10 +510,11 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
             <h1>AI Readiness Assessment</h1>
             <p>Results Report</p>
         </div>
-        <div class="header-right">
-            <strong>T-Logic Consulting</strong><br>
-            Date: {assessment_date}<br>
+        <div class="header-center">
             {company_section}
+        </div>
+        <div class="header-right">
+            {logo_html}
         </div>
     </div>
     
@@ -504,13 +565,20 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     </div>
     
     <div class="footer">
-        Page 1 of 2 | AI Process Readiness Assessment | T-Logic Consulting
+        Page 1 of 2 | AI Process Readiness Assessment
     </div>
 </div>
 
 <!-- PAGE 2: RECOMMENDATIONS & ACTION PLAN -->
 <div class="report page-break">
-    <h2>Recommendations & Action Plan</h2>
+    <div class="header">
+        <div class="header-left">
+            <h1>Recommendations & Action Plan</h1>
+        </div>
+        <div class="header-right">
+            {logo_html}
+        </div>
+    </div>
     
     <!-- Dimension-by-Dimension -->
     {dimension_cards_html}
@@ -544,7 +612,7 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     </div>
     
     <div class="footer">
-        Page 2 of 2 | AI Process Readiness Assessment | T-Logic Consulting
+        Page 2 of 2 | AI Process Readiness Assessment
     </div>
 </div>
 
