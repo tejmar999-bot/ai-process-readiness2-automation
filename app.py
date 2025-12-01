@@ -467,7 +467,7 @@ def render_progress_bar():
             <div class="header-content-row">
                 <div class="title-description">
                     <div>
-                        <span style="color: {bright_color}; font-size: 2rem; font-weight: 700;">{dimension["title"]}</span>
+                        <span style="color: {bright_color}; font-size: 2rem; font-weight: 700;">{dimension["title"]}{' <span style="color: {bright_color}; font-size: 2rem; font-weight: 700;">*</span>' if dimension.get('critical', False) else ''}</span>
                     </div>
                     <span style="color: #D1D5DB; font-size: 1.05rem; font-style: italic;"> - {dimension["what_it_measures"]}</span>
                 </div>
