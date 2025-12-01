@@ -46,13 +46,13 @@ INDUSTRY_BENCHMARKS = {
         'description': 'Technology-first companies with advanced AI capabilities and mature practices'
     },
     'Industry Average': {
-        'process': 11.1,
+        'process': 10.8,
         'tech': 10.5,
         'data': 10.2,
-        'people': 11.5,
+        'people': 11.1,
         'leadership': 9.6,
         'change': 9.2,
-        'total': 62.1,
+        'total': 61.4,
         'description': 'Overall average across all industries and company sizes'
     }
 }
@@ -143,10 +143,10 @@ def get_moving_average_benchmark():
             total += score
         
         return {
-            'process': benchmark_dict.get('process', 11.1),
+            'process': benchmark_dict.get('process', 10.8),
             'tech': benchmark_dict.get('tech', 10.5),
             'data': benchmark_dict.get('data', 10.2),
-            'people': benchmark_dict.get('people', 11.5),
+            'people': benchmark_dict.get('people', 11.1),
             'leadership': benchmark_dict.get('leadership', 9.6),
             'change': benchmark_dict.get('change', 9.2),
             'total': round(total, 1),
@@ -156,12 +156,12 @@ def get_moving_average_benchmark():
         print(f"Error fetching moving average benchmark: {e}")
         # Return default baseline on error
         return {
-            'process': 11.1,
+            'process': 10.8,
             'tech': 10.5,
             'data': 10.2,
-            'people': 11.5,
+            'people': 11.1,
             'leadership': 9.6,
             'change': 9.2,
-            'total': 62.1,
+            'total': 61.4,
             'description': 'Default baseline (moving average unavailable)'
         }
