@@ -163,3 +163,69 @@ def get_critical_dimension_status(data_readiness, leadership):
             'color': '#10B981',
             'severity': 'info'
         }
+
+
+def generate_executive_summary(scores_data):
+    """
+    Generate executive summary text based on assessment scores.
+    
+    Args:
+        scores_data: Dictionary with scores, readiness band, and critical status
+    
+    Returns:
+        String with executive summary
+    """
+    raw_scores = scores_data['raw_dimension_scores']
+    total_score = scores_data['total']
+    readiness_band = scores_data['readiness_band']
+    critical_status = scores_data['critical_status']
+    
+    # Dimension names
+    dimension_names = ['Process Maturity', 'Technology Infrastructure', 'Data Readiness', 'People & Culture', 'Leadership & Alignment', 'Governance & Risk']
+    
+    # Identify strong and weak dimensions
+    avg_score = sum(raw_scores) / len(raw_scores)
+    strong_dims = [dimension_names[i] for i, score in enumerate(raw_scores) if score > avg_score + 1]
+    weak_dims = [dimension_names[i] for i, score in enumerate(raw_scores) if score < avg_score - 1]
+    
+    # Build summary based on readiness level
+    if readiness_band['label'].startswith('🟢'):
+        # AI-Ready
+        strengths = f"Across the board, your organization shows strong capabilities. Your {', '.join(strong_dims) if strong_dims else 'key dimensions'} are particularly well-developed."
+        next_steps = "Begin strategic pilots with confidence. Select 1-2 high-value use cases, establish clear success metrics, and launch pilots to demonstrate AI's business impact."
+    elif readiness_band['label'].startswith('🔵'):
+        # Building Blocks
+        if weak_dims:
+            weak_list = ', '.join(weak_dims)
+            strengths = f"You have foundational elements in place. Focus on strengthening {weak_list} over the next 3-6 months to accelerate your AI readiness."
+        else:
+            strengths = "You have foundational elements in place with good balance across dimensions."
+        next_steps = "Build on your foundation by addressing identified gaps. Plan targeted improvements for the next 3-6 months, then reassess before scaling."
+    elif readiness_band['label'].startswith('🟡'):
+        # Foundational Gaps
+        if weak_dims:
+            weak_list = ', '.join(weak_dims[:2])  # Show top 2
+            strengths = f"Significant foundational work is needed. Weak areas include {weak_list}. Focus on business fundamentals rather than AI implementation at this time."
+        else:
+            strengths = "Significant foundational work is needed across multiple dimensions. Focus on business fundamentals rather than AI implementation at this time."
+        next_steps = "Invest 9-12 months improving your core operations, data quality, and organizational alignment. Build a strong foundation before pursuing AI initiatives."
+    else:
+        # Not Ready
+        strengths = "Your organization needs foundational improvements across multiple areas before AI can deliver meaningful value."
+        next_steps = "Focus on core operations, process optimization, and data infrastructure first. Plan for 12-18 months of foundational work before reconsidering AI initiatives."
+    
+    # Critical dimension note
+    critical_note = ""
+    if critical_status['severity'] == 'critical':
+        critical_note = f"<strong>Important: {critical_status['icon']} Both critical dimensions are below threshold.</strong> {critical_status['message'].split('Address')[1].strip() if 'Address' in critical_status['message'] else ''} Proceed with caution—do not scale AI initiatives until these are addressed, regardless of overall score."
+    elif critical_status['severity'] == 'warning':
+        critical_note = f"<strong>Caution: {critical_status['icon']} One critical dimension needs attention.</strong> {critical_status['message'].split('This')[1].strip() if 'This' in critical_status['message'] else ''} Address this before scaling, despite your overall score."
+    
+    # Combine everything
+    summary = f"{strengths} {next_steps}"
+    if critical_note:
+        summary += f" {critical_note}"
+    
+    summary += " For more detailed recommendations on each dimension, please see below. As always, feel free to reach out to us for any assistance!"
+    
+    return summary

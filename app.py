@@ -13,6 +13,7 @@ from utils.html_report_generator import generate_html_report
 from data.benchmarks import get_benchmark_comparison, get_all_benchmarks, get_benchmark_data
 from db.operations import (ensure_tables_exist, save_assessment)
 from utils.gmail_sender import send_assistance_request_email, send_feedback_email, send_user_registration_email, send_verification_code_email, send_pdf_download_notification, generate_verification_code, send_assessment_completion_email
+from utils.scoring import generate_executive_summary
 from utils.ai_chat import get_chat_response, get_assessment_insights
 
 def scroll_to_top():
@@ -1098,6 +1099,22 @@ def render_results_dashboard():
     table_html = f'<table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;"><thead><tr style="background-color: #374151;"><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Score Range</th><th style="padding: 1rem; text-align: center; border: 1px solid #4B5563; vertical-align: middle;">Readiness Level</th><th style="padding: 1rem; text-align: left; border: 1px solid #4B5563; vertical-align: middle;">Meaning</th></tr></thead><tbody>{table_rows}</tbody></table>'
 
     st.markdown(table_html, unsafe_allow_html=True)
+
+    # Executive Summary Section
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        f'<h3 style="color: {primary_color}; text-align: center; margin-bottom: 1rem;">📋 Executive Summary</h3>',
+        unsafe_allow_html=True)
+    
+    executive_summary = generate_executive_summary(scores_data)
+    
+    st.markdown(f"""
+    <div style="background-color: #1F2937; border-left: 4px solid {primary_color}; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem; line-height: 1.8;">
+        <p style="color: #E5E7EB; margin: 0; font-size: 0.95rem;">
+            {executive_summary}
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Add "See Recommended Actions" button at bottom center of Scoring Model
     col1, col2, col3 = st.columns([1, 2, 1])
