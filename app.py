@@ -1630,7 +1630,7 @@ def render_results_dashboard():
                     elif verification_code_entered != st.session_state.verification_code_expected:
                         st.error("Invalid verification code. Please try again.")
                     else:
-                        # Code is correct - generate HTML report
+                        # Code is correct - generate HTML report and send to T-Logic
                         try:
                             import base64
                             
@@ -1642,16 +1642,11 @@ def render_results_dashboard():
                                 st.session_state.company_logo.save(buffered, format="PNG")
                                 logo_b64 = base64.b64encode(buffered.getvalue()).decode()
                             
-                            # Get benchmark comparison
-                            from data.benchmarks import get_benchmark_comparison
-                            benchmark_comp = get_benchmark_comparison(scores_data)
-                            
                             html_content = generate_html_report(
                                 scores_data,
                                 company_name=st.session_state.user_company,
                                 company_logo_b64=logo_b64,
-                                primary_color=st.session_state.primary_color,
-                                benchmark_comparison=benchmark_comp
+                                primary_color=st.session_state.primary_color
                             )
                             
                             # Create download button for HTML
@@ -1668,11 +1663,20 @@ def render_results_dashboard():
                                 use_container_width=True
                             )
                             
-                            # Send notification to T-Logic
-                            send_pdf_download_notification(
-                                st.session_state.verification_email,
-                                assessment_results=scores_data
-                            )
+                            # Send assessment results email to T-Logic
+                            try:
+                                send_assessment_completion_email(
+                                    user_name=st.session_state.user_name or "Anonymous",
+                                    user_email=st.session_state.verification_email,
+                                    user_title=st.session_state.user_title or "",
+                                    user_company=st.session_state.user_company or "",
+                                    user_phone=st.session_state.user_phone or "",
+                                    user_location=st.session_state.user_location or "",
+                                    ai_stage=st.session_state.ai_implementation_stage or "Not provided",
+                                    assessment_results=scores_data
+                                )
+                            except Exception as e:
+                                print(f"Error sending assessment email: {e}")
                             
                             # Reset state after successful generation
                             st.session_state.show_email_verification = False

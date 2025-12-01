@@ -1,0 +1,179 @@
+I need to create a downloadable HTML report (not PDF) that summarizes the assessment results in a clean, printable format. The report should be 2 pages maximum and optimized for printing in color.
+
+REPORT STRUCTURE:
+
+PAGE 1: EXECUTIVE SUMMARY
+========================
+
+Header:
+- T-Logic Consulting logo (top right)
+- Title: "AI Readiness Assessment Results"
+- Assessment Date: [Date]
+- Company: [Name if available]
+
+Key Metrics Section (3 boxes side-by-side):
+- Box 1: Total Score: X/90 (Y%)
+- Box 2: Readiness Level: [Level] [Emoji]
+- Box 3: Average Score: X/15
+
+Critical Dimension Alert (if applicable):
+- Prominent warning box (orange/yellow background)
+- Show ⚠️ WARNING or 🛑 STOP icon based on critical dimension status
+- Message text explaining which critical dimension(s) are below threshold
+
+Scoring Model Reference Table:
+- 4 rows showing score ranges, readiness levels, and meanings
+- Highlight the current readiness level row
+
+Dimension Scores Visual:
+- Horizontal bar chart showing all 6 dimensions (X/15)
+- Mark critical dimensions (Data Readiness, Leadership) with ⭐
+- Color code bars: Red (<7), Orange (7-9), Green (10-12), Dark Green (13-15)
+
+Executive Summary:
+- 3-4 sentence paragraph summarizing overall readiness
+- Key finding about strongest areas and gaps
+- Critical dimension status summary
+
+---
+
+PAGE 2: RECOMMENDATIONS & ACTION PLAN
+=====================================
+
+Dimension-by-Dimension Analysis:
+For each of 6 dimensions, show:
+- Dimension name with icon
+- Score: X/15 (Y%)
+- Status assessment (one sentence)
+- Top 2-3 specific recommendations (bullet points)
+- Use compact cards/sections to fit all 6
+
+Priority Action Items:
+- Extract top 3-4 most critical recommendations
+- Number as Priority 1, 2, 3, 4
+- Include timeline estimate for each
+- Focus on critical dimension gaps first
+
+Timeline Roadmap:
+- 30-day actions
+- 90-day actions  
+- 6-month goals
+
+Call-to-Action Footer:
+- "Let's Discuss Your AI Journey" heading
+- Brief text about consultation offer
+- Contact information or booking link
+- Professional but inviting tone
+
+---
+
+DESIGN SPECIFICATIONS:
+
+1. USE LIGHT THEME FOR PRINTABILITY:
+   - White or light gray (#F9FAFB) background
+   - Dark text (#1F2937) for body content
+   - Orange (#F97316) for headers and accents (keep brand color)
+   - Use your current color scheme for status indicators
+
+2. TYPOGRAPHY:
+   - Headers: 18-24px, bold
+   - Subheaders: 14-16px, semi-bold
+   - Body text: 11-12px (smaller for print)
+   - Use system fonts (Arial, Helvetica, or similar)
+
+3. LAYOUT:
+   - Max width: 8.5" (letter size)
+   - Margins: 0.5" on all sides
+   - Add CSS for page break between page 1 and 2:
+     .page-break { page-break-after: always; }
+
+4. PRINT OPTIMIZATION:
+   - Add @media print CSS rules
+   - Remove background colors for large areas (use borders instead)
+   - Ensure all text is readable in grayscale
+   - Add "Page X of 2" footer on each page
+
+5. COMPONENTS TO INCLUDE:
+   - Same content as current results screen
+   - Condense to fit 2 pages
+   - Prioritize critical information
+   - Remove redundant elements
+
+6. DOWNLOAD FUNCTIONALITY:
+   - Generate HTML file with inline CSS (no external dependencies)
+   - Filename: "AI_Readiness_Assessment_Report_[Date].html"
+   - User clicks "Download Report" button
+   - File opens in browser, can be printed or saved
+
+---
+
+CONTENT TO PULL FROM CURRENT RESULTS:
+
+From Image 1 (Assessment Results):
+- Total Score, Readiness Level, Average Score
+- Critical dimension warning box
+
+From Image 2 (Scoring Model & Executive Summary):
+- Scoring model table
+- Executive summary paragraph
+
+From Image 3 (Dimension Breakdown):
+- Radar chart OR convert to horizontal bar chart (better for print)
+- All 6 dimension scores
+
+From Image 4 (Industry Benchmark):
+- SKIP THIS - not essential for individual report
+- Can mention "compared to industry average" in executive summary
+
+From Image 5 (Detailed Comparison):
+- SKIP THIS - too detailed for 2-page summary
+
+From Images 6-9 (Recommended Actions):
+- All 6 dimension recommendations
+- Condense each dimension card to fit page 2
+
+From Image 10 (CTA):
+- Include at bottom of page 2
+- Contact information and consultation offer
+
+---
+
+TECHNICAL REQUIREMENTS:
+
+1. Create a new function: generate_html_report()
+2. Use template string with all HTML/CSS inline
+3. Include current assessment data (scores, recommendations, etc.)
+4. Add download button on results page: "📄 Download Report"
+5. When clicked, trigger file download of generated HTML
+6. HTML should be standalone (no external CSS/JS files)
+7. Optimized for Chrome/Firefox/Safari print functionality
+
+EXAMPLE DOWNLOAD BUTTON CODE:
+```python
+# In your Flask route or component:
+@app.route('/download_report/<assessment_id>')
+def download_report(assessment_id):
+    # Get assessment data
+    assessment = get_assessment_data(assessment_id)
+    
+    # Generate HTML report
+    html_content = generate_html_report(assessment)
+    
+    # Return as downloadable file
+    return Response(
+        html_content,
+        mimetype='text/html',
+        headers={
+            'Content-Disposition': f'attachment; filename=AI_Readiness_Report_{assessment_id}.html'
+        }
+    )
+```
+
+PRIORITY ORDER:
+1. Generate clean 2-page HTML structure with inline CSS
+2. Pull all data from current assessment results
+3. Optimize layout for printing (light theme, proper spacing)
+4. Add download functionality
+5. Test print preview to ensure 2-page limit
+
+The report should look professional enough to present to executives while being concise enough to print and review in 5 minutes.

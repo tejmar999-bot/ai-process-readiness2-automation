@@ -1,656 +1,535 @@
 """
-HTML/Text report generator for T-Logic AI-Enabled Process Readiness results.
-Generates a professional, printable HTML report with company branding.
+2-page HTML report generator for AI Process Readiness Assessment.
+Light theme, print-optimized with professional layout.
 """
 from datetime import datetime
+from utils.scoring import generate_executive_summary
 
-# Recommendations map for each dimension
-RECOMMENDATIONS_MAP = {
-    'process': [
-        "Document and standardize critical business processes with clear workflows and performance metrics",
-        "Implement regular process monitoring and variation analysis to identify optimization opportunities",
-        "Establish a continuous improvement culture with data-driven decision making",
-        "Create process maps that highlight where AI could deliver the most impact"
-    ],
-    'data': [
-        "Digitize manual data collection processes and eliminate paper-based workflows",
-        "Implement data quality frameworks including cleaning, validation, and integration protocols",
-        "Build historical data repositories with proper governance and accessibility controls",
-        "Ensure data is structured and labeled appropriately for AI model training",
-        "Address any data silos by creating unified data access layers"
-    ],
-    'tech': [
-        "Develop API-first infrastructure to enable seamless AI integration",
-        "Invest in secure cloud or hybrid systems with scalability in mind",
-        "Establish AI experimentation platforms or sandboxes for safe testing",
-        "Ensure robust cybersecurity measures are in place before AI deployment",
-        "Evaluate and select AI/ML platforms aligned with your use cases"
-    ],
-    'people': [
-        "Launch AI literacy and awareness programs across all organizational levels",
-        "Provide hands-on training in data-driven decision making and AI tools",
-        "Identify and empower AI champions who can drive adoption within teams",
-        "Create cross-functional teams to bridge technical and business expertise",
-        "Develop clear career paths that reward AI skill development"
-    ],
-    'leadership': [
-        "Integrate AI into strategic planning with clear business objectives and ROI expectations",
-        "Secure executive sponsorship and dedicated funding for AI pilots and initiatives",
-        "Align AI goals with measurable business outcomes and KPIs",
-        "Establish governance frameworks for ethical AI use and risk management",
-        "Communicate a compelling AI vision that connects to organizational mission"
-    ],
-    'governance': [
-        "Establish formal governance structures for AI decision-making and oversight",
-        "Develop comprehensive AI risk assessment and mitigation frameworks",
-        "Create and enforce compliance guardrails throughout AI processes",
-        "Define clear roles and responsibilities for AI initiatives",
-        "Implement continuous monitoring and auditing of AI systems"
-    ]
-}
-
-
-def build_recommendations_html(dimension_names, dimension_scores, benchmark_comparison):
+def generate_html_report(scores_data, company_name="", company_logo_b64=None, primary_color="#F97316", assessment_date=None):
     """
-    Build dynamic recommendations based on scores and benchmarks.
-    Shows recommendations for scores < 3.0 or < benchmark.
-    Shows encouraging words for scores > 3.0 AND > benchmark.
-    """
-    dimension_ids = ['process', 'tech', 'data', 'people', 'leadership', 'governance']
-    recommendations_list = []
-    
-    for i, (name, score) in enumerate(zip(dimension_names, dimension_scores)):
-        dim_id = dimension_ids[i] if i < len(dimension_ids) else None
-        score = float(score) if score else 0.0
-        
-        # Get benchmark score for this dimension
-        bench_score = 0.0
-        if benchmark_comparison:
-            for dim in benchmark_comparison.get('dimensions', []):
-                if dim.get('title') == name or dim.get('id') == dim_id:
-                    bench_score = float(dim.get('benchmark_score', 0))
-                    break
-        
-        # Logic: show recommendations if score < 3.0 OR score < benchmark
-        if score < 3.0 or score < bench_score:
-            if dim_id is not None:
-                recs = RECOMMENDATIONS_MAP.get(dim_id, [])
-                if recs:
-                    recommendations_list.append(f"<strong>{name}:</strong>")
-                    for rec in recs[:3]:  # Limit to first 3 recommendations
-                        recommendations_list.append(f"<li>{rec}</li>")
-        # Show encouraging words for strong dimensions
-        elif score > 3.0 and score > bench_score:
-            recommendations_list.append(f"<li><strong>{name}:</strong> Excellent work! Your strong performance here positions you well for AI adoption. Keep this momentum going.</li>")
-    
-    # Build HTML
-    if not recommendations_list:
-        recommendations_list = ["<li>Continue building on your current strengths across all dimensions</li>"]
-    
-    recommendations_html = "<ul style='margin-bottom: 20px;'>" + "".join([f"<li>{item}</li>" if not item.startswith("<li>") else item for item in recommendations_list]) + "</ul>"
-    return recommendations_html
-
-
-def generate_html_report(
-    results: dict,
-    company_name: str = "Your Company",
-    company_logo_b64=None,
-    primary_color: str = "#BF6A16",
-    benchmark_comparison=None
-) -> str:
-    """
-    Generate a professional HTML report that can be printed or saved as PDF.
+    Generate a professional 2-page HTML report optimized for printing.
     
     Args:
-        results: Dictionary with assessment results from compute_scores
-        company_name: Company name for branding
-        company_logo_b64: Optional base64-encoded company logo
+        scores_data: Dictionary with assessment scores
+        company_name: Company name
+        company_logo_b64: Base64 encoded company logo
         primary_color: Primary brand color
-        
+        assessment_date: Date of assessment
+    
     Returns:
-        HTML string that can be downloaded
+        HTML string for the report
     """
     
-    # Use "Your Company" as default if company_name is empty
-    if not company_name or company_name.strip() == "":
-        company_name = "Your Company"
+    if not assessment_date:
+        assessment_date = datetime.now().strftime("%B %d, %Y")
     
-    # Extract data with safe type conversion
-    try:
-        overall_score = float(results.get('total', 0) or 0)
-    except:
-        overall_score = 0.0
+    # Extract data
+    total_score = scores_data.get('total', 0)
+    percentage = scores_data.get('percentage', 0)
+    readiness_band = scores_data.get('readiness_band', {})
+    critical_status = scores_data.get('critical_status', {})
+    raw_scores = scores_data.get('raw_dimension_scores', [])
+    avg_score = round(total_score / 6, 1)
     
-    try:
-        percentage = int(results.get('percentage', 0) or 0)
-    except:
-        percentage = 0
+    # Dimension info
+    dimension_names = ['Process Maturity', 'Technology Infrastructure', 'Data Readiness', 'People & Culture', 'Leadership & Alignment', 'Governance & Risk']
+    dimension_icons = ['⚙️', '💻', '📊', '👥', '🎯', '⚖️']
+    critical_dims = [2, 4]  # Data Readiness (2) and Leadership (4)
     
-    readiness_band = results.get('readiness_band', {})
-    readiness_label = readiness_band.get('label', 'Foundational')
-    readiness_color = readiness_band.get('color', '#999999')
+    # Get color for score
+    def get_score_color(score):
+        if score < 7:
+            return "#DC2626"  # Red
+        elif score < 9:
+            return "#F97316"  # Orange
+        elif score < 12:
+            return "#10B981"  # Green
+        else:
+            return "#059669"  # Dark Green
     
-    # Dimension scores as list - convert all to floats
-    raw_scores = results.get('dimension_scores', [])
-    dimension_scores_list = []
-    for score in raw_scores:
-        try:
-            if isinstance(score, dict):
-                dimension_scores_list.append(float(score.get('score', 0) or 0))
-            else:
-                dimension_scores_list.append(float(score) if score else 0.0)
-        except (TypeError, ValueError):
-            dimension_scores_list.append(0.0)
+    # Executive summary
+    exec_summary = generate_executive_summary(scores_data)
     
-    dimension_names = [
-        "Process Maturity",
-        "Technology Infrastructure",
-        "Data Readiness",
-        "People & Culture",
-        "Leadership & Alignment",
-        "Governance & Risk"
-    ]
-    
-    # Color mapping for dimensions
-    dimension_colors = {
-        "Process Maturity": "#DFA5A0",
-        "Technology Infrastructure": "#FDD9B8",
-        "Data Readiness": "#FFFB4B",
-        "People & Culture": "#B9F0C9",
-        "Leadership & Alignment": "#B3E5FC",
-        "Governance & Risk": "#D7BDE2",
+    # Build recommendations by dimension
+    recommendations = {
+        0: ["Document and standardize critical business processes", "Implement process monitoring and KPI tracking", "Establish continuous improvement culture with data-driven decisions"],
+        1: ["Develop API-first infrastructure for AI integration", "Invest in secure cloud systems with scalability", "Establish AI experimentation platforms"],
+        2: ["Implement data quality frameworks and governance", "Build historical data repositories", "Create unified data access layers"],
+        3: ["Launch AI literacy programs across organization", "Provide hands-on training in data-driven decision making", "Identify and empower AI champions"],
+        4: ["Integrate AI into strategic planning with clear objectives", "Secure executive sponsorship and dedicated funding", "Align AI goals with measurable business outcomes"],
+        5: ["Establish formal AI governance structures", "Develop AI risk assessment frameworks", "Implement continuous monitoring of AI systems"]
     }
     
-    current_date = datetime.now().strftime("%B %d, %Y")
+    # Priority actions - focus on weak dimensions
+    priority_actions = []
+    for i, score in enumerate(raw_scores):
+        if score < 9:
+            priority_actions.append({
+                'dimension': dimension_names[i],
+                'score': score,
+                'action': recommendations[i][0],
+                'timeline': '90 days' if score < 6 else '60 days'
+            })
     
-    logo_html = ""
-    if company_logo_b64:
-        logo_html = '<img src="data:image/png;base64,' + company_logo_b64 + '" alt="Logo" style="height: 60px; width: auto;">'
+    priority_actions = sorted(priority_actions, key=lambda x: x['score'])[:4]
     
-    # Build dimension items HTML
-    dimension_items_html = ""
-    for name, score in zip(dimension_names, dimension_scores_list):
-        color = dimension_colors.get(name, '#999')
-        score = float(score) if score else 0.0
-        percentage_val = int((score / 5.0) * 100)
-        dimension_items_html += '''
-            <div class="dimension-item" style="border-color: {0};">
-                <div class="dimension-name">{1}</div>
-                <div class="dimension-score">
-                    <span class="score-text">{2:.1f} / 5.0</span>
-                    <div class="score-bar">
-                        <div class="score-fill" style="width: {3}%; background-color: {4};"></div>
-                    </div>
-                    <span class="score-text" style="text-align: right; min-width: 40px;">{3}%</span>
-                </div>
-            </div>
-            '''.format(color, name, score, percentage_val, color)
-    
-    # Build benchmark table HTML
-    benchmark_table_html = ""
-    benchmark_title = ""
-    if benchmark_comparison:
-        your_total = benchmark_comparison.get('your_total', overall_score)
-        benchmark_total = benchmark_comparison.get('benchmark_total', 18.4)
-        benchmark_title = f"Your Scores vs. Benchmark Scores ({your_total:.1f} vs. Benchmark of {benchmark_total:.1f} overall)"
-        
-        benchmark_table_html = '<table style="background-color: #f0f0f0; font-size: 0.8em; margin: 0;"><thead><tr><th style="background-color: #e0e0e0; color: black; padding: 6px;">Dimension</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Your Score</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Benchmark</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Difference</th><th style="background-color: #e0e0e0; color: black; padding: 6px;">Status</th></tr></thead><tbody>'
-        
-        for dim in benchmark_comparison.get('dimensions', []):
-            your_score = dim.get('your_score', 0)
-            bench_score = dim.get('benchmark_score', 0)
-            diff = dim.get('difference', 0)
-            
-            # Status icons and colors based on difference
-            if diff < 0:
-                status = "⚠️"
-                color = '#DC2626'
-            elif diff == 0 or (diff > -0.2 and diff < 0.2):
-                status = "✓"
-                color = 'black'
-            else:
-                status = "✅"
-                color = '#16A34A'
-            
-            benchmark_table_html += f'<tr style="background-color: #f9f9f9; color: black;"><td style="color: black; padding: 5px;">{dim.get("title", "")}</td><td style="color: black; font-weight: bold; padding: 5px;">{your_score:.1f}/5</td><td style="color: black; padding: 5px;">{bench_score:.1f}/5</td><td style="color: {color}; font-weight: bold; padding: 5px;">{diff:+.1f}</td><td style="color: {color}; text-align: center; font-weight: bold; padding: 5px;">{status}</td></tr>'
-        
-        benchmark_table_html += '</tbody></table>'
-    
-    # Build dynamic recommendations based on scores and benchmarks
-    recommendations_html = build_recommendations_html(dimension_names, dimension_scores_list, benchmark_comparison)
-    
-    # Build dimension table rows HTML (no longer used but kept for compatibility)
-    dimension_table_rows = ""
-    for name, score in zip(dimension_names, dimension_scores_list):
-        color = dimension_colors.get(name, '#999')
-        score = float(score) if score else 0.0
-        status = "✅ Strong" if score >= 4 else "✓ Good" if score >= 3 else "⚠ Needs Work"
-        dimension_table_rows += '''
-                    <tr>
-                        <td>{0}</td>
-                        <td style="font-weight: bold; color: {1};">{2:.1f} / 5.0</td>
-                        <td>{3}</td>
-                    </tr>
-                    '''.format(name, color, score, status)
-    
-    html = '''<!DOCTYPE html>
-<html>
+    # Build HTML
+    html = f"""
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Process Readiness Assessment Report</title>
+    <title>AI Readiness Assessment Report</title>
     <style>
-        * {
+        * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
+        }}
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
+        body {{
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #F9FAFB;
+            color: #1F2937;
             line-height: 1.6;
-            background: white;
-        }
+        }}
         
-        @page {
-            size: A4;
-            margin: 1cm;
-        }
-        
-        @media print {
-            body { margin: 0; padding: 0; }
-            .page { page-break-after: always; margin: 0; padding: 2cm 1.5cm; }
-            .page:last-child { page-break-after: avoid; }
-        }
-        
-        .page {
-            width: 8.5in;
+        .report {{
+            max-width: 8.5in;
             height: 11in;
-            margin: 0 auto;
-            padding: 0.75in;
-            background: white;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 0.5in auto;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0.5in;
             page-break-after: always;
-        }
+        }}
         
-        .page-header {
+        .page-break {{
+            page-break-after: always;
+            clear: both;
+        }}
+        
+        .header {{
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 3px solid {primary_color};
-            margin-bottom: 30px;
-            background-color: #4B5563;
-        }
-        
-        .header-left {
-            flex: 1;
-        }
-        
-        .header-right {
-            flex: 0 0 80px;
-            text-align: right;
-        }
-        
-        .page-footer {
-            position: absolute;
-            bottom: 0.5in;
-            left: 0.75in;
-            right: 0.75in;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            font-size: 0.85em;
-            color: #666;
-        }
-        
-        .page-number {
-            text-align: right;
-        }
-        
-        .company-info {
-            font-size: 0.9em;
-            text-align: center;
-            color: #666;
-        }
-        
-        h1 {
-            color: #FF8C00;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        h2 {
-            color: {primary_color};
-            font-size: 18px;
-            margin-top: 15px;
-            margin-bottom: 10px;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
             border-bottom: 2px solid {primary_color};
-            padding-bottom: 8px;
-        }
+            padding-bottom: 1rem;
+        }}
         
-        h3 {
-            color: {primary_color};
-            font-size: 16px;
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .score-box {
-            background: linear-gradient(135deg, {primary_color}15, {primary_color}05);
-            border-left: 4px solid {primary_color};
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        
-        .score-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .score-card {
-            background: #f8f8f8;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 4px;
-            text-align: center;
-        }
-        
-        .score-card-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .score-card-value {
+        .header-left h1 {{
             font-size: 24px;
             font-weight: bold;
             color: {primary_color};
-        }
+            margin-bottom: 0.3rem;
+        }}
         
-        .score-card-sublabel {
-            font-size: 0.85em;
-            color: {readiness_color};
-            margin-top: 5px;
-        }
+        .header-left p {{
+            font-size: 11px;
+            color: #6B7280;
+        }}
         
-        .dimension-item {
-            margin: 2px 0;
-            padding: 2px 10px;
-            background: #f9f9f9;
-            border-left: 16px solid;
-            border-radius: 2px;
-            transform: scale(0.765);
-            transform-origin: left;
-        }
+        .header-right {{
+            text-align: right;
+            font-size: 10px;
+            color: #6B7280;
+        }}
         
-        .report-subtitle {
-            font-size: 14px;
-            font-weight: normal;
-            color: #E5E7EB;
-            margin-top: 5px;
-            margin-bottom: 0;
-        }
-        
-        .dimension-name {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 3px;
-            font-size: 1.05em;
-        }
-        
-        .dimension-score {
+        .metrics-box {{
             display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
             justify-content: space-between;
-            align-items: center;
-        }
+        }}
         
-        .score-text {
-            font-size: 0.95em;
-            font-weight: 500;
-        }
-        
-        .score-bar {
+        .metric-item {{
             flex: 1;
-            height: 12px;
-            background: #e0e0e0;
+            border: 1px solid #E5E7EB;
+            padding: 1rem;
             border-radius: 6px;
-            margin: 0 4px;
-            overflow: hidden;
-        }
+            text-align: center;
+            background-color: #F9FAFB;
+        }}
         
-        .score-fill {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
+        .metric-item h3 {{
+            font-size: 11px;
+            color: #6B7280;
+            margin-bottom: 0.3rem;
+            font-weight: normal;
+        }}
         
-        .readiness-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: {readiness_color};
-            color: white;
-            border-radius: 4px;
+        .metric-item .value {{
+            font-size: 20px;
             font-weight: bold;
-            font-size: 0.95em;
-        }
-        
-        .readiness-description {
-            color: #666;
-            font-size: 0.95em;
-            margin-top: 8px;
-            font-style: italic;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-            font-size: 0.9em;
-        }
-        
-        th {
-            background-color: {primary_color}20;
-            border-bottom: 2px solid {primary_color};
-            padding: 10px;
-            text-align: left;
             color: {primary_color};
+        }}
+        
+        .critical-alert {{
+            background-color: {('#FEF3C7' if critical_status.get('severity') == 'warning' else '#FEE2E2')};
+            border-left: 4px solid {('#F59E0B' if critical_status.get('severity') == 'warning' else '#DC2626')};
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 11px;
+            line-height: 1.5;
+        }}
+        
+        .critical-alert strong {{
+            display: block;
+            margin-bottom: 0.3rem;
+            font-size: 12px;
+        }}
+        
+        .scoring-table {{
+            width: 100%;
+            font-size: 10px;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }}
+        
+        .scoring-table th {{
+            background-color: #E5E7EB;
+            padding: 0.5rem;
+            text-align: left;
+            font-weight: bold;
+        }}
+        
+        .scoring-table td {{
+            padding: 0.5rem;
+            border-bottom: 1px solid #E5E7EB;
+        }}
+        
+        .scoring-table tr.current {{
+            background-color: #FEF3C7;
+            font-weight: bold;
+        }}
+        
+        .dimension-bars {{
+            margin-bottom: 1.5rem;
+        }}
+        
+        .bar-item {{
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.7rem;
+            gap: 0.5rem;
+        }}
+        
+        .bar-label {{
+            font-size: 11px;
+            width: 35%;
             font-weight: 600;
-        }
+        }}
         
-        td {
-            border-bottom: 1px solid #e0e0e0;
-            padding: 10px;
-        }
+        .bar-container {{
+            flex: 1;
+            height: 20px;
+            background-color: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }}
         
-        tr:hover {
-            background-color: #f5f5f5;
-        }
+        .bar-fill {{
+            height: 100%;
+            background-color: #10B981;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.3rem;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+        }}
         
-        .content {
-            height: auto;
-            padding-bottom: 40px;
-        }
+        .bar-star {{
+            margin-left: 0.3rem;
+            font-size: 14px;
+        }}
         
-        .page-1 .content {
-            height: auto;
-        }
+        .exec-summary {{
+            font-size: 12px;
+            font-style: italic;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 1rem;
+        }}
         
-        ul {
-            margin-left: 20px;
-        }
+        h2 {{
+            font-size: 18px;
+            font-weight: bold;
+            color: {primary_color};
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 0.5rem;
+        }}
         
-        li {
-            margin-bottom: 8px;
-        }
+        h3 {{
+            font-size: 14px;
+            font-weight: bold;
+            color: #1F2937;
+            margin: 0.8rem 0 0.4rem 0;
+        }}
+        
+        .dimension-card {{
+            margin-bottom: 0.8rem;
+            border-left: 3px solid {primary_color};
+            padding: 0.6rem;
+            background-color: #F9FAFB;
+            font-size: 11px;
+        }}
+        
+        .dimension-card h4 {{
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }}
+        
+        .dimension-score {{
+            font-size: 10px;
+            color: #6B7280;
+            margin-bottom: 0.3rem;
+        }}
+        
+        .dimension-card ul {{
+            margin-left: 1.2rem;
+            font-size: 10px;
+            line-height: 1.4;
+        }}
+        
+        .dimension-card li {{
+            margin-bottom: 0.2rem;
+        }}
+        
+        .priority-box {{
+            background-color: #F0F9FF;
+            border: 1px solid #BAE6FD;
+            border-radius: 4px;
+            padding: 0.6rem;
+            margin-bottom: 0.8rem;
+            font-size: 10px;
+        }}
+        
+        .priority-box strong {{
+            color: {primary_color};
+        }}
+        
+        .timeline {{
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            font-size: 11px;
+        }}
+        
+        .timeline-item {{
+            flex: 1;
+            border-left: 3px solid {primary_color};
+            padding-left: 0.6rem;
+        }}
+        
+        .timeline-item strong {{
+            color: {primary_color};
+            display: block;
+            margin-bottom: 0.2rem;
+        }}
+        
+        .cta {{
+            background-color: #F0F9FF;
+            border-top: 2px solid {primary_color};
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 11px;
+        }}
+        
+        .cta h3 {{
+            color: {primary_color};
+            margin-bottom: 0.3rem;
+        }}
+        
+        .footer {{
+            font-size: 10px;
+            color: #9CA3AF;
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #E5E7EB;
+        }}
+        
+        @media print {{
+            body {{
+                background-color: white;
+            }}
+            .report {{
+                box-shadow: none;
+                margin: 0;
+                padding: 0.5in;
+                max-width: 100%;
+                page-break-after: always;
+            }}
+        }}
     </style>
 </head>
 <body>
-    <div class="page page-1">
-        <div class="page-header">
-            <div class="header-left">
-                <h1>AI-Enabled Process Readiness Assessment</h1>
-                <p class="report-subtitle">Report for {company_name}</p>
-                <p style="color: #999; font-size: 0.85em; margin-top: 3px;">{current_date}</p>
-            </div>
-            <div class="header-right">
-                {logo_html}
-            </div>
-        </div>
-        
-        <div class="content">
-            <h2>Executive Summary</h2>
-            
-            <div class="score-grid">
-                <div class="score-card">
-                    <div class="score-card-label">Overall Score</div>
-                    <div class="score-card-value">{overall_score:.1f}</div>
-                    <div class="score-card-sublabel">out of 30</div>
-                </div>
-                <div class="score-card">
-                    <div class="score-card-label">Readiness %</div>
-                    <div class="score-card-value">{percentage}%</div>
-                    <div class="score-card-sublabel">completion</div>
-                </div>
-                <div class="score-card">
-                    <div class="score-card-label">Readiness Level</div>
-                    <div class="score-card-value" style="font-size: 18px; color: {readiness_color};">{readiness_label}</div>
-                    <div class="score-card-sublabel">{readiness_desc}</div>
-                </div>
-            </div>
-            
-            <div class="score-box">
-                <h3>Assessment Interpretation</h3>
-                <p>Your organization scored <strong>{overall_score:.1f} out of 30</strong>, placing you in the <strong>{readiness_label}</strong> readiness band. 
-                <strong>{readiness_desc}</strong> This assessment evaluates your organization's preparedness for adopting and rolling out AI at scale across 
-                six critical dimensions including process maturity, technology infrastructure, data readiness, people and culture, leadership alignment, and governance. 
-                The insights provided highlight your current capabilities and identify priority areas for advancement.</p>
-                <p style="margin-top: 12px; font-size: 0.85em; color: #666; font-style: italic;"><strong>Note:</strong> These results are based on subjective assessments and do not necessarily serve as a substitute for AI implementation preparedness using a more thorough investigation of the organization's capabilities and performance.</p>
-            </div>
-        </div>
-        
-        <div class="page-footer">
-            <div>www.tlogic.consulting</div>
-            <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 1/4</div>
-        </div>
-    </div>
-    
-    <div class="page page-2">
-        <div class="page-header">
-            <div class="header-left">
-                <h1 style="font-size: 22px;">Dimension Breakdown</h1>
-                <p class="report-subtitle">Report for {company_name}</p>
-            </div>
-            <div class="header-right">
-                {logo_html}
-            </div>
-        </div>
-        
-        <div class="content">
-            <h2>Your Scores Across All Dimensions</h2>
-            <p style="margin-bottom: 12px; color: #666;">Your scores across the six dimensions of AI readiness:</p>
-            
-            {dimension_items_html}
-            
-            <h2 style="margin-top: 12px; margin-bottom: 8px;">{benchmark_title}</h2>
-            {benchmark_table_html}
-        </div>
-        
-        <div class="page-footer">
-            <div>www.tlogic.consulting</div>
-            <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 2/4</div>
-        </div>
-    </div>
-    
-    <div class="page page-3">
-        <div class="page-header">
-            <div class="header-left">
-                <h1 style="font-size: 22px;">Next Steps</h1>
-                <p class="report-subtitle">Report for {company_name}</p>
-            </div>
-            <div class="header-right">
-                {logo_html}
-            </div>
-        </div>
-        
-        <div class="content" style="padding-bottom: 100px;">
-            <h2>Recommended Actions</h2>
-            
-            <div class="score-box">
-                <h3>Your Readiness Profile: {readiness_label}</h3>
-                <p>{readiness_desc}</p>
-                <p style="margin-top: 10px;">Based on your assessment results, here are key areas to focus on:</p>
-            </div>
-            
-            <h3>Immediate Priority Areas</h3>
-            {recommendations_html}
-        </div>
-        
-        <div class="page-footer">
-            <div>www.tlogic.consulting</div>
-            <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 3/4</div>
-        </div>
-    </div>
-    
-    <div class="page page-4">
-        <div class="page-header">
-            <div class="header-left">
-                <h1 style="font-size: 22px;">Expert Support</h1>
-                <p class="report-subtitle">Report for {company_name}</p>
-            </div>
-            <div class="header-right">
-                {logo_html}
-            </div>
-        </div>
-        
-        <div class="content">
-            <div class="score-box">
-                <h3>Get Expert Support</h3>
-                <p>T-Logic specializes in helping organizations like yours accelerate their AI readiness journey. Our team can provide:</p>
-                <ul style="margin-top: 10px;">
-                    <li>Detailed assessment consultation</li>
-                    <li>Customized implementation roadmaps</li>
-                    <li>Change management support</li>
-                    <li>Process optimization and AI integration</li>
-                </ul>
-                <p style="margin-top: 15px; font-weight: bold;">Contact us at: tej@tlogic.consulting</p>
-            </div>
-        </div>
-        
-        <div class="page-footer">
-            <div>www.tlogic.consulting</div>
-            <div class="company-info">© T-Logic Consulting Pvt. Ltd.</div>
-            <div class="page-number">Pg. 4/4</div>
-        </div>
-    </div>
-</body>
-</html>'''
 
-    # Safe string replacement to avoid format string issues
-    readiness_desc = readiness_band.get('description', '')
-    html = html.replace('{primary_color}', primary_color)
-    html = html.replace('{readiness_color}', readiness_color)
-    html = html.replace('{company_name}', company_name)
-    html = html.replace('{current_date}', current_date)
-    html = html.replace('{overall_score:.1f}', str(round(overall_score, 1)))
-    html = html.replace('{percentage}', str(percentage))
-    html = html.replace('{readiness_label}', readiness_label)
-    html = html.replace('{readiness_desc}', readiness_desc)
-    html = html.replace('{logo_html}', logo_html)
-    html = html.replace('{dimension_items_html}', dimension_items_html)
-    html = html.replace('{dimension_table_rows}', dimension_table_rows)
-    html = html.replace('{benchmark_title}', benchmark_title)
-    html = html.replace('{benchmark_table_html}', benchmark_table_html)
-    html = html.replace('{recommendations_html}', recommendations_html)
+<!-- PAGE 1: EXECUTIVE SUMMARY -->
+<div class="report">
+    <div class="header">
+        <div class="header-left">
+            <h1>AI Readiness Assessment</h1>
+            <p>Results Report</p>
+        </div>
+        <div class="header-right">
+            <strong>T-Logic Consulting</strong><br>
+            Date: {assessment_date}<br>
+            {f'Company: {company_name}' if company_name else ''}
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="metrics-box">
+        <div class="metric-item">
+            <h3>Total Score</h3>
+            <div class="value">{int(total_score)}<span style="font-size: 14px; color: #6B7280;">/90</span></div>
+            <p style="font-size: 10px; color: #6B7280;">{percentage}%</p>
+        </div>
+        <div class="metric-item">
+            <h3>Readiness Level</h3>
+            <div class="value" style="font-size: 16px;">{readiness_band.get('label', 'N/A')}</div>
+        </div>
+        <div class="metric-item">
+            <h3>Average Score</h3>
+            <div class="value">{avg_score}<span style="font-size: 14px; color: #6B7280;">/15</span></div>
+        </div>
+    </div>
+    
+    <!-- Critical Alert -->
+    {f'''<div class="critical-alert">
+        <strong>{critical_status.get("icon", "")} {critical_status.get("title", "")}</strong>
+        {critical_status.get("message", "")}
+    </div>''' if critical_status.get('severity') != 'info' else ''}
+    
+    <!-- Scoring Model Table -->
+    <table class="scoring-table">
+        <thead>
+            <tr>
+                <th>Score Range</th>
+                <th>Readiness Level</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr {"class='current'" if 0 <= total_score <= 41 else ""}>
+                <td>0-41</td>
+                <td>🔴 Not Ready</td>
+                <td>High risk; focus on business fundamentals first.</td>
+            </tr>
+            <tr {"class='current'" if 42 <= total_score <= 55 else ""}>
+                <td>42-55</td>
+                <td>🟡 Foundational Gaps</td>
+                <td>Significant work needed; start with basics.</td>
+            </tr>
+            <tr {"class='current'" if 56 <= total_score <= 69 else ""}>
+                <td>56-69</td>
+                <td>🔵 Building Blocks</td>
+                <td>Address weak dimensions before scaling.</td>
+            </tr>
+            <tr {"class='current'" if total_score >= 70 else ""}>
+                <td>70-90</td>
+                <td>🟢 AI-Ready</td>
+                <td>Strong foundation; focus on strategic pilots.</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- Dimension Scores -->
+    <h3 style="font-size: 14px; margin-bottom: 0.6rem;">Dimension Scores</h3>
+    <div class="dimension-bars">
+        {f""".join([f'''
+        <div class="bar-item">
+            <div class="bar-label">{dimension_icons[i]} {dimension_names[i]}{' ⭐' if i in critical_dims else ''}</div>
+            <div class="bar-container">
+                <div class="bar-fill" style="width: {(raw_scores[i]/15)*100:.0f}%; background-color: {get_score_color(raw_scores[i])};">
+                    {raw_scores[i]:.1f}/15
+                </div>
+            </div>
+        </div>
+        ''' for i in range(len(dimension_names))])}
+    </div>
+    
+    <!-- Executive Summary -->
+    <h3 style="font-size: 13px; margin-top: 1rem; margin-bottom: 0.5rem;">Executive Summary</h3>
+    <div class="exec-summary">
+        {exec_summary[:300]}...
+    </div>
+    
+    <div class="footer">
+        Page 1 of 2 | AI Process Readiness Assessment | T-Logic Consulting
+    </div>
+</div>
+
+<!-- PAGE 2: RECOMMENDATIONS & ACTION PLAN -->
+<div class="report page-break">
+    <h2>Recommendations & Action Plan</h2>
+    
+    <!-- Dimension-by-Dimension -->
+    {f""".join([f'''
+    <div class="dimension-card" style="border-left-color: {PALETTE[i]};">
+        <h4>{dimension_icons[i]} {dimension_names[i]} {' ⭐' if i in critical_dims else ''}</h4>
+        <div class="dimension-score">Score: {raw_scores[i]:.1f}/15 ({int((raw_scores[i]/15)*100)}%)</div>
+        <ul>
+    ''' + "".join([f"<li>{rec}</li>" for rec in recommendations[i][:2]]) + f"""
+        </ul>
+    </div>
+    ''' for i in range(len(dimension_names))])}
+    
+    <!-- Priority Actions -->
+    <h3 style="margin-top: 1.2rem;">Priority Actions</h3>
+    {f""".join([f'''
+    <div class="priority-box">
+        <strong>Priority {i+1}: {action['dimension']}</strong><br>
+        {action['action']}<br>
+        <strong style="color: #6B7280;">Timeline: {action['timeline']}</strong>
+    </div>
+    ''' for i, action in enumerate(priority_actions)])}
+    
+    <!-- Timeline Roadmap -->
+    <h3 style="margin-top: 1rem;">Implementation Timeline</h3>
+    <div class="timeline">
+        <div class="timeline-item">
+            <strong>30 Days</strong>
+            Assess current state & quick wins
+        </div>
+        <div class="timeline-item">
+            <strong>90 Days</strong>
+            Address critical gaps
+        </div>
+        <div class="timeline-item">
+            <strong>6 Months</strong>
+            Reassess & plan pilots
+        </div>
+    </div>
+    
+    <!-- Call-to-Action -->
+    <div class="cta">
+        <h3>Let's Discuss Your AI Journey</h3>
+        <p>We're here to help you develop a strategic roadmap for AI implementation. Schedule a consultation to dive deeper into your results.</p>
+        <p style="margin-top: 0.5rem;"><strong>tej@tlogic.consulting | www.tlogic.consulting</strong></p>
+    </div>
+    
+    <div class="footer">
+        Page 2 of 2 | AI Process Readiness Assessment | T-Logic Consulting
+    </div>
+</div>
+
+</body>
+</html>
+"""
+    
+    # Add PALETTE constant reference
+    PALETTE = ['#D17070', '#FDD9B8', '#FFFB4B', '#B9F0C9', '#9DD0F8', '#D7BDE2']
     
     return html
