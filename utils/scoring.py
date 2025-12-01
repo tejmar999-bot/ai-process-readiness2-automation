@@ -183,49 +183,58 @@ def generate_executive_summary(scores_data):
     # Dimension names
     dimension_names = ['Process Maturity', 'Technology Infrastructure', 'Data Readiness', 'People & Culture', 'Leadership & Alignment', 'Governance & Risk']
     
-    # Identify strong and weak dimensions
+    # Identify strong and weak dimensions with scores
     avg_score = sum(raw_scores) / len(raw_scores)
-    strong_dims = [dimension_names[i] for i, score in enumerate(raw_scores) if score > avg_score + 1]
-    weak_dims = [dimension_names[i] for i, score in enumerate(raw_scores) if score < avg_score - 1]
+    strong_dims = [(dimension_names[i], raw_scores[i]) for i, score in enumerate(raw_scores) if score > avg_score + 1]
+    weak_dims = [(dimension_names[i], raw_scores[i]) for i, score in enumerate(raw_scores) if score < avg_score - 1]
+    
+    # Get critical dimension info
+    data_readiness = raw_scores[2]
+    leadership = raw_scores[4]
     
     # Build summary based on readiness level
     if readiness_band['label'].startswith('🟢'):
         # AI-Ready
-        strengths = f"Across the board, your organization shows strong capabilities. Your {', '.join(strong_dims) if strong_dims else 'key dimensions'} are particularly well-developed."
-        next_steps = "Begin strategic pilots with confidence. Select 1-2 high-value use cases, establish clear success metrics, and launch pilots to demonstrate AI's business impact."
+        if strong_dims:
+            top_strong = strong_dims[0][0]
+            summary = f"Your organization is well-positioned for AI success, with {top_strong} ({strong_dims[0][1]:.1f}/15) showing particular strength. You've built the fundamentals needed for effective AI deployment. Now focus on execution: identify 1-2 high-impact use cases aligned with business goals, establish clear success metrics, and launch pilots with executive sponsorship to validate your approach."
+        else:
+            summary = f"Your organization demonstrates strong, balanced capabilities across all dimensions. You've built the fundamentals needed for effective AI deployment. Now focus on execution: identify 1-2 high-impact use cases aligned with business goals, establish clear success metrics, and launch pilots with executive sponsorship to demonstrate AI's business value."
     elif readiness_band['label'].startswith('🔵'):
         # Building Blocks
         if weak_dims:
-            weak_list = ', '.join(weak_dims)
-            strengths = f"You have foundational elements in place. Focus on strengthening {weak_list} over the next 3-6 months to accelerate your AI readiness."
+            weakest = weak_dims[0]
+            weak_list = ', '.join([d[0] for d in weak_dims])
+            summary = f"You have core foundational pieces in place, but {weakest[0]} ({weakest[1]:.1f}/15) and a few other areas need targeted attention. Prioritize strengthening {weak_list} before scaling AI initiatives. Set specific improvement goals for each weak area, assign ownership, and plan to reassess in 3-6 months when you've made meaningful progress."
         else:
-            strengths = "You have foundational elements in place with good balance across dimensions."
-        next_steps = "Build on your foundation by addressing identified gaps. Plan targeted improvements for the next 3-6 months, then reassess before scaling."
+            summary = f"You have core foundational pieces in place with good overall balance. While each dimension could use some refinement, you're on the right track. Continue incremental improvements across your organization, then reassess in 6 months when you can pursue pilot projects with greater confidence."
     elif readiness_band['label'].startswith('🟡'):
         # Foundational Gaps
         if weak_dims:
-            weak_list = ', '.join(weak_dims[:2])  # Show top 2
-            strengths = f"Significant foundational work is needed. Weak areas include {weak_list}. Focus on business fundamentals rather than AI implementation at this time."
+            weakest_list = ', '.join([f"{d[0]} ({d[1]:.1f}/15)" for d in weak_dims[:2]])
+            summary = f"Significant foundational work is required—{weakest_list} need urgent attention. Don't pursue AI initiatives yet; instead, invest the next 9-12 months on operational excellence. Stabilize your processes, improve data practices, and strengthen leadership alignment. Once these basics are solid, you'll be in a much better position to adopt AI effectively."
         else:
-            strengths = "Significant foundational work is needed across multiple dimensions. Focus on business fundamentals rather than AI implementation at this time."
-        next_steps = "Invest 9-12 months improving your core operations, data quality, and organizational alignment. Build a strong foundation before pursuing AI initiatives."
+            summary = f"Significant foundational work is required across your organization before AI can deliver value. Invest the next 9-12 months on operational excellence: stabilize your processes, improve data practices, strengthen leadership alignment, and build organizational capability. Once these basics are solid, you'll be ready to explore AI more seriously."
     else:
         # Not Ready
-        strengths = "Your organization needs foundational improvements across multiple areas before AI can deliver meaningful value."
-        next_steps = "Focus on core operations, process optimization, and data infrastructure first. Plan for 12-18 months of foundational work before reconsidering AI initiatives."
+        summary = f"Your organization needs to focus on core operations and business fundamentals first. Plan for 12-18 months of foundational work: streamline and document your key processes, invest in modern technology infrastructure, establish data governance, and build internal capability. Revisit AI readiness after making meaningful progress on these areas."
     
-    # Critical dimension note
+    # Critical dimension note - only add if there's a caution/stop, and don't repeat if already mentioned
     critical_note = ""
     if critical_status['severity'] == 'critical':
-        critical_note = f"<strong>Important: {critical_status['icon']} Both critical dimensions are below threshold.</strong> {critical_status['message'].split('Address')[1].strip() if 'Address' in critical_status['message'] else ''} Proceed with caution—do not scale AI initiatives until these are addressed, regardless of overall score."
+        critical_note = f"<strong>Critical Note:</strong> Both Data Readiness and Leadership & Alignment are below the minimum threshold. These two dimensions are foundational to any AI initiative—do not proceed with pilots or implementations until both are strengthened, regardless of your overall score."
     elif critical_status['severity'] == 'warning':
-        critical_note = f"<strong>Caution: {critical_status['icon']} One critical dimension needs attention.</strong> {critical_status['message'].split('This')[1].strip() if 'This' in critical_status['message'] else ''} Address this before scaling, despite your overall score."
+        # Determine which dimension is below threshold
+        if data_readiness < 9:
+            dim_below = f"Data Readiness ({data_readiness:.1f}/15)"
+        else:
+            dim_below = f"Leadership & Alignment ({leadership:.1f}/15)"
+        critical_note = f"<strong>Important:</strong> {dim_below} is below the recommended threshold of 9. This critical gap must be addressed before scaling any AI initiatives, even though your overall score is in the {readiness_band['label'].split()[1].lower()} range."
     
     # Combine everything
-    summary = f"{strengths} {next_steps}"
     if critical_note:
         summary += f" {critical_note}"
     
-    summary += " For more detailed recommendations on each dimension, please see below. As always, feel free to reach out to us for any assistance!"
+    summary += " For detailed recommendations on improving each dimension, see below. We're here to help—please reach out if you'd like to discuss your results or need guidance."
     
     return summary

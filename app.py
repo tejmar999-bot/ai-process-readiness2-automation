@@ -1110,7 +1110,7 @@ def render_results_dashboard():
     
     st.markdown(f"""
     <div style="background-color: #1F2937; border-left: 4px solid {primary_color}; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem; line-height: 1.8;">
-        <p style="color: #E5E7EB; margin: 0; font-size: 0.95rem;">
+        <p style="color: #E5E7EB; margin: 0; font-size: 1.05rem; font-style: italic;">
             {executive_summary}
         </p>
     </div>
