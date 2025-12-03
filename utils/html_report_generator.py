@@ -52,7 +52,6 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     
     # Executive summary
     exec_summary = generate_executive_summary(scores_data)
-    exec_summary_short = exec_summary[:300]
     
     # Build recommendations by dimension
     recommendations = {
@@ -366,11 +365,11 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
         }}
         
         .exec-summary {{
-            font-size: 12px;
+            font-size: 11px;
             font-style: italic;
-            line-height: 1.6;
+            line-height: 1.5;
             color: #374151;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }}
         
         h2 {{
@@ -559,9 +558,9 @@ def generate_html_report(scores_data, company_name="", company_logo_b64=None, pr
     </div>
     
     <!-- Executive Summary -->
-    <h3 style="font-size: 13px; margin-top: 1rem; margin-bottom: 0.5rem;">Executive Summary</h3>
+    <h3 style="font-size: 13px; margin-top: 0.8rem; margin-bottom: 0.4rem;">Executive Summary</h3>
     <div class="exec-summary">
-        {exec_summary_short}...
+        {exec_summary}
     </div>
     
     <div class="footer">
