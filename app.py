@@ -756,12 +756,16 @@ def create_dimension_breakdown_chart(raw_scores, dimension_titles, dimension_col
     labels_with_scores = [f"{title}<br>{score:.1f}/15<br>({pct:.0f}%)" 
                           for title, score, pct in zip(dimension_titles, raw_scores, percentages)]
     
+    # Close the polygon by adding the first point at the end
+    r_values = list(raw_scores) + [raw_scores[0]]
+    theta_values = labels_with_scores + [labels_with_scores[0]]
+    
     fig = go.Figure()
     
     # Add spider trace
     fig.add_trace(go.Scatterpolar(
-        r=raw_scores,
-        theta=labels_with_scores,
+        r=r_values,
+        theta=theta_values,
         fill='toself',
         fillcolor='rgba(96, 165, 244, 0.35)',
         line=dict(color='#60A5FA', width=2),
